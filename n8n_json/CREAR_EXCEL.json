@@ -1,0 +1,236 @@
+{
+  "name": "CREAR_EXCEL",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {
+          "fileName": "={{ $('start').item.json.file_name+ \".xlsx\" }}"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -656,
+        -32
+      ],
+      "id": "22b7dc85-e9cf-4fd4-907f-adbbfd675a86",
+      "name": "Convert to File4"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/me/drive/root/children",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -512,
+        -336
+      ],
+      "id": "e0cd90ac-e149-4c04-a460-e9c01b575520",
+      "name": "getfolder",
+      "credentials": {
+        "microsoftOAuth2Api": {
+          "id": "Y5GP57FlaZyiBK8B",
+          "name": "Microsoft account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileName": "={{ $('start').item.json.file_name+ \".xlsx\" }}",
+        "parentId": "01ZX2MQXLIPZG6YCWIRNA2FRDSIYBGHMP5",
+        "binaryData": true
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        0
+      ],
+      "id": "f41fcdb2-1a5a-44fe-8028-ccc117534eb4",
+      "name": "GUARDAR_ARCHIVO",
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "Sk09Y3pRv4uy2lLG",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.microsoft.com/v1.0/me/drive/items/{{ $json.id }}/createLink",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"type\": \"edit\",\n  \"scope\": \"anonymous\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -80,
+        -32
+      ],
+      "id": "c8e9036d-6b33-4441-a887-899d4a34a2d4",
+      "name": "URL_DESCARGA",
+      "credentials": {
+        "microsoftOAuth2Api": {
+          "id": "Y5GP57FlaZyiBK8B",
+          "name": "Microsoft account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "array",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -832,
+        -32
+      ],
+      "id": "b63995f3-c36f-47cb-87e2-72a57dc3254f",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n  \"array\":  [\n  {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  },\n    {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  },\n    {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  },\n    {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  }\n],\n  \"file_name\": \"SDJFJASHDF\"\n  \n}\n"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1024,
+        -32
+      ],
+      "id": "fb314f92-abfc-4d8d-a109-d19a1df407dc",
+      "name": "start"
+    }
+  ],
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "array": [
+            {
+              "name": "Andrés Tituana",
+              "topic": "Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación.",
+              "option": ""
+            },
+            {
+              "name": "Jennifer Tituana",
+              "topic": "Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación.",
+              "option": ""
+            },
+            {
+              "name": "Matthew Jaramillo",
+              "topic": "Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación.",
+              "option": ""
+            },
+            {
+              "name": "Andrés Tituana",
+              "topic": "Aprobación de la actualización del Calendario Académico PAO 2025-II",
+              "option": ""
+            },
+            {
+              "name": "Jennifer Tituana",
+              "topic": "Aprobación de la actualización del Calendario Académico PAO 2025-II",
+              "option": ""
+            },
+            {
+              "name": "Matthew Jaramillo",
+              "topic": "Aprobación de la actualización del Calendario Académico PAO 2025-II",
+              "option": ""
+            },
+            {
+              "name": "Andrés Tituana",
+              "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
+              "option": ""
+            },
+            {
+              "name": "Jennifer Tituana",
+              "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
+              "option": ""
+            },
+            {
+              "name": "Matthew Jaramillo",
+              "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
+              "option": ""
+            }
+          ],
+          "file_name": "asdfasdfasdfasdf"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Convert to File4": {
+      "main": [
+        [
+          {
+            "node": "GUARDAR_ARCHIVO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getfolder": {
+      "main": [
+        []
+      ]
+    },
+    "GUARDAR_ARCHIVO": {
+      "main": [
+        [
+          {
+            "node": "URL_DESCARGA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Convert to File4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0ab5c3f7-1f8a-4d15-beb3-a75a7f9b91c5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"
+  },
+  "id": "sOKBJYRMRjAcRKTh",
+  "tags": []
+}

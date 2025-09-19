@@ -1,0 +1,288 @@
+{
+  "name": "GUARDAR_DATOS_REUNION",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n  \"id_meeting\": \"0d9dca47-a43a-4f37-9c57-ac4f32de8155\",\n  \"meeting_url\": \"\",\n  \"meeting_datetime_ISO8631\": \"1996-12-12T12:00:00.0000000\",\n  \"convocation_date_ISO8631\": \"2025-09-14\",\n  \"meeting_type\": \"Ordinaria\",\n  \"session_code\": \"COD_GENERADO_MAIN_CONVOCATORIA\",\n  \"attendees\": [\n    {\n      \"name\": \"Andrés Tituana\",\n      \"mail\": \"alvaro.andres1996@hotmail.com\",\n      \"role\": \"Representante de Estudiantes\"\n    },\n    {\n      \"name\": \"Jennifer Tituana\",\n      \"mail\": \"mrwringo@hotmail.com\",\n      \"role\": \"Miembro de la comisión de Etica\"\n    },\n    {\n      \"name\": \"Matthew Jaramillo\",\n      \"mail\": \"mnjaramillo@hotmail.com\",\n      \"role\": \"Representante de profesores\"\n    }\n  ],\n  \"topics\": [\n    {\n      \"topic\": \"Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera\",\n      \"sub_topics\": [\n        \"Msc. Alfredo Armando Rodríquez Guzman, representante del Rector, como presidente del comité.\",\n        \"Msc Dania Elena Portelles Cobas, Vicerrectora Académica\",\n        \"Adm. Carlos Eduardo Esterlla Carrera, docente de la carrera de Gastronomía en calidad de delegado del personal docente.\"\n      ]\n    },\n    {\n      \"topic\": \"Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación.\",\n      \"sub_topics\": []\n    },\n    {\n      \"topic\": \"Aprobación de la actualización del Calendario Académico PAO 2025-II\",\n      \"sub_topics\": []\n    }\n  ]\n}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -64,
+        16
+      ],
+      "id": "223b422c-7957-4768-a54e-4144d451960f",
+      "name": "start"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "binaryPropertyName": "=file",
+        "options": {
+          "fileName": "={{ $json.session_code+\"_METADATA.json\" }}"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        320,
+        -208
+      ],
+      "id": "87b8b9d8-9f86-4343-a560-dc297937a2ba",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "fileName": "={{ $('PARSER1').item.json.session_code+\"_METADATA.json\" }}",
+        "parentId": "01ZX2MQXOS5TWC5IXXI5H2DRTRMZAPE6BT",
+        "binaryData": true,
+        "binaryPropertyName": "file"
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1,
+      "position": [
+        512,
+        -208
+      ],
+      "id": "5f607efe-0583-42f1-a54c-83b09995bf6e",
+      "name": "Upload a file",
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "Sk09Y3pRv4uy2lLG",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "sOKBJYRMRjAcRKTh",
+          "mode": "list",
+          "cachedResultName": "CREAR_EXCEL"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "array": "={{ \n    (() => {\n      \n        const attendees = $json.attendees\n        const topics = $json.topics\n        const combinedArray = [];\n\n        attendees.forEach(person => {\n            topics.forEach(topicObj => {\n                combinedArray.push({\n                    name: person.name,\n                    id_topic: topicObj.id_topic,\n                    topic: topicObj.topic,\n                    option: '',\n                    table: \"votos\"\n                });\n            });\n        });\n\n        return combinedArray.sort((a, b) => a.topic.localeCompare(b.topic));\n    })()\n}}",
+            "file_name": "={{ $json.session_code+\"_VOTOS\" }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "array",
+              "displayName": "array",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            },
+            {
+              "id": "file_name",
+              "displayName": "file_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        16
+      ],
+      "id": "827346fa-54fb-4817-9367-6123c1e71413",
+      "name": "Call 'EXCEL_VOTOS'"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "sOKBJYRMRjAcRKTh",
+          "mode": "list",
+          "cachedResultName": "CREAR_EXCEL"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "array": "={{ \n   $('start').item.json.attendees.map(at=>{\n  return({\"id_assistant\":at.id, \"name\":at.name, \"role\": at.role, \"attendance\": \"\", \"table\": \"asistencia\"})})\n}}",
+            "file_name": "={{ $('PARSER1').item.json.session_code+\"_ASISTENCIA\"  }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "array",
+              "displayName": "array",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            },
+            {
+              "id": "file_name",
+              "displayName": "file_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        512,
+        16
+      ],
+      "id": "96d83fd9-ebd6-43a3-b8dd-b7d0cf6026f9",
+      "name": "Call 'EXCEL_ASISTENCIA'"
+    },
+    {
+      "parameters": {
+        "jsCode": "const object = $('start').first().json\n\nconst id = () => Date.now().toString(36) + Math.random().toString(36).slice(2);\n\nconst attendes = $input.first().json.attendees\nconst attendesId = attendes.map(attendee=>({...attendee, id_assistant: id()}))\n\nconst topics = $input.first().json.topics\nconst topicsId = topics.map(tp=>({...tp, id_topic: id()}))\n\nreturn [{...object,\n         topics: topicsId,\n         attendees:attendesId\n        }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        16
+      ],
+      "id": "a53852d1-d272-4554-92ff-340e5eb6c85f",
+      "name": "PARSER1"
+    }
+  ],
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "id_meeting": "0d9dca47-a43a-4f37-9c57-ac4f32de8155",
+          "meeting_datetime_ISO8631": "1996-12-12T12:00:00.0000000",
+          "convocation_date_ISO8631": "2025-09-14",
+          "meeting_type": "Ordinaria",
+          "session_code": "COD_GENERADO_MAIN_CONVOCATORIA",
+          "attendees": [
+            {
+              "name": "Andrés Tituana",
+              "mail": "alvaro.andres1996@hotmail.com",
+              "role": "Representante de Estudiantes"
+            },
+            {
+              "name": "Jennifer Tituana",
+              "mail": "mrwringo@hotmail.com",
+              "role": "Miembro de la comisión de Etica"
+            },
+            {
+              "name": "Matthew Jaramillo",
+              "mail": "mnjaramillo@hotmail.com",
+              "role": "Representante de profesores"
+            }
+          ],
+          "topics": [
+            {
+              "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
+              "sub_topics": [
+                "Msc. Alfredo Armando Rodríquez Guzman, representante del Rector, como presidente del comité.",
+                "Msc Dania Elena Portelles Cobas, Vicerrectora Académica",
+                "Adm. Carlos Eduardo Esterlla Carrera, docente de la carrera de Gastronomía en calidad de delegado del personal docente."
+              ]
+            },
+            {
+              "topic": "Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación.",
+              "sub_topics": []
+            },
+            {
+              "topic": "Aprobación de la actualización del Calendario Académico PAO 2025-II",
+              "sub_topics": []
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "connections": {
+    "start": {
+      "main": [
+        [
+          {
+            "node": "PARSER1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Upload a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'EXCEL_VOTOS'": {
+      "main": [
+        [
+          {
+            "node": "Call 'EXCEL_ASISTENCIA'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'EXCEL_ASISTENCIA'": {
+      "main": [
+        []
+      ]
+    },
+    "PARSER1": {
+      "main": [
+        [
+          {
+            "node": "Call 'EXCEL_VOTOS'",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "33615e03-7bdd-46f6-84bc-1befa8a46fc6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"
+  },
+  "id": "k6Op54V8oySaHd25",
+  "tags": []
+}

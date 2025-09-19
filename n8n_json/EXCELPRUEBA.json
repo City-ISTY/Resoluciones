@@ -1,0 +1,348 @@
+{
+  "name": "EXCELPRUEBA",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {
+          "fileName": "eeeee.xlsx"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1904,
+        592
+      ],
+      "id": "5f309bbf-bb9e-4aea-914b-51563e9d52c5",
+      "name": "Convert to File4"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/me/drive/root/children",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1968,
+        352
+      ],
+      "id": "18190e2c-773e-4364-82f3-f35e5688c45f",
+      "name": "getfolder",
+      "credentials": {
+        "microsoftOAuth2Api": {
+          "id": "Y5GP57FlaZyiBK8B",
+          "name": "Microsoft account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileName": "eeeee.xlsx",
+        "parentId": "01ZX2MQXLIPZG6YCWIRNA2FRDSIYBGHMP5",
+        "binaryData": true
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1,
+      "position": [
+        -1712,
+        592
+      ],
+      "id": "f576ade7-74ad-4564-bea5-3f639c72bd4f",
+      "name": "GUARDAR_ARCHIVO",
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "Sk09Y3pRv4uy2lLG",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.microsoft.com/v1.0/me/drive/items/{{ $json.id }}/createLink",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"type\": \"edit\",\n  \"scope\": \"anonymous\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1600,
+        912
+      ],
+      "id": "85784316-412b-4755-a505-8576fac513bc",
+      "name": "URL_DESCARGA",
+      "credentials": {
+        "microsoftOAuth2Api": {
+          "id": "Y5GP57FlaZyiBK8B",
+          "name": "Microsoft account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n  \"arreglo\":  [\n  {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  },\n    {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  },\n    {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  },\n    {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  }\n]\n  \n}\n"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2272,
+        592
+      ],
+      "id": "1df95b40-29c7-49fd-b676-6e671f35dc6b",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "operation": "addWorksheet",
+        "workbook": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "additionalFields": {
+          "name": "VOTOS"
+        }
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.1,
+      "position": [
+        -1488,
+        496
+      ],
+      "id": "688cb9b4-483d-4389-85fb-f144f4e03fab",
+      "name": "AGREGAR HOJA VOTOS",
+      "credentials": {
+        "microsoftExcelOAuth2Api": {
+          "id": "7jl4WbaJjbJZ6pG5",
+          "name": "Microsoft Excel account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "arreglo",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -2080,
+        592
+      ],
+      "id": "735da0ab-e20e-4d6f-88d2-b3e007ca888b",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "resource": "worksheet",
+        "operation": "append",
+        "workbook": {
+          "__rl": true,
+          "value": "={{ $('GUARDAR_ARCHIVO').item.json.id }}",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "=",
+          "mode": "id"
+        },
+        "dataMode": "=",
+        "options": {
+          "rawData": false
+        }
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.1,
+      "position": [
+        -1248,
+        704
+      ],
+      "id": "230feb99-f61d-4e26-8b06-14fa9ac1f700",
+      "name": "Append data to sheet",
+      "credentials": {
+        "microsoftExcelOAuth2Api": {
+          "id": "7jl4WbaJjbJZ6pG5",
+          "name": "Microsoft Excel account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "worksheet",
+        "operation": "readRows",
+        "workbook": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "worksheet": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.1,
+      "position": [
+        -784,
+        736
+      ],
+      "id": "ff3d1f45-bce8-4388-a670-fb9490c6ac18",
+      "name": "Get rows from sheet",
+      "credentials": {
+        "microsoftExcelOAuth2Api": {
+          "id": "7jl4WbaJjbJZ6pG5",
+          "name": "Microsoft Excel account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "arreglo": [
+            {
+              "id_assistant": "Juan",
+              "name": "Pérez",
+              "role": 30,
+              "attendance": false,
+              "table": "asistencia"
+            },
+            {
+              "id_assistant": "Juan",
+              "name": "Pérez",
+              "role": 30,
+              "attendance": false,
+              "table": "asistencia"
+            },
+            {
+              "id_assistant": "Juan",
+              "name": "Pérez",
+              "role": 30,
+              "attendance": false,
+              "table": "asistencia"
+            },
+            {
+              "id_assistant": "Juan",
+              "name": "Pérez",
+              "role": 30,
+              "attendance": false,
+              "table": "asistencia"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Convert to File4": {
+      "main": [
+        [
+          {
+            "node": "GUARDAR_ARCHIVO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getfolder": {
+      "main": [
+        [
+          {
+            "node": "GUARDAR_ARCHIVO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GUARDAR_ARCHIVO": {
+      "main": [
+        [
+          {
+            "node": "URL_DESCARGA",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AGREGAR HOJA VOTOS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "URL_DESCARGA": {
+      "main": [
+        []
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Convert to File4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AGREGAR HOJA VOTOS": {
+      "main": [
+        [
+          {
+            "node": "Append data to sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append data to sheet": {
+      "main": [
+        [
+          {
+            "node": "Get rows from sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8ba2ea69-a691-45e2-8ac2-4a9cfd99949e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"
+  },
+  "id": "S8uwabb5E8JTPf5h",
+  "tags": []
+}

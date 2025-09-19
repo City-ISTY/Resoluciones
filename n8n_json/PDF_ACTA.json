@@ -1,0 +1,582 @@
+{
+  "name": "PDF_ACTA",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "html",
+        "binaryPropertyName": "=footer",
+        "options": {
+          "fileName": "footer.html"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        0
+      ],
+      "id": "3327876a-077b-4d5a-b7eb-f780bfd1581e",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"UTF-8\">\n    <style>\n    body {\n        margin: 0;\n        padding: 15px 20px;\n        color: #666666 !important;\n        width: 100%;\n        box-sizing: border-box;\n        -webkit-print-color-adjust: exact;\n    }\n    .footer-container {\n        width: 100%;\n        margin: 0 auto;\n    }\n    .footer-content {\n        display: flex;\n        justify-content: space-between;\n        align-items: center;\n        width: 100%;\n        line-height: 1.6 !important;\n    }\n    .footer-section strong {\n        color: #333333 !important;\n        font-weight: bold;\n    }\n    </style>\n</head>\n<body>\n    <div class=\"footer-container\">\n        <div class=\"footer-content\">\n            <div class=\"footer-section\">\n                <strong>(+593) 983961156</strong><br>\n                contacto@isty.edu.ec\n            </div>\n            <div class=\"footer-section\">\n                <strong>www.isty.edu.ec</strong><br>\n                calle Eugenio Espejo y Amazonas\n            </div>\n        </div>\n    </div>\n</body>\n</html>"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "dcfe3676-7636-417f-aab4-f092c1217f85",
+      "name": "footer"
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"UTF-8\">\n    <style>\n    body {\n        margin: 0;\n        padding: 5px 15px;\n        font-size: 12px !important;\n        width: 100%;\n        box-sizing: border-box;\n        -webkit-print-color-adjust: exact;\n        font-family: Arial, sans-serif;\n    }\n    .header-container {\n        width: 100%;\n    }\n    .logo-container {\n        text-align: left !important; /* Fuerza alineación izquierda */\n        margin-bottom: 10px;\n    }\n    .logo-image {\n        width: 180px !important;\n        height: 40px !important;\n        object-fit: contain;\n        display: inline-block !important; /* Permite alineación izquierda */\n        margin: 0 !important; /* Elimina márgenes automáticos */\n        float: left !important; /* Fuerza flotación a izquierda */\n    }\n    .header-row {\n        display: flex;\n        justify-content: space-between;\n        align-items: center;\n        width: 100%;\n        margin-top: 8px;\n        clear: both; /* Limpia el float */\n    }\n    .separator {\n        border-top: 2px solid #ccc;\n        margin: 8px 0;\n        padding-top: 5px;\n        clear: both; /* Limpia el float */\n    }\n    .resolution {\n        font-size: 12px !important;\n        font-weight: bold;\n    }\n    .version {\n        font-size: 12px !important;\n        color: #666666 !important;\n    }\n    </style>\n</head>\n<body>\n    <div class=\"header-container\">\n        <!-- Logo solo a la izquierda -->\n        <div class=\"logo-container\">\n            <img class=\"logo-image\" \n                 src=\"data:image/png;base64,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\" \n                 alt=\"ISTY Logo\">\n        </div>\n        \n        <div class=\"header-row\">\n            <div class=\"resolution\">RESOLUCI&Oacute;N RCP-S0-35-No.544-2022</div>\n            <div class=\"version\">Versi&oacute;n 001</div>\n        </div>\n        \n        <div class=\"separator\"></div>\n    </div>\n</body>\n</html>"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        160
+      ],
+      "id": "d7c686f6-0fe5-4b57-bcbe-47f366a33fb2",
+      "name": "header"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "html",
+        "binaryPropertyName": "=header",
+        "options": {
+          "fileName": "header.html"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        160
+      ],
+      "id": "1c8d412c-1c16-4ba7-b3b7-c55773b9acdd",
+      "name": "Convert to File3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://gotenberg:3000/forms/chromium/convert/html",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "index"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "footer"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "header"
+            },
+            {
+              "name": "paperWidth",
+              "value": "8.27"
+            },
+            {
+              "name": "paperHeight",
+              "value": "11.7"
+            },
+            {
+              "name": "marginTop",
+              "value": "1"
+            },
+            {
+              "name": "marginBottom",
+              "value": "1"
+            },
+            {
+              "name": "marginLeft",
+              "value": "1"
+            },
+            {
+              "name": "marginRight",
+              "value": "1"
+            },
+            {
+              "name": "files"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        160
+      ],
+      "id": "2f309574-5dbf-4593-8b6f-20427e9cbebe",
+      "name": "HTTP Request7"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        400,
+        144
+      ],
+      "id": "00e9a85e-89b8-4541-8a99-e4b09ecd479c",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html>\n<html>\n  <header>\n    <style>\n      .table_component {\n          overflow: auto;\n          width: 100%;\n      }\n      \n      .table_component table {\n          border: 1px solid #000000;\n          height: 100%;\n          width: 100%;\n          table-layout: auto;\n          border-collapse: collapse;\n          border-spacing: 1px;\n          text-align: left;\n      }\n      \n      .table_component caption {\n          caption-side: top;\n          text-align: left;\n      }\n      \n      .table_component th {\n          border: 1px solid #000000;\n          color: #000000;\n          padding: 5px;\n      }\n      \n      .table_component td {\n          border: 1px solid #000000;\n          color: #000000;\n          padding: 5px;\n      }\n</style>\n  </header>\n   <body style=\"text-align: justify\">\n      <div id=\"paguina\">\n         <p style=\"text-align: center;\"><strong>INSTITUTO TECNOL&Oacute;GICO SUPERIOR YARUQU&Iacute;</strong></p>\n         <p style=\"text-align: center;\"><strong>ACTA DEL &Oacute;RGANO COLEGIADO SUPERIOR<br /></strong></p>\n         <p style=\"text-align: center;\"><strong>SESI&Oacute;N {{ $('start').item.json.meeting_type.toUpperCase() }} Nro. {{ $json.session_code }}</strong></p>\n         <p>En la parroquia de Yaruqu&iacute;, del Distrito Metropolitano de Quito, con fecha {{ DateTime.fromISO($json.meeting_datetime_ISO8631).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}; con el uso de la plataforma Teams, siendo las {{   $json.meeting_datetime_ISO8631.split('T')[1].split(':').slice(0, 2).join(':') }} horas se instala la sesi&oacute;n extraordinaria del Organo Colegiado superior, cuya convocatoria fue previamente enviada a:</p>\n         {{ $json.attendeesHTML }}\n         <p>Act&uacute;a como secretaria la Srta. Pisu&ntilde;a Chicaiza Camila Alexandra.</p>\n         <p>El Mgtr. Javier Hernando Garz&oacute;n Espinoza, solicita que a trav&eacute;z de Secretar&iacute;a se de lectura al orden del d&iacute;a con el que fue convocada la presente sesi&oacute;n.</p>\n         <p>A travez de secretar&iacute;a se procede a dar lectura de la convocatoria con fecha: {{ DateTime.fromISO($json.convocation_date_ISO8631).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}; emitida por Rectorado, se&ntilde;al&aacute;ndose como puntos del orden del d&iacute;a los siguientes:</p>\n         <ul>\n            <li>1. Constataci&oacute;n del qu&oacute;rum.</li>\n            {{ $json.topicsHTML.map((tpc, index) => `<li>${index+2}. ${tpc.slice(4)}`).join('') }}\n         </ul>\n         <p><strong>DESARROLLO DE LA SESI&Oacute;N</strong></p>\n         <p><strong>1. Constataci&oacute;n del Quorum</strong></p>\n         <p>El Rector solicita a Secretar&iacute;a que proceda con la constataci&oacute;n del quorum:</p>\n        <div class=\"table_component\" role=\"region\" tabindex=\"0\">\n          {{ $json.html_assistance_table }}\n        </div>\n         <p>\n           {{ \n              $json.absences && $json.absences.length > 0 \n                ? `Se evidencia la ausencia de ${$json.absences.length === 1 ? $json.absences[0] : $json.absences.slice(0, -1).join(\", \") + \" y \" + $json.absences.slice(-1)}; en este sentido ` \n                : '' \n            }}\n           {{ $json.absences && $json.absences.length > 0 ? \"t\":\"T\" }}oma la palabra el Mgtr. Javier Hernando Garz&oacute;n Espinoza y menciona que la presente reuni&oacute;n se instaurar&aacute; sin ning&uacute;n inconveniente en base al Art1 35 del Estatuto Institucional, que indica lo siguiente: <em>(...) \"Las reuniones se instalar&aacute;n previa verificaci&oacute;n de la asistencia de la mayor&iacute;a simple de los miembros, esto es, la mitad m&aacute;s uno. Las resoluciones se adoptar&aacute;n con los votos de la mitad m&aacute;s uno de lso miembros con derecho a voto asistentes a la sesi&oacute;n. El presidente tendr&aacute; voto dirimente en caso de empate.\" (...)</em></p>\n\n        <!-- TEMAS A TRATAR -->\n        {{\n          $json.html_topics_covered.map((topic, index) => `\n            <div>\n              <p>${index+2}. ${topic.slice(3)}\n              <p><strong>RESOLUCIÓN: ${$json.meeting_topics[index].resolution_code}</strong></p>\n              <p>\n                Artículo 1. ${$json.meeting_topics[index].desition}\n                <br />\n                Artículo 2. Notificar la presente resolución a ${$json.meeting_topics[index].notification_area}\n              </p>\n            </div>\n          `).join('')\n        }}\n     \n         <p>Para constancia una vez le&iacute;da y aprobada el acta en la misma sesi&oacute;n, suscriben los miembros del &Oacute;rgano Colegiado superior y la secretaria que certifica.</p>\n        {{ $json.attendances.filter(item => item.hasOwnProperty('attendance') && item.attendance).map(item => (`<p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>${item.name}<br><strong>${item.role}</strong></p>`)).join('') }}\n        <p>En mi calidad de secretaria del &Oacute;rgano Colegiado Superior del Instituto Superior Tecnol&oacute;gico Yaruqu&iacute;, CERTIFICO que la presente acta fue discutida y aprobada en sesi&oacute;n extraordinaria Nro. {{ $json.session_code }} desarrollada el {{ DateTime.fromISO($json.meeting_datetime_ISO8631).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}.</p>\n         <p>Lo certifico.-</p>\n         <p>&nbsp;</p>\n         <p>&nbsp;</p>\n         <p>&nbsp;</p>\n         <p>Srta. Pisu&ntilde;a Chicaiza Camila Alexandra</p>\n         <p><strong>SECRETARIA</strong></p>\n         <p><strong>&Oacute;RGANO COLEGIADO SUPERIOR</strong></p>\n      </div>\n   </body>\n</html>"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        352
+      ],
+      "id": "c1d6b13e-261b-4cdc-871b-e6df6ea03dfc",
+      "name": "index"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "html",
+        "binaryPropertyName": "=index",
+        "options": {
+          "fileName": "index.html"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        352
+      ],
+      "id": "69192f1e-66d4-4c56-91a0-0e23cbc3116c",
+      "name": "Convert to File4"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst attendeesHTML = $input.first().json.attendees\n.map(attendee => {\n  return `<p>${attendee.name}<br><strong>${attendee.role}</strong></p>`;\n}).join('');\n\n\nconst topics_meeting = () =>{\n    // Preprocesar los temas de la reunión\n  //Se returna un array donde cada elemento es el tema de la reunión en html\n  let topicsHTML = [];\n  const newTopic = \"Temas Varios.\";\n  \n  \n  // Agregar todos los temas existentes\n  $input.first().json.meeting_topics.forEach((topic, index) => {\n    let temp_topic = `<li>${topic.topic}</li>`;\n\n    //extraigo los subtemas, deben estar separados por linea\n    if (topic.sub_topics && topic.sub_topics.length > 0){\n      temp_topic += '<ul>';\n      topic.sub_topics.forEach(subtema => {\n        temp_topic += `<li>${subtema}</li>`;\n      });\n      temp_topic += '</ul>';\n    }\n    \n    topicsHTML.push(temp_topic)\n  });\n  \n  // Validar si es reunión ordinaria (case insensitive)\n  if ($input.first().json.meeting_type.toLowerCase().includes('ordinaria')) {\n    topicsHTML.push(`<li>${newTopic}</li>`);\n  }\n\n  return topicsHTML\n\n}\n\n\n//se arma el html para un puntoc\nconst tema_reunion = (topic) =>{\n  /***Construye el HTML correspondiente a un tema que hayan conversado en la reunión\n  INPUT:\n  description: Título del tema a tratar\n  a_presentes: Lista de asistentes que votan\n  votes: Lista de votos de asistentes\n  meeting_summary: Resumen de maximo dos parrafos con lo que se conversó en el tema.\n  ***/\n\n\n  const text = `<p><strong>${topic.reformulacion}</strong></p><p>${topic.meeting_summary}</p><p>Concluida la intervenci&oacute;n, la MSc. Dania Elena Portelles Cobas propone la aprobaci&oacute;n del punto correspondiente del orden del d&iacute;a. La moci&oacute;n es secundada por la Lcda. Valeria Elizabeth Pinango Farinango, tras lo cual se procede a la votaci&oacute;n respectiva</p><div class=\"table_component\" role=\"region\" tabindex=\"0\">${tabla_votacion(topic.votes)}</div><p>Con ${topic.vote_count_object[\"AF\"]|| 0} a favor, ${topic.vote_count_object[\"EC\"]|| 0} en contra, y ${topic.vote_count_object[\"AB\"]|| 0} abstenciones, se resuelve:</p>`\n  return text\n}\n\nconst tabla_votacion = (votes) =>{\n/***Construye el HTML correspondiente a un tema que hayan conversado en la reunión\n  INPUT:\n  votes: array de objetos\n  ESTRUCTURA \n  [{name:\"Javier\", position: \"Rector\", vote:\"F\"}...]\n  vote: F-> A FAVOR, C: EN CONTRA, A: ABSTENSION\n  ***/\n  let html_table = `<div class=\"table_component\" role=\"region\" tabindex=\"0\"><table><thead><tr><th>Nombres y apellidos</th><th>Cargo</th><th>A favor</th><th>En contra</th><th>Abstenci&oacute;n</th></tr></thead><tbody>`\n   votes.forEach((p) => {\n    html_table += `<tr>\n        <td>${p.name || 'NA'}</td>\n        <td>${p.role}</td>\n        <td>${p.option === 'A favor' ? 'X' : '&nbsp;'}</td>\n        <td>${p.option === 'En contra' ? 'X' : '&nbsp;'}</td>\n        <td>${(!p.option || p.option === 'Abstencion') ? 'X' : '&nbsp;'}</td>\n    </tr>`;\n});\n  html_table += `</tbody></table></div>`\n  return html_table\n}\n\n\n //Se genera el HTML por cada tema tratado\nconst html_topics_covered = $input.first().json.meeting_topics.map(topic=>{\n  return tema_reunion(topic)\n})\n\n\n\nconst html_assistance_table = (attendances) => {\n  /***\n  Genera el HTML para la tabla de asistencia\n  INPUT:\n  assistances: array de objetos\n  ESTRUCTURA \n  [{name:\"Javier\", asistencia: \"SI\"}...]\n  asistencia: Si, No\n  ***/\n  let html = `<table><thead><tr><th>Nombres y apellidos</th><th>Presente</th><th>Ausente</th></tr></thead><tbody>`\n\n  attendances.forEach((p) => {\n    html += `<tr><td>${p.name || 'NA'}</td><td>${p.attendance ? 'X' : '&nbsp;'}</td><td>${!p.attendance ? 'X' : '&nbsp;'}</td></tr>`;\n  });\n  html += `</tbody></table>`\n  return html       \n}\n\n\nconst absences = $input.first().json.attendances\n  .filter(persona => !persona.attendance)\n  .map(persona => persona.name);\n\n// Agregar el HTML generado al objeto principal\nreturn {\n  json: {\n    ...items[0].json,\n    attendeesHTML: attendeesHTML,\n    topicsHTML:topics_meeting(),\n    html_topics_covered: html_topics_covered,\n    html_assistance_table: html_assistance_table($input.first().json.attendances),\n    absences: absences\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        160
+      ],
+      "id": "c37417bb-748e-43b6-8d71-02467cf1ef9c",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n  \"id\": \"15ff9c50-5ba2-4149-a116-880fe2cdccbd\",\n  \"meeting_datetime_ISO8631\": \"1996-12-12T12:00:00.0000000\",\n  \"convocation_date_ISO8631\": \"2025-09-16\",\n  \"meeting_type\": \"Ordinaria\",\n  \"session_code\": \"OCS-SO-008-2025\",\n  \"attendees\": [\n    {\n      \"name\": \"Andrés Tituana\",\n      \"mail\": \"alvaro.andres1996@hotmail.com\",\n      \"role\": \"Representante de Estudiantes\",\n      \"id\": \"df9ac23b-0a40-4d7e-9a08-e3d7c7043236\"\n    },\n    {\n      \"name\": \"Jennifer Tituana\",\n      \"mail\": \"mrwringo@hotmail.com\",\n      \"role\": \"Miembro de la comisión de Etica\",\n      \"id\": \"a4bacb04-207c-4880-a518-4a548e8bb5f2\"\n    },\n    {\n      \"name\": \"Matthew Jaramillo\",\n      \"mail\": \"mnjaramillo@hotmail.com\",\n      \"role\": \"Representante de profesores\",\n      \"id\": \"a863dece-6fb1-47f9-805a-305b27def9d0\"\n    }\n  ],\n  \"meeting_topics\": [\n    {\n      \"topic\": \"Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera\",\n      \"sub_topics\": [\n        \"Msc. Alfredo Armando Rodríquez Guzman, representante del Rector, como presidente del comité.\",\n        \"Msc Dania Elena Portelles Cobas, Vicerrectora Académica\",\n        \"Adm. Carlos Eduardo Esterlla Carrera, docente de la carrera de Gastronomía en calidad de delegado del personal docente.\"\n      ],\n      \"id\": \"ce5168aa-5115-431b-b002-ba007ae01ace\",\n      \"resolution_code\": \"R-OCS-SO-013-Nro.119-2025\",\n      \"vote_count_object\": {\n        \"AF\": 1,\n        \"EC\": 1,\n        \"AB\": 0,\n        \"RECTOR_VOTE\": \"EC\"\n      },\n      \"votes\": [\n        {\n          \"id\": \"recPHwZwh2wz1z2c0\",\n          \"createdTime\": \"2025-09-16T12:45:58.000Z\",\n          \"name\": \"Matthew Jaramillo\",\n          \"option\": \"A favor\",\n          \"topic\": \"Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera\",\n          \"table\": \"votos\",\n          \"id_topic\": \"ce5168aa-5115-431b-b002-ba007ae01ace\",\n          \"role\": \"Representante de profesores\"\n        },\n        {\n          \"id\": \"recxQJYBc9RFPS1ad\",\n          \"createdTime\": \"2025-09-16T12:45:57.000Z\",\n          \"name\": \"Javier Garzón\",\n          \"option\": \"En contra\",\n          \"topic\": \"Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera\",\n          \"table\": \"votos\",\n          \"id_topic\": \"ce5168aa-5115-431b-b002-ba007ae01ace\",\n          \"role\": \"NA\"\n        }\n      ],\n      \"approved\": false,\n      \"meeting_summary\": \"Lorem ipsum dolor sit amet consectetur adipiscing elit iaculis fringilla, urna fames ridiculus interdum fusce cubilia dictum hendrerit tempus magnis, euismod magna auctor imperdiet cursus pellentesque varius enim. Tristique lacus venenatis iaculis interdum lobortis semper libero, congue suspendisse pretium tempor scelerisque orci ultrices augue, convallis laoreet fringilla condimentum dui ut.\\n Ullamcorper vel tempor conubia ut metus lacus, diam mauris penatibus risus dapibus fringilla mollis, justo vitae volutpat vehicula dis.Erat aptent orci phasellus viverra ligula, justo sodales tristique sem, arcu varius felis molestie. Mollis neque ultrices hac nulla pellentesque est diam phasellus suspendisse justo eget platea, risus hendrerit elementum condimentum vitae a eu tellus nullam vestibulum porttitor tristique feugiat, volutpat consequat curabitur lobortis purus mauris nibh tempor mi ullamcorper duis. Natoque phasellus quis varius vitae accumsan donec et sed sodales luctus imperdiet magna nostra aliquet, ornare porttitor class eget himenaeos dapibus ac mauris inceptos orci egestas habitasse.\",\n      \"reformulacion\": \"Aprobación de la designación de los miembros del comité de ética del Instituto Superior Tecnológico Yaruquí.\",\n      \"desition\": \"Negar la designación de los miembros del comité de ética del Instituto Superior Tecnológico Yaruquí.\"\n    },\n    {\n      \"topic\": \"Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación.\",\n      \"sub_topics\": [],\n      \"id\": \"7728b797-b6d2-4516-9caf-837be57b2681\",\n      \"resolution_code\": \"R-OCS-SO-013-Nro.120-2025\",\n      \"vote_count_object\": {\n        \"AF\": 1,\n        \"EC\": 1,\n        \"AB\": 0,\n        \"RECTOR_VOTE\": \"EC\"\n      },\n      \"votes\": [\n        {\n          \"id\": \"recOLGmGzkQMkVbO5\",\n          \"createdTime\": \"2025-09-16T12:45:59.000Z\",\n          \"name\": \"Javier Garzón\",\n          \"option\": \"En contra\",\n          \"topic\": \"Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación.\",\n          \"table\": \"votos\",\n          \"id_topic\": \"7728b797-b6d2-4516-9caf-837be57b2681\",\n          \"role\": \"NA\"\n        },\n        {\n          \"id\": \"recYu3SbxfOZx4eqG\",\n          \"createdTime\": \"2025-09-16T12:46:00.000Z\",\n          \"name\": \"Matthew Jaramillo\",\n          \"option\": \"A favor\",\n          \"topic\": \"Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación.\",\n          \"table\": \"votos\",\n          \"id_topic\": \"7728b797-b6d2-4516-9caf-837be57b2681\",\n          \"role\": \"Representante de profesores\"\n        }\n      ],\n      \"approved\": false,\n      \"meeting_summary\": \"Lorem ipsum dolor sit amet consectetur adipiscing elit iaculis fringilla, urna fames ridiculus interdum fusce cubilia dictum hendrerit tempus magnis, euismod magna auctor imperdiet cursus pellentesque varius enim. Tristique lacus venenatis iaculis interdum lobortis semper libero, congue suspendisse pretium tempor scelerisque orci ultrices augue, convallis laoreet fringilla condimentum dui ut.\\n Ullamcorper vel tempor conubia ut metus lacus, diam mauris penatibus risus dapibus fringilla mollis, justo vitae volutpat vehicula dis.Erat aptent orci phasellus viverra ligula, justo sodales tristique sem, arcu varius felis molestie. Mollis neque ultrices hac nulla pellentesque est diam phasellus suspendisse justo eget platea, risus hendrerit elementum condimentum vitae a eu tellus nullam vestibulum porttitor tristique feugiat, volutpat consequat curabitur lobortis purus mauris nibh tempor mi ullamcorper duis. Natoque phasellus quis varius vitae accumsan donec et sed sodales luctus imperdiet magna nostra aliquet, ornare porttitor class eget himenaeos dapibus ac mauris inceptos orci egestas habitasse.\",\n      \"reformulacion\": \"Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la Información y Comunicación.\",\n      \"desition\": \"Negar la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la Información y Comunicación.\"\n    },\n    {\n      \"topic\": \"Aprobación de la actualización del Calendario Académico PAO 2025-II\",\n      \"sub_topics\": [],\n      \"id\": \"493236eb-c19e-4bc6-b2fd-8b34673f8bb2\",\n      \"resolution_code\": \"R-OCS-SO-013-Nro.121-2025\",\n      \"vote_count_object\": {\n        \"AF\": 2,\n        \"EC\": 0,\n        \"AB\": 0,\n        \"RECTOR_VOTE\": \"AF\"\n      },\n      \"votes\": [\n        {\n          \"id\": \"recAt1Sg9c3NqVxCs\",\n          \"createdTime\": \"2025-09-16T12:46:01.000Z\",\n          \"name\": \"Matthew Jaramillo\",\n          \"option\": \"A favor\",\n          \"topic\": \"Aprobación de la actualización del Calendario Académico PAO 2025-II\",\n          \"table\": \"votos\",\n          \"id_topic\": \"493236eb-c19e-4bc6-b2fd-8b34673f8bb2\",\n          \"role\": \"Representante de profesores\"\n        },\n        {\n          \"id\": \"recPU9Lpg1fGN7BZO\",\n          \"createdTime\": \"2025-09-16T12:46:00.000Z\",\n          \"name\": \"Javier Garzón\",\n          \"option\": \"A favor\",\n          \"topic\": \"Aprobación de la actualización del Calendario Académico PAO 2025-II\",\n          \"table\": \"votos\",\n          \"id_topic\": \"493236eb-c19e-4bc6-b2fd-8b34673f8bb2\",\n          \"role\": \"NA\"\n        }\n      ],\n      \"approved\": true,\n      \"meeting_summary\": \"Lorem ipsum dolor sit amet consectetur adipiscing elit iaculis fringilla, urna fames ridiculus interdum fusce cubilia dictum hendrerit tempus magnis, euismod magna auctor imperdiet cursus pellentesque varius enim. Tristique lacus venenatis iaculis interdum lobortis semper libero, congue suspendisse pretium tempor scelerisque orci ultrices augue, convallis laoreet fringilla condimentum dui ut.\\n Ullamcorper vel tempor conubia ut metus lacus, diam mauris penatibus risus dapibus fringilla mollis, justo vitae volutpat vehicula dis.Erat aptent orci phasellus viverra ligula, justo sodales tristique sem, arcu varius felis molestie. Mollis neque ultrices hac nulla pellentesque est diam phasellus suspendisse justo eget platea, risus hendrerit elementum condimentum vitae a eu tellus nullam vestibulum porttitor tristique feugiat, volutpat consequat curabitur lobortis purus mauris nibh tempor mi ullamcorper duis. Natoque phasellus quis varius vitae accumsan donec et sed sodales luctus imperdiet magna nostra aliquet, ornare porttitor class eget himenaeos dapibus ac mauris inceptos orci egestas habitasse.\",\n      \"reformulacion\": \"Aprobación de la actualización del Calendario Académico PAO 2025-II.\",\n      \"desition\": \"Aprobar la actualización del Calendario Académico PAO 2025-II.\"\n    },\n    {\n      \"id\": \"mfmz1dprs3xgcaj6wip\",\n      \"topic\": \"Aprobacion subida de precios en aranceles de matrículas\",\n      \"sub_topics\": [],\n      \"resolution_code\": \"R-OCS-SO-013-Nro.122-2025\",\n      \"vote_count_object\": {\n        \"AF\": 2,\n        \"EC\": 0,\n        \"AB\": 0,\n        \"RECTOR_VOTE\": \"AF\"\n      },\n      \"votes\": [\n        {\n          \"id\": \"rec1f4hHSCapsWFQK\",\n          \"createdTime\": \"2025-09-16T12:52:57.000Z\",\n          \"name\": \"Javier Garzón\",\n          \"option\": \"A favor\",\n          \"topic\": \"Aprobacion subida de precios en aranceles de matrículas\",\n          \"table\": \"votos\",\n          \"id_topic\": \"mfmz1dprs3xgcaj6wip\",\n          \"role\": \"NA\"\n        },\n        {\n          \"id\": \"recYaxJga42l0kDKg\",\n          \"createdTime\": \"2025-09-16T12:53:03.000Z\",\n          \"name\": \"Matthew Jaramillo\",\n          \"option\": \"A favor\",\n          \"topic\": \"Aprobacion subida de precios en aranceles de matrículas\",\n          \"table\": \"votos\",\n          \"id_topic\": \"mfmz1dprs3xgcaj6wip\",\n          \"role\": \"Representante de profesores\"\n        }\n      ],\n      \"approved\": true,\n      \"meeting_summary\": \"Lorem ipsum dolor sit amet consectetur adipiscing elit iaculis fringilla, urna fames ridiculus interdum fusce cubilia dictum hendrerit tempus magnis, euismod magna auctor imperdiet cursus pellentesque varius enim. Tristique lacus venenatis iaculis interdum lobortis semper libero, congue suspendisse pretium tempor scelerisque orci ultrices augue, convallis laoreet fringilla condimentum dui ut.\\n Ullamcorper vel tempor conubia ut metus lacus, diam mauris penatibus risus dapibus fringilla mollis, justo vitae volutpat vehicula dis.Erat aptent orci phasellus viverra ligula, justo sodales tristique sem, arcu varius felis molestie. Mollis neque ultrices hac nulla pellentesque est diam phasellus suspendisse justo eget platea, risus hendrerit elementum condimentum vitae a eu tellus nullam vestibulum porttitor tristique feugiat, volutpat consequat curabitur lobortis purus mauris nibh tempor mi ullamcorper duis. Natoque phasellus quis varius vitae accumsan donec et sed sodales luctus imperdiet magna nostra aliquet, ornare porttitor class eget himenaeos dapibus ac mauris inceptos orci egestas habitasse.\",\n      \"reformulacion\": \"Aprobación de la subida de precios en los aranceles de matrículas.\",\n      \"desition\": \"Aprobar la subida de precios en los aranceles de matrículas.\"\n    },\n    {\n      \"id\": \"mfmz1dpr09k1zc02y\",\n      \"topic\": \"Eliminacion de materias de vinculacion con la sociedad\",\n      \"sub_topics\": [],\n      \"resolution_code\": \"R-OCS-SO-013-Nro.123-2025\",\n      \"vote_count_object\": {\n        \"AF\": 1,\n        \"EC\": 1,\n        \"AB\": 0,\n        \"RECTOR_VOTE\": \"AF\"\n      },\n      \"votes\": [\n        {\n          \"id\": \"recPGuzvEh4j4LODg\",\n          \"createdTime\": \"2025-09-16T12:55:02.000Z\",\n          \"name\": \"Matthew Jaramillo\",\n          \"option\": \"En contra\",\n          \"topic\": \"Eliminacion de materias de vinculacion con la sociedad\",\n          \"table\": \"votos\",\n          \"id_topic\": \"mfmz1dpr09k1zc02y\",\n          \"role\": \"Representante de profesores\"\n        },\n        {\n          \"id\": \"recdYJ1oY3N15h1G5\",\n          \"createdTime\": \"2025-09-16T12:54:56.000Z\",\n          \"name\": \"Javier Garzón\",\n          \"option\": \"A favor\",\n          \"topic\": \"Eliminacion de materias de vinculacion con la sociedad\",\n          \"table\": \"votos\",\n          \"id_topic\": \"mfmz1dpr09k1zc02y\",\n          \"role\": \"NA\"\n        }\n      ],\n      \"approved\": false,\n      \"meeting_summary\": \"Lorem ipsum dolor sit amet consectetur adipiscing elit iaculis fringilla, urna fames ridiculus interdum fusce cubilia dictum hendrerit tempus magnis, euismod magna auctor imperdiet cursus pellentesque varius enim. Tristique lacus venenatis iaculis interdum lobortis semper libero, congue suspendisse pretium tempor scelerisque orci ultrices augue, convallis laoreet fringilla condimentum dui ut.\\n Ullamcorper vel tempor conubia ut metus lacus, diam mauris penatibus risus dapibus fringilla mollis, justo vitae volutpat vehicula dis.Erat aptent orci phasellus viverra ligula, justo sodales tristique sem, arcu varius felis molestie. Mollis neque ultrices hac nulla pellentesque est diam phasellus suspendisse justo eget platea, risus hendrerit elementum condimentum vitae a eu tellus nullam vestibulum porttitor tristique feugiat, volutpat consequat curabitur lobortis purus mauris nibh tempor mi ullamcorper duis. Natoque phasellus quis varius vitae accumsan donec et sed sodales luctus imperdiet magna nostra aliquet, ornare porttitor class eget himenaeos dapibus ac mauris inceptos orci egestas habitasse.\",\n      \"reformulacion\": \"Eliminación de materias de vinculación con la sociedad.\",\n      \"desition\": \"Negar la eliminación de materias de vinculación con la sociedad.\"\n    }\n  ],\n  \"attendances\": [\n    {\n      \"id\": \"recAOh1pnAvzykAlg\",\n      \"createdTime\": \"2025-09-16T12:45:45.000Z\",\n      \"name\": \"Jennifer Tituana\",\n      \"role\": \"Miembro de la comisión de Etica\",\n      \"table\": \"asistencia\",\n      \"id_assistant\": \"a4bacb04-207c-4880-a518-4a548e8bb5f2\"\n    },\n    {\n      \"id\": \"recnAGjp3RcpYPPdE\",\n      \"createdTime\": \"2025-09-16T12:45:45.000Z\",\n      \"name\": \"Javier Garzón\",\n      \"attendance\": true,\n      \"role\": \"Representante de Estudiantes\",\n      \"table\": \"asistencia\",\n      \"id_assistant\": \"df9ac23b-0a40-4d7e-9a08-e3d7c7043236\"\n    },\n    {\n      \"id\": \"recthOINRQa3dH1Ht\",\n      \"createdTime\": \"2025-09-16T12:45:46.000Z\",\n      \"name\": \"Matthew Jaramillo\",\n      \"attendance\": true,\n      \"role\": \"Representante de profesores\",\n      \"table\": \"asistencia\",\n      \"id_assistant\": \"a863dece-6fb1-47f9-805a-305b27def9d0\"\n    }\n  ]\n}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -400,
+        160
+      ],
+      "id": "362d2d64-883c-4073-abd8-ea1c4ae83240",
+      "name": "start"
+    }
+  ],
+  "pinData": {
+    "start": [
+      {
+        "json": {
+          "id": "15ff9c50-5ba2-4149-a116-880fe2cdccbd",
+          "meeting_datetime_ISO8631": "1996-12-12T12:00:00.0000000",
+          "convocation_date_ISO8631": "2025-09-16",
+          "meeting_type": "Ordinaria",
+          "session_code": "OCS-SO-008-2025",
+          "attendees": [
+            {
+              "name": "Andrés Tituana",
+              "mail": "alvaro.andres1996@hotmail.com",
+              "role": "Representante de Estudiantes",
+              "id": "df9ac23b-0a40-4d7e-9a08-e3d7c7043236"
+            },
+            {
+              "name": "Jennifer Tituana",
+              "mail": "mrwringo@hotmail.com",
+              "role": "Miembro de la comisión de Etica",
+              "id": "a4bacb04-207c-4880-a518-4a548e8bb5f2"
+            },
+            {
+              "name": "Matthew Jaramillo",
+              "mail": "mnjaramillo@hotmail.com",
+              "role": "Representante de profesores",
+              "id": "a863dece-6fb1-47f9-805a-305b27def9d0"
+            }
+          ],
+          "meeting_topics": [
+            {
+              "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
+              "sub_topics": [
+                "Msc. Alfredo Armando Rodríquez Guzman, representante del Rector, como presidente del comité.",
+                "Msc Dania Elena Portelles Cobas, Vicerrectora Académica",
+                "Adm. Carlos Eduardo Esterlla Carrera, docente de la carrera de Gastronomía en calidad de delegado del personal docente."
+              ],
+              "id": "ce5168aa-5115-431b-b002-ba007ae01ace",
+              "resolution_code": "R-OCS-SO-013-Nro.119-2025",
+              "vote_count_object": {
+                "AF": 1,
+                "EC": 1,
+                "AB": 0,
+                "RECTOR_VOTE": "EC"
+              },
+              "votes": [
+                {
+                  "id": "recPHwZwh2wz1z2c0",
+                  "createdTime": "2025-09-16T12:45:58.000Z",
+                  "name": "Matthew Jaramillo",
+                  "option": "A favor",
+                  "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
+                  "table": "votos",
+                  "id_topic": "ce5168aa-5115-431b-b002-ba007ae01ace",
+                  "role": "Representante de profesores"
+                },
+                {
+                  "id": "recxQJYBc9RFPS1ad",
+                  "createdTime": "2025-09-16T12:45:57.000Z",
+                  "name": "Javier Garzón",
+                  "option": "En contra",
+                  "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
+                  "table": "votos",
+                  "id_topic": "ce5168aa-5115-431b-b002-ba007ae01ace",
+                  "role": "NA"
+                }
+              ],
+              "approved": false,
+              "meeting_summary": "Lorem ipsum dolor sit amet consectetur adipiscing elit iaculis fringilla, urna fames ridiculus interdum fusce cubilia dictum hendrerit tempus magnis, euismod magna auctor imperdiet cursus pellentesque varius enim. Tristique lacus venenatis iaculis interdum lobortis semper libero, congue suspendisse pretium tempor scelerisque orci ultrices augue, convallis laoreet fringilla condimentum dui ut.\n Ullamcorper vel tempor conubia ut metus lacus, diam mauris penatibus risus dapibus fringilla mollis, justo vitae volutpat vehicula dis.Erat aptent orci phasellus viverra ligula, justo sodales tristique sem, arcu varius felis molestie. Mollis neque ultrices hac nulla pellentesque est diam phasellus suspendisse justo eget platea, risus hendrerit elementum condimentum vitae a eu tellus nullam vestibulum porttitor tristique feugiat, volutpat consequat curabitur lobortis purus mauris nibh tempor mi ullamcorper duis. Natoque phasellus quis varius vitae accumsan donec et sed sodales luctus imperdiet magna nostra aliquet, ornare porttitor class eget himenaeos dapibus ac mauris inceptos orci egestas habitasse.",
+              "reformulacion": "Aprobación de la designación de los miembros del comité de ética del Instituto Superior Tecnológico Yaruquí.",
+              "desition": "Negar la designación de los miembros del comité de ética del Instituto Superior Tecnológico Yaruquí."
+            },
+            {
+              "topic": "Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación.",
+              "sub_topics": [],
+              "id": "7728b797-b6d2-4516-9caf-837be57b2681",
+              "resolution_code": "R-OCS-SO-013-Nro.120-2025",
+              "vote_count_object": {
+                "AF": 1,
+                "EC": 1,
+                "AB": 0,
+                "RECTOR_VOTE": "EC"
+              },
+              "votes": [
+                {
+                  "id": "recOLGmGzkQMkVbO5",
+                  "createdTime": "2025-09-16T12:45:59.000Z",
+                  "name": "Javier Garzón",
+                  "option": "En contra",
+                  "topic": "Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación.",
+                  "table": "votos",
+                  "id_topic": "7728b797-b6d2-4516-9caf-837be57b2681",
+                  "role": "NA"
+                },
+                {
+                  "id": "recYu3SbxfOZx4eqG",
+                  "createdTime": "2025-09-16T12:46:00.000Z",
+                  "name": "Matthew Jaramillo",
+                  "option": "A favor",
+                  "topic": "Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación.",
+                  "table": "votos",
+                  "id_topic": "7728b797-b6d2-4516-9caf-837be57b2681",
+                  "role": "Representante de profesores"
+                }
+              ],
+              "approved": false,
+              "meeting_summary": "Lorem ipsum dolor sit amet consectetur adipiscing elit iaculis fringilla, urna fames ridiculus interdum fusce cubilia dictum hendrerit tempus magnis, euismod magna auctor imperdiet cursus pellentesque varius enim. Tristique lacus venenatis iaculis interdum lobortis semper libero, congue suspendisse pretium tempor scelerisque orci ultrices augue, convallis laoreet fringilla condimentum dui ut.\n Ullamcorper vel tempor conubia ut metus lacus, diam mauris penatibus risus dapibus fringilla mollis, justo vitae volutpat vehicula dis.Erat aptent orci phasellus viverra ligula, justo sodales tristique sem, arcu varius felis molestie. Mollis neque ultrices hac nulla pellentesque est diam phasellus suspendisse justo eget platea, risus hendrerit elementum condimentum vitae a eu tellus nullam vestibulum porttitor tristique feugiat, volutpat consequat curabitur lobortis purus mauris nibh tempor mi ullamcorper duis. Natoque phasellus quis varius vitae accumsan donec et sed sodales luctus imperdiet magna nostra aliquet, ornare porttitor class eget himenaeos dapibus ac mauris inceptos orci egestas habitasse.",
+              "reformulacion": "Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la Información y Comunicación.",
+              "desition": "Negar la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la Información y Comunicación."
+            },
+            {
+              "topic": "Aprobación de la actualización del Calendario Académico PAO 2025-II",
+              "sub_topics": [],
+              "id": "493236eb-c19e-4bc6-b2fd-8b34673f8bb2",
+              "resolution_code": "R-OCS-SO-013-Nro.121-2025",
+              "vote_count_object": {
+                "AF": 2,
+                "EC": 0,
+                "AB": 0,
+                "RECTOR_VOTE": "AF"
+              },
+              "votes": [
+                {
+                  "id": "recAt1Sg9c3NqVxCs",
+                  "createdTime": "2025-09-16T12:46:01.000Z",
+                  "name": "Matthew Jaramillo",
+                  "option": "A favor",
+                  "topic": "Aprobación de la actualización del Calendario Académico PAO 2025-II",
+                  "table": "votos",
+                  "id_topic": "493236eb-c19e-4bc6-b2fd-8b34673f8bb2",
+                  "role": "Representante de profesores"
+                },
+                {
+                  "id": "recPU9Lpg1fGN7BZO",
+                  "createdTime": "2025-09-16T12:46:00.000Z",
+                  "name": "Javier Garzón",
+                  "option": "A favor",
+                  "topic": "Aprobación de la actualización del Calendario Académico PAO 2025-II",
+                  "table": "votos",
+                  "id_topic": "493236eb-c19e-4bc6-b2fd-8b34673f8bb2",
+                  "role": "NA"
+                }
+              ],
+              "approved": true,
+              "meeting_summary": "Lorem ipsum dolor sit amet consectetur adipiscing elit iaculis fringilla, urna fames ridiculus interdum fusce cubilia dictum hendrerit tempus magnis, euismod magna auctor imperdiet cursus pellentesque varius enim. Tristique lacus venenatis iaculis interdum lobortis semper libero, congue suspendisse pretium tempor scelerisque orci ultrices augue, convallis laoreet fringilla condimentum dui ut.\n Ullamcorper vel tempor conubia ut metus lacus, diam mauris penatibus risus dapibus fringilla mollis, justo vitae volutpat vehicula dis.Erat aptent orci phasellus viverra ligula, justo sodales tristique sem, arcu varius felis molestie. Mollis neque ultrices hac nulla pellentesque est diam phasellus suspendisse justo eget platea, risus hendrerit elementum condimentum vitae a eu tellus nullam vestibulum porttitor tristique feugiat, volutpat consequat curabitur lobortis purus mauris nibh tempor mi ullamcorper duis. Natoque phasellus quis varius vitae accumsan donec et sed sodales luctus imperdiet magna nostra aliquet, ornare porttitor class eget himenaeos dapibus ac mauris inceptos orci egestas habitasse.",
+              "reformulacion": "Aprobación de la actualización del Calendario Académico PAO 2025-II.",
+              "desition": "Aprobar la actualización del Calendario Académico PAO 2025-II."
+            },
+            {
+              "id": "mfmz1dprs3xgcaj6wip",
+              "topic": "Aprobacion subida de precios en aranceles de matrículas",
+              "sub_topics": [],
+              "resolution_code": "R-OCS-SO-013-Nro.122-2025",
+              "vote_count_object": {
+                "AF": 2,
+                "EC": 0,
+                "AB": 0,
+                "RECTOR_VOTE": "AF"
+              },
+              "votes": [
+                {
+                  "id": "rec1f4hHSCapsWFQK",
+                  "createdTime": "2025-09-16T12:52:57.000Z",
+                  "name": "Javier Garzón",
+                  "option": "A favor",
+                  "topic": "Aprobacion subida de precios en aranceles de matrículas",
+                  "table": "votos",
+                  "id_topic": "mfmz1dprs3xgcaj6wip",
+                  "role": "NA"
+                },
+                {
+                  "id": "recYaxJga42l0kDKg",
+                  "createdTime": "2025-09-16T12:53:03.000Z",
+                  "name": "Matthew Jaramillo",
+                  "option": "A favor",
+                  "topic": "Aprobacion subida de precios en aranceles de matrículas",
+                  "table": "votos",
+                  "id_topic": "mfmz1dprs3xgcaj6wip",
+                  "role": "Representante de profesores"
+                }
+              ],
+              "approved": true,
+              "meeting_summary": "Lorem ipsum dolor sit amet consectetur adipiscing elit iaculis fringilla, urna fames ridiculus interdum fusce cubilia dictum hendrerit tempus magnis, euismod magna auctor imperdiet cursus pellentesque varius enim. Tristique lacus venenatis iaculis interdum lobortis semper libero, congue suspendisse pretium tempor scelerisque orci ultrices augue, convallis laoreet fringilla condimentum dui ut.\n Ullamcorper vel tempor conubia ut metus lacus, diam mauris penatibus risus dapibus fringilla mollis, justo vitae volutpat vehicula dis.Erat aptent orci phasellus viverra ligula, justo sodales tristique sem, arcu varius felis molestie. Mollis neque ultrices hac nulla pellentesque est diam phasellus suspendisse justo eget platea, risus hendrerit elementum condimentum vitae a eu tellus nullam vestibulum porttitor tristique feugiat, volutpat consequat curabitur lobortis purus mauris nibh tempor mi ullamcorper duis. Natoque phasellus quis varius vitae accumsan donec et sed sodales luctus imperdiet magna nostra aliquet, ornare porttitor class eget himenaeos dapibus ac mauris inceptos orci egestas habitasse.",
+              "reformulacion": "Aprobación de la subida de precios en los aranceles de matrículas.",
+              "desition": "Aprobar la subida de precios en los aranceles de matrículas."
+            },
+            {
+              "id": "mfmz1dpr09k1zc02y",
+              "topic": "Eliminacion de materias de vinculacion con la sociedad",
+              "sub_topics": [],
+              "resolution_code": "R-OCS-SO-013-Nro.123-2025",
+              "vote_count_object": {
+                "AF": 1,
+                "EC": 1,
+                "AB": 0,
+                "RECTOR_VOTE": "AF"
+              },
+              "votes": [
+                {
+                  "id": "recPGuzvEh4j4LODg",
+                  "createdTime": "2025-09-16T12:55:02.000Z",
+                  "name": "Matthew Jaramillo",
+                  "option": "En contra",
+                  "topic": "Eliminacion de materias de vinculacion con la sociedad",
+                  "table": "votos",
+                  "id_topic": "mfmz1dpr09k1zc02y",
+                  "role": "Representante de profesores"
+                },
+                {
+                  "id": "recdYJ1oY3N15h1G5",
+                  "createdTime": "2025-09-16T12:54:56.000Z",
+                  "name": "Javier Garzón",
+                  "option": "A favor",
+                  "topic": "Eliminacion de materias de vinculacion con la sociedad",
+                  "table": "votos",
+                  "id_topic": "mfmz1dpr09k1zc02y",
+                  "role": "NA"
+                }
+              ],
+              "approved": false,
+              "meeting_summary": "Lorem ipsum dolor sit amet consectetur adipiscing elit iaculis fringilla, urna fames ridiculus interdum fusce cubilia dictum hendrerit tempus magnis, euismod magna auctor imperdiet cursus pellentesque varius enim. Tristique lacus venenatis iaculis interdum lobortis semper libero, congue suspendisse pretium tempor scelerisque orci ultrices augue, convallis laoreet fringilla condimentum dui ut.\n Ullamcorper vel tempor conubia ut metus lacus, diam mauris penatibus risus dapibus fringilla mollis, justo vitae volutpat vehicula dis.Erat aptent orci phasellus viverra ligula, justo sodales tristique sem, arcu varius felis molestie. Mollis neque ultrices hac nulla pellentesque est diam phasellus suspendisse justo eget platea, risus hendrerit elementum condimentum vitae a eu tellus nullam vestibulum porttitor tristique feugiat, volutpat consequat curabitur lobortis purus mauris nibh tempor mi ullamcorper duis. Natoque phasellus quis varius vitae accumsan donec et sed sodales luctus imperdiet magna nostra aliquet, ornare porttitor class eget himenaeos dapibus ac mauris inceptos orci egestas habitasse.",
+              "reformulacion": "Eliminación de materias de vinculación con la sociedad.",
+              "desition": "Negar la eliminación de materias de vinculación con la sociedad."
+            }
+          ],
+          "attendances": [
+            {
+              "id": "recAOh1pnAvzykAlg",
+              "createdTime": "2025-09-16T12:45:45.000Z",
+              "name": "Jennifer Tituana",
+              "role": "Miembro de la comisión de Etica",
+              "table": "asistencia",
+              "id_assistant": "a4bacb04-207c-4880-a518-4a548e8bb5f2"
+            },
+            {
+              "id": "recnAGjp3RcpYPPdE",
+              "createdTime": "2025-09-16T12:45:45.000Z",
+              "name": "Javier Garzón",
+              "attendance": true,
+              "role": "Representante de Estudiantes",
+              "table": "asistencia",
+              "id_assistant": "df9ac23b-0a40-4d7e-9a08-e3d7c7043236"
+            },
+            {
+              "id": "recthOINRQa3dH1Ht",
+              "createdTime": "2025-09-16T12:45:46.000Z",
+              "name": "Matthew Jaramillo",
+              "attendance": true,
+              "role": "Representante de profesores",
+              "table": "asistencia",
+              "id_assistant": "a863dece-6fb1-47f9-805a-305b27def9d0"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "footer": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "header": {
+      "main": [
+        [
+          {
+            "node": "Convert to File3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "index": {
+      "main": [
+        [
+          {
+            "node": "Convert to File4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File4": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "index",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "header",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "footer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "start": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cce3350b-b37d-408b-b087-a1282eda8eb1",
+  "meta": {
+    "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"
+  },
+  "id": "fxK4naUSjlJROArO",
+  "tags": []
+}

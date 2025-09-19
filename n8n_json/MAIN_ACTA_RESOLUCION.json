@@ -1,0 +1,860 @@
+{
+  "name": "MAIN_ACTA_RESOLUCION",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        224,
+        96
+      ],
+      "id": "6920f392-c4f6-42de-b3af-12d77a86890b",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appmLh9OZ0DbIuJDv",
+          "mode": "list",
+          "cachedResultName": "NOTAS_RESOLUCIONES",
+          "cachedResultUrl": "https://airtable.com/appmLh9OZ0DbIuJDv"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblQHfVUzkpB4vBPv",
+          "mode": "list",
+          "cachedResultName": "ASISTENCIA",
+          "cachedResultUrl": "https://airtable.com/appmLh9OZ0DbIuJDv/tblQHfVUzkpB4vBPv"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d16d5075-1225-415b-999d-f54330288cd0",
+      "name": "get_asistencia",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ahIgIA3gHcgLZgKy",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nfunction generarIdCorto() {\n    return Date.now().toString(36) + Math.random().toString(36).substring(2);\n}\n\n\nconst asistencias = $('get_asistencia').all().map(as=>as.json)\nconst votos = $('get_votos').all().map(vot=>vot.json)\n//filtro los votos de las personas que no vinieron\nconst votos_filtered = votos.filter(voto => \n  asistencias.some(asist => \n    asist.name.trim().toLowerCase() === voto.name.trim().toLowerCase() && \n    asist.attendance === true\n  )\n);\n//Primero analizo los votos para verificar si hay nuevos temas\n//si existen nuevos temas se crea la estructura para añadir a los votos que se extrayeron de la base\n//para ello se usa la tabla votos\n\n// 1. Filtrar elementos sin 'id_topic'\nconst filtered = votos_filtered.filter(item => !item.hasOwnProperty('id_topic'));\n\n// 2. Obtener topics únicos\nconst uniqueTopics = [...new Set(filtered.map(item => item.topic))];\n\n// 3. Crear un Map para asociar cada topic con un ID único generado\nconst topicIdMap = new Map();\n\nuniqueTopics.forEach(topic => {\n    topicIdMap.set(topic, generarIdCorto());\n});\n\n// 4. Crear el array result con IDs\nconst result = uniqueTopics.map(topic => ({\n    id: topicIdMap.get(topic),\n    topic: topic,\n    sub_topics: []\n}));\n\n// 5. Actualizar el array original votos agregando id_topic\nvotos_filtered.forEach(item => {\n    if (!item.hasOwnProperty('id_topic') && topicIdMap.has(item.topic)) {\n        item.id_topic = topicIdMap.get(item.topic);\n    }\n});\n\n/**\n * /COLOCO LAS VOTACIONES DENTRO DE LOS TEMAS LA IDEA ES TENER ESTA ESTRUCTURA\ntemas_reunion: [\n{\n        \"id\": \"101\",\n        \"createdTime\": \"\",\n        \"descripcion\": \"*Nombre del tema*\",\n        \"subtemas\": \"*subtemas separados por saltos de linea*\",\n        \"tabla\": \"temas_reunion\",\n        \"meeting_summary\": \"str\",\n        votes: [\n        {\n            \"id\": \"*id recordAirtable\",\n            \"createdTime\": \"2025-09-10T13:24:44.000Z\",\n            \"votante\": \"MSc. Dania Elena Portelles Cobas\",\n            \"opcion\": \"AF\",\n            \"tema\": \"Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera\",\n            \"tabla\": \"votos\",\n            \"id_tema\": \"101\",\n            \"cargoVotante\": \"Vicerrectora Académica Instituto Superior Tecnológico Yaruquí\"\n          },\n        ]\n }\n,...]\n\n */\nconst id_resolucion = (num_resolution)=>{\n  /*\n   PERMITE OBTENER EL CODIGO DE LA RESOLUCIÓN SEGUN EL INDEX DEL TEMA VISTO\n   DADO QUE HAY VARIOS TEMAS DENTRO DE UNA REUNION, SE VA UTILIZANDO ESTA FUNCION DE ACUERDO AL INDICE DEL TEMA VISTO.\n   */\n  const metadata_resolutions = $('Get many rows').first().json\n  const type_session = $('Extract from File').first().json.data[0].meeting_type\n  //primero obtengo el numero de la resolucion\n  const number_session = type_session.toLowerCase() == \"ordinaria\" ? \n    ('00' + (Number(metadata_resolutions.ordinary_session_number) + 1)\n).slice(-3) : \n    ('00' + (Number(metadata_resolutions.extraordinary_session_number) + 1)\n).slice(-3)\n  const resolution_name =  `R-OCS-S${type_session.toLowerCase() == \"ordinaria\" ? \"O\" : \"E\"}-${number_session}-Nro.${num_resolution}-${$today.toString().substring(0, 4)}`\n  return resolution_name\n}\n\nconst countVotesFunction = (votos) => votos.reduce((acc, { option, name }) => {\n  const key = option === \"A favor\" ? \"AF\" : option === \"En contra\" ? \"EC\" : \"AB\";\n  acc[key]++;\n  if (/javier\\W*garzon/i.test(name.normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\"))) acc.RECTOR_VOTE = key;\n  return acc;\n}, { AF: 0, EC: 0, AB: 0, RECTOR_VOTE: null });\n\n\n//antes de colocar los votos, agrego los temas nuevos en caso de que existan\nconst temasOriginales = $('Extract from File').first().json.data[0].topics;\nconst temas_reunion = [...temasOriginales, ...result];\n\ntemas_reunion.forEach((tema, index) => {\n  const votes = votos_filtered\n    .filter(voto => voto.id_topic == tema.id)\n    .map(voto => {\n      // Primero, crear el objeto base (con opcion si falta)\n      const votoBase = !voto.hasOwnProperty('option') \n        ? { ...voto, opcion: \"Abstencion\" }\n        : voto;\n      // Luego, agregar cargoVotante a TODOS los votos\n      return {\n        ...votoBase,\n        role: $('Extract from File').first().json.data[0].attendees.find(integ => integ.name === voto.name)?.role || \"NA\"\n      };\n    });\n\n  tema.resolution_code = id_resolucion(index+1+$('Get many rows').first().json.resolution_number)\n  tema.vote_count_object = countVotesFunction(votes)\n  tema.votes = votes;\n  tema.approved = tema.vote_count_object.AF - tema.vote_count_object.EC - tema.vote_count_object.AB > 0;\n\n  \n  tema.meeting_summary = \"Lorem ipsum dolor sit amet consectetur adipiscing elit iaculis fringilla, urna fames ridiculus interdum fusce cubilia dictum hendrerit tempus magnis, euismod magna auctor imperdiet cursus pellentesque varius enim. Tristique lacus venenatis iaculis interdum lobortis semper libero, congue suspendisse pretium tempor scelerisque orci ultrices augue, convallis laoreet fringilla condimentum dui ut.\\n Ullamcorper vel tempor conubia ut metus lacus, diam mauris penatibus risus dapibus fringilla mollis, justo vitae volutpat vehicula dis.Erat aptent orci phasellus viverra ligula, justo sodales tristique sem, arcu varius felis molestie. Mollis neque ultrices hac nulla pellentesque est diam phasellus suspendisse justo eget platea, risus hendrerit elementum condimentum vitae a eu tellus nullam vestibulum porttitor tristique feugiat, volutpat consequat curabitur lobortis purus mauris nibh tempor mi ullamcorper duis. Natoque phasellus quis varius vitae accumsan donec et sed sodales luctus imperdiet magna nostra aliquet, ornare porttitor class eget himenaeos dapibus ac mauris inceptos orci egestas habitasse.\";\n});\n\nconst newObj = $('Extract from File').first().json.data[0]\nnewObj.attendances = asistencias\nnewObj.topics = temas_reunion\n\nconst regex = /meeting[^%]*/;\n\nnewObj.id_teams_meeting = $('Extract from File')?.first()?.json?.data?.[0]?.meeting_url?.match(regex)?.[0] || '';\n\n\n\nreturn [{\n  json: newObj\n}];\n\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        96
+      ],
+      "id": "deb78c8b-17b0-40f8-9617-320623469a94",
+      "name": "estructure_data"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "2YgqQ2rGUufv3pSH",
+          "mode": "list",
+          "cachedResultName": "GENERACION_CONSIDERANDOS"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "resolucion": "={{ $json.topic }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "resolucion",
+              "displayName": "resolucion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1968,
+        112
+      ],
+      "id": "4478ef6b-b573-45c7-af2d-749dfc76ef10",
+      "name": "crear_considerandos"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appmLh9OZ0DbIuJDv",
+          "mode": "list",
+          "cachedResultName": "NOTAS_RESOLUCIONES",
+          "cachedResultUrl": "https://airtable.com/appmLh9OZ0DbIuJDv"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbllQ6axu72nv4mjN",
+          "mode": "list",
+          "cachedResultName": "VOTOS",
+          "cachedResultUrl": "https://airtable.com/appmLh9OZ0DbIuJDv/tbllQ6axu72nv4mjN"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        208
+      ],
+      "id": "efd93243-5b27-4812-ada7-a60e96013000",
+      "name": "get_votos",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ahIgIA3gHcgLZgKy",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -352,
+        112
+      ],
+      "id": "b10102a7-0a1a-4452-aa13-3d151af0aea1",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "4WPORFl40y0qlRSc",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "queryString": "={{ $('Airtable Trigger').item.json.fields.id_meeting }}",
+        "limit": 1,
+        "filter": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -512,
+        112
+      ],
+      "id": "f8d8f812-ae0b-4ca0-9d0b-273c6da2b8e4",
+      "name": "Search files and folders",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "4WPORFl40y0qlRSc",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        112
+      ],
+      "id": "cf3ada1c-3ab2-4200-84cb-05605873781d",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "oOHNNGSuiYoOKNdR",
+          "mode": "list",
+          "cachedResultName": "PDF_ACTA"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "attendees": "={{ $json.attendees }}",
+            "id": "={{ $json.id_meeting }}",
+            "meeting_datetime_ISO8631": "={{ $json.meeting_datetime_ISO8631 }}",
+            "convocation_date_ISO8631": "={{ $json.convocation_date_ISO8631 }}",
+            "meeting_type": "={{ $json.meeting_type }}",
+            "session_code": "={{ $json.session_code }}",
+            "meeting_topics": "={{ $json.topics }}",
+            "attendances": "={{ $json.attendances }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "meeting_datetime_ISO8631",
+              "displayName": "meeting_datetime_ISO8631",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "convocation_date_ISO8631",
+              "displayName": "convocation_date_ISO8631",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "meeting_type",
+              "displayName": "meeting_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "session_code",
+              "displayName": "session_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "attendees",
+              "displayName": "attendees",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            },
+            {
+              "id": "meeting_topics",
+              "displayName": "meeting_topics",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            },
+            {
+              "id": "attendances",
+              "displayName": "attendances",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1488,
+        112
+      ],
+      "id": "2fa80b0d-66c6-4fd6-bb9c-d95fc0375d3d",
+      "name": "PDF_ACTA"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Esto devuelve 3 items (uno por cada topic)\nreturn $('estructure_data').first().json.topics.map(topic => ({\n  json: topic\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        112
+      ],
+      "id": "1d87b1f3-0a7d-4d6a-8376-d7f18769a772",
+      "name": "split_topics"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "GwXuXI64MlNZR3pb",
+          "mode": "list",
+          "cachedResultName": "PDF_RESOLUCION"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "considerandos": "={{ $json.considerandos }}",
+            "cod_resolucion": "=AAAAAAAAAAAAAAAAA",
+            "area_a_notificar": "TALENTO HUMANO",
+            "n_esima": "PRIMERA",
+            "tema_reunion": "={{ $('split_topics').item}}",
+            "tipo_reunion": "={{ $('estructure_data').item.json.meeting_type }}",
+            "fecha_reunion": "={{ $('estructure_data').item.json.meeting_datetime_ISO8631 }}",
+            "cod_sesion": "={{ $('estructure_data').item.json.session_code }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "tipo_reunion",
+              "displayName": "tipo_reunion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "fecha_reunion",
+              "displayName": "fecha_reunion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "cod_sesion",
+              "displayName": "cod_sesion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "cod_resolucion",
+              "displayName": "cod_resolucion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "area_a_notificar",
+              "displayName": "area_a_notificar",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "n_esima",
+              "displayName": "n_esima",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "tema_reunion",
+              "displayName": "tema_reunion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "considerandos",
+              "displayName": "considerandos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2160,
+        96
+      ],
+      "id": "93adacf8-afa8-4d2f-b3e4-7a3a34d75384",
+      "name": "pdf_resolution"
+    },
+    {
+      "parameters": {
+        "toRecipients": "alvaro.andres1996@hotmail.com",
+        "subject": "=RESOLUCION - {{ $('split_topics').item.json.topic }}",
+        "bodyContent": "=Se adjunta las resoluciones resultantes de la sesion",
+        "additionalFields": {
+          "attachments": {
+            "attachments": [
+              {
+                "binaryPropertyName": "data"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        2320,
+        96
+      ],
+      "id": "f729a998-add9-471b-b07c-1e577cd47ed3",
+      "name": "Send a message",
+      "webhookId": "289dd8b7-e12d-4d80-89a2-e947de2d69a8"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "sessions_resolutions",
+        "limit": 1,
+        "filterType": "none"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        112
+      ],
+      "id": "5a3ed22b-565f-451c-97a5-58ffdbb86d4b",
+      "name": "Get many rows",
+      "credentials": {
+        "supabaseApi": {
+          "id": "7iDL76ggTML8vg0b",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Analiza los siguientes {{ $json.topics.length }} títulos de resolución y realiza dos acciones:\n1. Reformúlalos eliminando cualquier introducción o frase que anticipe detalles o subpuntos (por ejemplo: 'quedando conformado de la siguiente manera', 'como se detalla a continuación').\n2. Conjuga y da coherencia a la frase.** El título original está expresado como un sustantivo (ej. \"Aprobación de algo...\"). Tu tarea es convertirlo en una oración imperativa que comience con un verbo ('Aprobar algo...'). Para lograrlo, es fundamental que **antepongas el artículo correcto ('el', 'la', 'los', 'las') al sujeto de la oración para que conecte lógicamente la desicion tomada con el tema.**\n\n\nCUMPLE CON ESTO TAMBIEN: \n*Es imperativo que mantengas el orden de entrada de los titulos en lo que generes, no los cambies de orden.\n*Corrige si es necesario los signos de puntuación.\n*Mantén siempre el mismo numero de salidas, si se te coloca 5 titulos, cada elemento del json debe tener un string con 5 elementos separados por el separador que se te indique \nSEPARADOR: vas a separar los titulos generados utilizando una barra vertical (|)\nRESPUESTA:\nDevuelve un json con esta estructura \n{\n\"reformulacion\": \"aquí coloca los {{ $json.topics.length }} titulos separados por el separador indicado\" \n\"desition\": \"Aquí coloca los {{ $json.topics.length }} texto reformulado\"\n}\nNumero de titulos: {{ $json.topics.length }}\nTITULOS: {{ $json.topics.map((tp) => (\"TITULO:\"+tp.topic + \".    DESICION: \" + (tp.approved ? \"Aprobado\" : \"Negado\"))).join(\"\\n\") }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        560,
+        96
+      ],
+      "id": "aeb50226-100b-40b3-bd99-0bca2b1b9e7b",
+      "name": "ValidarTituloResolucion"
+    },
+    {
+      "parameters": {
+        "jsCode": "/*\nEL NODO DE IA ANTERIOR CREA MENSAJES PERSONALIZADOS DE ACUERDO A SI SE ACEPTA,  SE NIEGA LA RESOLUCION, TAMBIEN PERMITE ELIMINAR CUALQUIER INTRODUCCION A ALGUN SUBPUNTO.\nESTA FUNCION PERMITE UNIR NUEVAMENTE ESA SALIDA A CADA TEMA VISTO (LISTA TOPICS)\n*/\n\n// Acceder al primer elemento del nodo 'estructure_data'\nconst structureData = $('estructure_data').first().json;\n\n// Obtener el string JSON desde la entrada\nconst jsonString = $('ValidarTituloResolucion').first().json.candidates[0].content.parts[0].text\nconst jsonString_RESUMEN = $input.first().json.candidates[0].content.parts[0].text\n// Parsear el string a un objeto JavaScript\nconst parsedData = JSON.parse(jsonString);\nconst parsedData_RESUMEN = JSON.parse(jsonString_RESUMEN);\n\n// Dividir las cadenas en arrays usando \" | \" como separador\nconst reformulacionArray = parsedData.reformulacion.split(\"|\");\nconst desitionArray = parsedData.desition.split(\"|\");\nconst RESUMEN_ARRAY = parsedData_RESUMEN.resumenes.split(\"|\");\n\n// Verificar que la cantidad de topics coincida con los arrays\nif (structureData.topics.length !== reformulacionArray.length || structureData.topics.length !== desitionArray.length) {\n  throw new Error(`La cantidad de topics (${structureData.topics.length}) no coincide con la cantidad de elementos en reformulacion (${reformulacionArray.length}) o desition (${desitionArray.length}).`);\n}\n\n// Agregar las propiedades a cada topic\nstructureData.topics.forEach((topic, index) => {\n  topic.reformulacion = reformulacionArray[index];\n  topic.desition = desitionArray[index];\n  topic.meeting_summary = RESUMEN_ARRAY[index]\n});\n\n// Devolver los datos modificados\nreturn structureData;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        112
+      ],
+      "id": "fda3b565-073f-437f-abcb-2b1bd026abbc",
+      "name": "PutIAdataInObject"
+    },
+    {
+      "parameters": {
+        "toRecipients": "alvaro.andres1996@hotmail.com",
+        "subject": "=ACTA DE REUNIÓN - {{ $('PutIAdataInObject').item.json.session_code }}",
+        "bodyContent": "=Se adjunta las resoluciones resultantes de la sesion",
+        "additionalFields": {
+          "attachments": {
+            "attachments": [
+              {
+                "binaryPropertyName": "data"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        1648,
+        112
+      ],
+      "id": "64ab3bff-6ab9-4882-b312-bf6dc8c3e3c5",
+      "name": "send_document",
+      "webhookId": "289dd8b7-e12d-4d80-89a2-e947de2d69a8"
+    },
+    {
+      "parameters": {
+        "url": "=http://192.168.20.228:5000/run-automation?meeting_id={{ $('estructure_data').item.json.id_teams_meeting }}&filename={{ $('estructure_data').item.json.session_code }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        848,
+        96
+      ],
+      "id": "f45aa45e-f673-4c0d-9248-b09127751bc9",
+      "name": "get_transcriptions"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-pro",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-pro"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Vas a actuar como un asistente de reunión, para ello te voy a pasar una transcripcion de una reunión, de la cual se tratan {{  $('estructure_data').item.json.topics.length }} temas distintos, vas a identificar los temas dentro de la transcripcion y vas a generar un párrafo describiendo lo que se trató y lo que hicieron por cada uno de los  {{  $('estructure_data').item.json.topics.length }} que se encuentran en la transcripcion, como están mezclados, tienes queidentificar y extraer. \ngeneralmente los temas los tratan en el mismo orden en el que te enumero los temas.\n{{ $('estructure_data').item.json.topics.map((t,i)=>(`TEMA ${i+1}: ${t.topic}\\n`)) }}\n\nTRANSCRIPCIÓN:\n{{ $json.transcript }}\n\nFORMATO DE SALIDA: \nvas a devolver un json con la siguiente estructura \n{\n\"resumenes\": aqui vas a poner todos los resumenes en el mismo orden en el que te enlisté yo, todo eso separado por barras verticales (|)\n}"
+            }
+          ]
+        },
+        "simplify": false,
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        96
+      ],
+      "id": "fdafa808-9240-48c8-8ad5-d85a5a28d173",
+      "name": "EXTRAERRESUMENES"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "authentication": "airtableTokenApi",
+        "baseId": {
+          "__rl": true,
+          "value": "appmLh9OZ0DbIuJDv",
+          "mode": "id"
+        },
+        "tableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tbll380WCapYxHCK2"
+        },
+        "triggerField": "last_time",
+        "additionalFields": {
+          "formula": "{state} = 'FINALIZADA'"
+        }
+      },
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        112
+      ],
+      "id": "c6dccd47-8a3d-42c5-a02e-8df9dbd71fcf",
+      "name": "Airtable Trigger",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ahIgIA3gHcgLZgKy",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "estructure_data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_asistencia": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "estructure_data": {
+      "main": [
+        [
+          {
+            "node": "ValidarTituloResolucion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "crear_considerandos": {
+      "main": [
+        [
+          {
+            "node": "pdf_resolution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_votos": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "get_asistencia",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "get_votos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDF_ACTA": {
+      "main": [
+        [
+          {
+            "node": "send_document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "split_topics": {
+      "main": [
+        [
+          {
+            "node": "crear_considerandos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pdf_resolution": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ValidarTituloResolucion": {
+      "main": [
+        [
+          {
+            "node": "get_transcriptions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PutIAdataInObject": {
+      "main": [
+        [
+          {
+            "node": "PDF_ACTA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send_document": {
+      "main": [
+        [
+          {
+            "node": "split_topics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_transcriptions": {
+      "main": [
+        [
+          {
+            "node": "EXTRAERRESUMENES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EXTRAERRESUMENES": {
+      "main": [
+        [
+          {
+            "node": "PutIAdataInObject",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "95b19d61-33f4-4e5a-ac19-160a8a3318c6",
+  "meta": {
+    "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"
+  },
+  "id": "E1VxJCtNCmSJnhvG",
+  "tags": []
+}

@@ -1,0 +1,854 @@
+{
+  "name": "GENERACION_EMBEDDINGS",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false
+      },
+      "type": "n8n-nodes-base.microsoftOneDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        -32
+      ],
+      "id": "075cf994-3519-4bb0-b852-f7cf72eee675",
+      "name": "ESPERAR_SUBIDA",
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "Sk09Y3pRv4uy2lLG",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/drives/{{ $('Loop Over Items').item.json.parentReference_driveId }}/items/{{ $('Loop Over Items').item.json.file_id }}/content",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        992,
+        144
+      ],
+      "id": "029c5ad8-87fd-4c17-8630-fc98846b9c02",
+      "name": "DESCARCAR_ARCHIVO",
+      "alwaysOutputData": false,
+      "credentials": {
+        "microsoftOAuth2Api": {
+          "id": "Y5GP57FlaZyiBK8B",
+          "name": "Microsoft account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        1728,
+        112
+      ],
+      "id": "a46a1c49-9f7d-41f0-bf9a-eaea1068bdb0",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "3UFgNLDytpRNxPz0",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=ACTÚA COMO UN REFINADOR Y ESTRACTOR DE TEXTO\nNecesito que hagas dos cosas\nContexto: Se te proporcionará un texto extraído de una página de un documento normativo mediante OCR. Este texto puede contener el inicio de un nuevo artículo, el final de un artículo de la página anterior, o una combinación de ambos.\n\n# TAREA PRINCIPAL\nTu objetivo es analizar el texto, identificar y extraer los artículos o fragmentos de artículos, corregir errores de OCR y ortografía, y devolver la información en un formato JSON estructurado.\n\n# LÓGICA DE EXTRACCIÓN Y REGLAS\nSigue estas reglas en orden estricto:\n1.  **IDENTIFICAR EL FRAGMENTO INICIAL:** Barre el texto desde el principio. Todo el contenido que aparezca ANTES del primer marcador de artículo (como \"Art. 14\", \"Articulo 15\", etc.) debe ser considerado como un único bloque cohesivo. Este bloque es la continuación de un artículo de la página anterior. Agrupa todo este contenido inicial en un solo objeto JSON.\n    * En este objeto, los campos `numero` y `titulo` deben estar vacíos (`\"\"`).\n    * Todo el texto de este bloque debe ir dentro del campo `norma`.\n2.  **EXTRAER ARTÍCULOS COMPLETOS:** A partir del primer marcador de artículo encontrado, cada nuevo bloque que comience con un patrón como \"Art. #\", \"Articulo #\", etc., debe ser extraído como un objeto JSON individual.\n    * Identifica y extrae el `numero` del artículo.\n    * Identifica y extrae el `titulo`, que es la frase corta que sigue al número del artículo, y que termina justo antes del comienzo de la descripción principal de la norma. La estructura suele ser: Art [Número] [Separador]  [Título del artículo] [Separador] [Inicio del cuerpo de la norma].\n    * El resto del texto del artículo conformará la `norma`.\n3. EXTRAER DISPOSICIONES: Busca en el texto fragmentos numerados con ordinales en formato de texto (ej. PRIMERA, SEGUNDA, TERCERA).\n    *Para estos casos vas a asignar asi los campos.\n    El campo numero será el ordinal en texto (ej. \"PRIMERA\").\n    El campo titulo vas a poner \"DISPOSICIONES\"\n    El campo norma será el texto completo que sigue al número ordinal.\n4. EXTRAER CONSIDERANDOS: Los considerandos siempre inician con la palabra \"Que\", y luego hacen referencia a algun artículo, ten cuidado, ya que esto no es un artículo en sí. para estos vas a colocar en el campo `titulo` la palabra \"CONSIDERANDO\"\n4.  **CASO SIN ARTÍCULOS:** Si el texto proporcionado NO CONTIENE ningún marcador de artículo en absoluto, trata todo el texto como un único fragmento. En este caso, crea un solo objeto JSON donde todo el contenido esté en el campo `norma`, y los campos `numero` y `titulo` estén vacíos.\n5.  **CORRECCIÓN Y LIMPIEZA:** Durante la extracción, corrige errores evidentes de ortografía y OCR (ej. \"ArL\" por \"Art.\", \"proclamaci6n\" por \"proclamación\") y elimina saltos de línea, encabezados y pies de páguina. NO cambies el sentido original del texto.\n\nSALIDA: \nVas a devolver un array donde vas a encontrar cada artículo encontrado\n\n[\n    {\n        \"numero\": \"1\",\n        \"titulo\": \"El título que siempre viene luego del identificador de artículo (Articulo n)\",\n        \"norma\": \"El texto corregido y completo del artículo.\"\n    }\n]\n\n\nTEXTO A ANALIZAR: \n{{ $json.text }}",
+        "hasOutputParser": true,
+        "batching": {
+          "batchSize": 20
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1728,
+        -64
+      ],
+      "id": "a206fab9-3fee-453a-9399-2723422cb71f",
+      "name": "Basic LLM Chain",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"array\",\n\t\"items\": {\n\t\t\"type\": \"object\",\n\t\t\"properties\": {\n\t\t\t\"articulo\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t},\n\t\t\t\"titulo\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t},\n\t\t\t\"norma\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t}\n\t\t}\n\t}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1872,
+        112
+      ],
+      "id": "fcf9a5cb-e60e-4e0d-bef9-eb4f669beeac",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Inicializar un array vacío para los artículos unificados\nlet articulosUnificados = [];\n\n// Iterar sobre cada item del input\nfor (let item of items) {\n    // Verificar que el item tenga la propiedad 'output' y que sea un array\n    if (item.json.output && Array.isArray(item.json.output)) {\n        // Concatenar los elementos de 'output' al array unificado\n        articulosUnificados = articulosUnificados.concat(item.json.output);\n    }\n}\n\n// Devolver un único item con la propiedad \"articulos\" que contiene el array unificado\nreturn [{\n    json: {\n        articulos: articulosUnificados\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2032,
+        -64
+      ],
+      "id": "486d477e-17b0-462c-9473-4096a720edc8",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtener el array de artículos del primer item\nlet articulos = items[0].json.articulos;\n\n// Array para almacenar el resultado\nlet resultado = [];\n\n// Recorrer todos los artículos\nfor (let i = 0; i < articulos.length; i++) {\n    let actual = articulos[i];\n\n    //agrego metadata al artículo antes de procesarlo\n    actual.document_name = $('Loop Over Items').first().json.filename\n    // Si el artículo actual tiene un número de artículo válido\n    if (actual.articulo && actual.articulo.trim() !== \"\") {\n        resultado.push(actual);\n    } \n    // Si el artículo actual está vacío y hay artículos previos\n    else if (resultado.length > 0) {\n        // Obtener el último artículo agregado al resultado\n        let ultimoArticulo = resultado[resultado.length - 1];\n        \n        // Concatenar la norma del artículo vacío al último artículo\n        ultimoArticulo.norma += \" \" + actual.norma;\n    }\n    // Si el primer artículo está vacío, lo agregamos tal cual\n    else {\n        resultado.push(actual);\n    }\n    actual.norma = actual.titulo +\" - \"+ actual.norma\n}\n\n// Devolver el resultado como un único item\nreturn [{\n    json: {\n        articulos: resultado\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2224,
+        -64
+      ],
+      "id": "f91e6e1f-2c41-4c39-8029-0c3212040cac",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2608,
+        64
+      ],
+      "id": "72fa970d-533e-4421-b5e0-fedf05c00303",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0Zr2gDUeSEg2Xe6E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "embeddingBatchSize": 20,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        2672,
+        -128
+      ],
+      "id": "1ef9d067-c77e-4e92-b548-587123c31d8f",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "7iDL76ggTML8vg0b",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "articulos",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2416,
+        -64
+      ],
+      "id": "164f087d-8b60-4801-b35c-eefc0e0f09e3",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.norma }}",
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "articulo",
+                "value": "={{ $json.articulo }}"
+              },
+              {
+                "name": "titulo",
+                "value": "={{ $json.titulo }}"
+              },
+              {
+                "name": "document_name",
+                "value": "={{ $json.document_name }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        2800,
+        16
+      ],
+      "id": "54caa09b-d169-429f-8c63-10215378dabe",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkSize": 2000,
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        2912,
+        160
+      ],
+      "id": "147fbbea-c7d7-4028-a4a3-8a383f3b6498",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e536b8ba-fa8e-41fc-bc8d-b7867f545478",
+              "leftValue": "={{ $json.last_Modifies_Database }}",
+              "rightValue": "={{ $('Edit Fields').item.json.last_ModifiedDateTime }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        256,
+        -32
+      ],
+      "id": "c46c219b-064d-47fe-9100-7e9d066d2caa",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e34bd100-a598-4edd-b740-719c0475f482",
+              "name": "file_id",
+              "value": "={{ $('Sort').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "c44cff44-c3f4-45dd-830f-35034660802b",
+              "name": "last_ModifiedDateTime",
+              "value": "={{ $('Sort').item.json.lastModifiedDateTime }}",
+              "type": "string"
+            },
+            {
+              "id": "7d4b3e49-88da-4d00-9e1e-2d11ed909634",
+              "name": "parentReference_driveId",
+              "value": "={{ $('Sort').item.json.parentReference.driveId }}",
+              "type": "string"
+            },
+            {
+              "id": "4ae00074-2007-439f-808e-b21f2d6327fa",
+              "name": "filename",
+              "value": "={{ $('Sort').item.json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "f693dbac-d5b2-4f87-9328-830847791148",
+              "name": "last_Modifies_Database",
+              "value": "={{ $json.last_modified }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        96,
+        -32
+      ],
+      "id": "a977d238-dd18-40b0-accc-fa80e9e7533d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "lastModifiedDateTime"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        -32
+      ],
+      "id": "5c8fd534-0f61-43f8-b2c5-80bdafbd4525",
+      "name": "Sort"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        464,
+        32
+      ],
+      "id": "dae33708-4182-45dc-8f09-b5c6c361b4a6",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "lastmodified",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "gt",
+              "keyValue": "=0"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "last_modified",
+              "fieldValue": "={{ $('Loop Over Items').first().json.last_ModifiedDateTime }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3248,
+        128
+      ],
+      "id": "b41758cd-d2e2-47ab-8f30-5146e32ad5ce",
+      "name": "Update a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "7iDL76ggTML8vg0b",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "documents",
+        "filterType": "string",
+        "filterString": "=metadata->>document_name=ilike.*{{ $json.filename }}*"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        640,
+        112
+      ],
+      "id": "ac61d6d4-7f8e-41ee-b863-9b108d927b1c",
+      "name": "BORRAR_EMBEDDINGS",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "7iDL76ggTML8vg0b",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "=data",
+        "options": {
+          "language": "spa"
+        }
+      },
+      "type": "n8n-nodes-tesseractjs.tesseractNode",
+      "typeVersion": 1,
+      "position": [
+        1584,
+        128
+      ],
+      "id": "dee199e2-c888-4b88-b995-b623f9baa958",
+      "name": "EXTRAER_TEXTO"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "lastmodified",
+        "limit": 1
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -32
+      ],
+      "id": "a81daf5e-5c8f-41fc-ad23-c87ad8eea47e",
+      "name": "Get many rows",
+      "credentials": {
+        "supabaseApi": {
+          "id": "7iDL76ggTML8vg0b",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        816,
+        128
+      ],
+      "id": "78a0cee8-6d2f-4183-bf7b-34c480be7f79",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6a2cda01-249d-4bf6-ad22-e25ab64e773b",
+              "leftValue": "={{ $json.data.length }}",
+              "rightValue": 3000,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1296,
+        -32
+      ],
+      "id": "41589ae2-952f-4042-878d-ee19dd0c6d11",
+      "name": "ES_TEXTO"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtener el texto de la variable\nconst texto = $input.first().json.data\n\n// Verificar si el texto existe\nif (!texto) {\n  return [{ json: { error: \"No se encontró texto para procesar\" } }];\n}\n\n// Dividir el texto en bloques de ~600 caracteres preservando palabras\nconst longitudMaxima = 4000;\nconst bloques = [];\nlet inicio = 0;\n\nwhile (inicio < texto.length) {\n  let fin = Math.min(inicio + longitudMaxima, texto.length);\n  \n  // Si no estamos al final del texto, buscar el último espacio para no cortar palabras\n  if (fin < texto.length) {\n    const ultimoEspacio = texto.lastIndexOf(' ', fin);\n    if (ultimoEspacio > inicio) {\n      fin = ultimoEspacio;\n    }\n  }\n  \n  const bloque = texto.substring(inicio, fin).trim();\n  if (bloque) {\n    bloques.push(bloque);\n  }\n  \n  inicio = fin + 1; // +1 para saltar el espacio\n}\n\n// Crear items para el siguiente nodo\nconst items = bloques.map((bloque, index) => ({\n  json: {\n    text: bloque,\n    bloqueNumero: index + 1,\n    totalBloques: bloques.length,\n    longitud: bloque.length\n  }\n}));\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        -160
+      ],
+      "id": "8c228797-5787-4ad0-a448-4538b0563658",
+      "name": "DIVIDIR_TEXTO"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1440,
+        128
+      ],
+      "id": "ec473333-b881-40ad-8343-728a9bdb8873",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.1.199:5000/extract-text",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1152,
+        -32
+      ],
+      "id": "4cb521de-f201-442d-80b8-d81bfd984db7",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "ESPERAR_SUBIDA": {
+      "main": [
+        [
+          {
+            "node": "Sort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DESCARCAR_ARCHIVO": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "BORRAR_EMBEDDINGS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a row": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BORRAR_EMBEDDINGS": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EXTRAER_TEXTO": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "main": [
+        [
+          {
+            "node": "Update a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "DESCARCAR_ARCHIVO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ES_TEXTO": {
+      "main": [
+        [
+          {
+            "node": "DIVIDIR_TEXTO",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DIVIDIR_TEXTO": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "EXTRAER_TEXTO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "ES_TEXTO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "38503f5e-9f61-4b20-98e5-354b46e503a8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"
+  },
+  "id": "CH0z9r0Q0e08azMb",
+  "tags": []
+}
