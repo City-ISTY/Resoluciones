@@ -19,37 +19,15 @@
     },
     {
       "parameters": {
-        "url": "=https://graph.microsoft.com/v1.0/me/drive/root/children",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "microsoftOAuth2Api",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -512,
-        -336
-      ],
-      "id": "e0cd90ac-e149-4c04-a460-e9c01b575520",
-      "name": "getfolder",
-      "credentials": {
-        "microsoftOAuth2Api": {
-          "id": "Y5GP57FlaZyiBK8B",
-          "name": "Microsoft account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "fileName": "={{ $('start').item.json.file_name+ \".xlsx\" }}",
-        "parentId": "01ZX2MQXLIPZG6YCWIRNA2FRDSIYBGHMP5",
+        "parentId": "={{ $('start').item.json.parent_folder }}",
         "binaryData": true
       },
       "type": "n8n-nodes-base.microsoftOneDrive",
       "typeVersion": 1,
       "position": [
-        -432,
-        0
+        -464,
+        -32
       ],
       "id": "f41fcdb2-1a5a-44fe-8028-ccc117534eb4",
       "name": "GUARDAR_ARCHIVO",
@@ -74,7 +52,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -80,
+        -288,
         -32
       ],
       "id": "c8e9036d-6b33-4441-a887-899d4a34a2d4",
@@ -103,7 +81,7 @@
     {
       "parameters": {
         "inputSource": "jsonExample",
-        "jsonExample": "{\n  \"array\":  [\n  {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  },\n    {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  },\n    {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  },\n    {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  }\n],\n  \"file_name\": \"SDJFJASHDF\"\n  \n}\n"
+        "jsonExample": "{\n  \"array\":  [\n  {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  },\n    {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  },\n    {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  },\n    {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  }\n],\n  \"file_name\": \"SDJFJASHDF\",\n  \"parent_folder\": \"\"\n  \n}\n"
       },
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -113,6 +91,28 @@
       ],
       "id": "fb314f92-abfc-4d8d-a109-d19a1df407dc",
       "name": "start"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/me/drive/root/children",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -624,
+        -256
+      ],
+      "id": "e0cd90ac-e149-4c04-a460-e9c01b575520",
+      "name": "VER_CARPETAS",
+      "credentials": {
+        "microsoftOAuth2Api": {
+          "id": "Y5GP57FlaZyiBK8B",
+          "name": "Microsoft account"
+        }
+      }
     }
   ],
   "pinData": {
@@ -121,52 +121,36 @@
         "json": {
           "array": [
             {
-              "name": "Andrés Tituana",
-              "topic": "Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación.",
-              "option": ""
+              "id_assistant": "Juan",
+              "name": "Pérez",
+              "role": 30,
+              "attendance": false,
+              "table": "asistencia"
             },
             {
-              "name": "Jennifer Tituana",
-              "topic": "Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación.",
-              "option": ""
+              "id_assistant": "Juan",
+              "name": "Pérez",
+              "role": 30,
+              "attendance": false,
+              "table": "asistencia"
             },
             {
-              "name": "Matthew Jaramillo",
-              "topic": "Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación.",
-              "option": ""
+              "id_assistant": "Juan",
+              "name": "Pérez",
+              "role": 30,
+              "attendance": false,
+              "table": "asistencia"
             },
             {
-              "name": "Andrés Tituana",
-              "topic": "Aprobación de la actualización del Calendario Académico PAO 2025-II",
-              "option": ""
-            },
-            {
-              "name": "Jennifer Tituana",
-              "topic": "Aprobación de la actualización del Calendario Académico PAO 2025-II",
-              "option": ""
-            },
-            {
-              "name": "Matthew Jaramillo",
-              "topic": "Aprobación de la actualización del Calendario Académico PAO 2025-II",
-              "option": ""
-            },
-            {
-              "name": "Andrés Tituana",
-              "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
-              "option": ""
-            },
-            {
-              "name": "Jennifer Tituana",
-              "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
-              "option": ""
-            },
-            {
-              "name": "Matthew Jaramillo",
-              "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
-              "option": ""
+              "id_assistant": "Juan",
+              "name": "Pérez",
+              "role": 30,
+              "attendance": false,
+              "table": "asistencia"
             }
           ],
-          "file_name": "asdfasdfasdfasdf"
+          "file_name": "SDJFJASHDF",
+          "parent_folder": ""
         }
       }
     ]
@@ -181,11 +165,6 @@
             "index": 0
           }
         ]
-      ]
-    },
-    "getfolder": {
-      "main": [
-        []
       ]
     },
     "GUARDAR_ARCHIVO": {
@@ -220,13 +199,18 @@
           }
         ]
       ]
+    },
+    "VER_CARPETAS": {
+      "main": [
+        []
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "0ab5c3f7-1f8a-4d15-beb3-a75a7f9b91c5",
+  "versionId": "fcff5e3f-7b02-4127-ad9c-f0cdc1e177c3",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"

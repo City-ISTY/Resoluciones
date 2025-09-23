@@ -4,3 +4,4 @@ selenium
 webdriver-manager
 robotframework-requests
 Flask
+python-dotenv

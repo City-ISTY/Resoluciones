@@ -2,59 +2,27 @@
   "name": "MAIN_ACTA_RESOLUCION",
   "nodes": [
     {
-      "parameters": {},
+      "parameters": {
+        "numberInputs": 3
+      },
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        224,
-        96
+        256,
+        112
       ],
       "id": "6920f392-c4f6-42de-b3af-12d77a86890b",
       "name": "Merge1"
     },
     {
       "parameters": {
-        "operation": "search",
-        "base": {
-          "__rl": true,
-          "value": "appmLh9OZ0DbIuJDv",
-          "mode": "list",
-          "cachedResultName": "NOTAS_RESOLUCIONES",
-          "cachedResultUrl": "https://airtable.com/appmLh9OZ0DbIuJDv"
-        },
-        "table": {
-          "__rl": true,
-          "value": "tblQHfVUzkpB4vBPv",
-          "mode": "list",
-          "cachedResultName": "ASISTENCIA",
-          "cachedResultUrl": "https://airtable.com/appmLh9OZ0DbIuJDv/tblQHfVUzkpB4vBPv"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.1,
-      "position": [
-        0,
-        0
-      ],
-      "id": "d16d5075-1225-415b-999d-f54330288cd0",
-      "name": "get_asistencia",
-      "credentials": {
-        "airtableTokenApi": {
-          "id": "ahIgIA3gHcgLZgKy",
-          "name": "Airtable Personal Access Token account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "\nfunction generarIdCorto() {\n    return Date.now().toString(36) + Math.random().toString(36).substring(2);\n}\n\n\nconst asistencias = $('get_asistencia').all().map(as=>as.json)\nconst votos = $('get_votos').all().map(vot=>vot.json)\n//filtro los votos de las personas que no vinieron\nconst votos_filtered = votos.filter(voto => \n  asistencias.some(asist => \n    asist.name.trim().toLowerCase() === voto.name.trim().toLowerCase() && \n    asist.attendance === true\n  )\n);\n//Primero analizo los votos para verificar si hay nuevos temas\n//si existen nuevos temas se crea la estructura para añadir a los votos que se extrayeron de la base\n//para ello se usa la tabla votos\n\n// 1. Filtrar elementos sin 'id_topic'\nconst filtered = votos_filtered.filter(item => !item.hasOwnProperty('id_topic'));\n\n// 2. Obtener topics únicos\nconst uniqueTopics = [...new Set(filtered.map(item => item.topic))];\n\n// 3. Crear un Map para asociar cada topic con un ID único generado\nconst topicIdMap = new Map();\n\nuniqueTopics.forEach(topic => {\n    topicIdMap.set(topic, generarIdCorto());\n});\n\n// 4. Crear el array result con IDs\nconst result = uniqueTopics.map(topic => ({\n    id: topicIdMap.get(topic),\n    topic: topic,\n    sub_topics: []\n}));\n\n// 5. Actualizar el array original votos agregando id_topic\nvotos_filtered.forEach(item => {\n    if (!item.hasOwnProperty('id_topic') && topicIdMap.has(item.topic)) {\n        item.id_topic = topicIdMap.get(item.topic);\n    }\n});\n\n/**\n * /COLOCO LAS VOTACIONES DENTRO DE LOS TEMAS LA IDEA ES TENER ESTA ESTRUCTURA\ntemas_reunion: [\n{\n        \"id\": \"101\",\n        \"createdTime\": \"\",\n        \"descripcion\": \"*Nombre del tema*\",\n        \"subtemas\": \"*subtemas separados por saltos de linea*\",\n        \"tabla\": \"temas_reunion\",\n        \"meeting_summary\": \"str\",\n        votes: [\n        {\n            \"id\": \"*id recordAirtable\",\n            \"createdTime\": \"2025-09-10T13:24:44.000Z\",\n            \"votante\": \"MSc. Dania Elena Portelles Cobas\",\n            \"opcion\": \"AF\",\n            \"tema\": \"Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera\",\n            \"tabla\": \"votos\",\n            \"id_tema\": \"101\",\n            \"cargoVotante\": \"Vicerrectora Académica Instituto Superior Tecnológico Yaruquí\"\n          },\n        ]\n }\n,...]\n\n */\nconst id_resolucion = (num_resolution)=>{\n  /*\n   PERMITE OBTENER EL CODIGO DE LA RESOLUCIÓN SEGUN EL INDEX DEL TEMA VISTO\n   DADO QUE HAY VARIOS TEMAS DENTRO DE UNA REUNION, SE VA UTILIZANDO ESTA FUNCION DE ACUERDO AL INDICE DEL TEMA VISTO.\n   */\n  const metadata_resolutions = $('Get many rows').first().json\n  const type_session = $('Extract from File').first().json.data[0].meeting_type\n  //primero obtengo el numero de la resolucion\n  const number_session = type_session.toLowerCase() == \"ordinaria\" ? \n    ('00' + (Number(metadata_resolutions.ordinary_session_number) + 1)\n).slice(-3) : \n    ('00' + (Number(metadata_resolutions.extraordinary_session_number) + 1)\n).slice(-3)\n  const resolution_name =  `R-OCS-S${type_session.toLowerCase() == \"ordinaria\" ? \"O\" : \"E\"}-${number_session}-Nro.${num_resolution}-${$today.toString().substring(0, 4)}`\n  return resolution_name\n}\n\nconst countVotesFunction = (votos) => votos.reduce((acc, { option, name }) => {\n  const key = option === \"A favor\" ? \"AF\" : option === \"En contra\" ? \"EC\" : \"AB\";\n  acc[key]++;\n  if (/javier\\W*garzon/i.test(name.normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\"))) acc.RECTOR_VOTE = key;\n  return acc;\n}, { AF: 0, EC: 0, AB: 0, RECTOR_VOTE: null });\n\n\n//antes de colocar los votos, agrego los temas nuevos en caso de que existan\nconst temasOriginales = $('Extract from File').first().json.data[0].topics;\nconst temas_reunion = [...temasOriginales, ...result];\n\ntemas_reunion.forEach((tema, index) => {\n  const votes = votos_filtered\n    .filter(voto => voto.id_topic == tema.id)\n    .map(voto => {\n      // Primero, crear el objeto base (con opcion si falta)\n      const votoBase = !voto.hasOwnProperty('option') \n        ? { ...voto, opcion: \"Abstencion\" }\n        : voto;\n      // Luego, agregar cargoVotante a TODOS los votos\n      return {\n        ...votoBase,\n        role: $('Extract from File').first().json.data[0].attendees.find(integ => integ.name === voto.name)?.role || \"NA\"\n      };\n    });\n\n  tema.resolution_code = id_resolucion(index+1+$('Get many rows').first().json.resolution_number)\n  tema.vote_count_object = countVotesFunction(votes)\n  tema.votes = votes;\n  tema.approved = tema.vote_count_object.AF - tema.vote_count_object.EC - tema.vote_count_object.AB > 0;\n\n  \n  tema.meeting_summary = \"Lorem ipsum dolor sit amet consectetur adipiscing elit iaculis fringilla, urna fames ridiculus interdum fusce cubilia dictum hendrerit tempus magnis, euismod magna auctor imperdiet cursus pellentesque varius enim. Tristique lacus venenatis iaculis interdum lobortis semper libero, congue suspendisse pretium tempor scelerisque orci ultrices augue, convallis laoreet fringilla condimentum dui ut.\\n Ullamcorper vel tempor conubia ut metus lacus, diam mauris penatibus risus dapibus fringilla mollis, justo vitae volutpat vehicula dis.Erat aptent orci phasellus viverra ligula, justo sodales tristique sem, arcu varius felis molestie. Mollis neque ultrices hac nulla pellentesque est diam phasellus suspendisse justo eget platea, risus hendrerit elementum condimentum vitae a eu tellus nullam vestibulum porttitor tristique feugiat, volutpat consequat curabitur lobortis purus mauris nibh tempor mi ullamcorper duis. Natoque phasellus quis varius vitae accumsan donec et sed sodales luctus imperdiet magna nostra aliquet, ornare porttitor class eget himenaeos dapibus ac mauris inceptos orci egestas habitasse.\";\n});\n\nconst newObj = $('Extract from File').first().json.data[0]\nnewObj.attendances = asistencias\nnewObj.topics = temas_reunion\n\nconst regex = /meeting[^%]*/;\n\nnewObj.id_teams_meeting = $('Extract from File')?.first()?.json?.data?.[0]?.meeting_url?.match(regex)?.[0] || '';\n\n\n\nreturn [{\n  json: newObj\n}];\n\n\n"
+        "jsCode": "\nfunction generarIdCorto() {\n    return Date.now().toString(36) + Math.random().toString(36).substring(2);\n}\n\n\nconst asistencias = $('EXTRACT_ATTENDANCE').all().map(as=>as.json)\nconst votos = $('GET_VOTE_DATA').all().map(vot=>vot.json)\n//filtro los votos de las personas que no vinieron\nconst votos_filtered = votos.filter(voto => \n  asistencias.some(asist => \n    asist.name.trim().toLowerCase() === voto.name.trim().toLowerCase() && \n    asist.attendance.toLowerCase() === \"x\"\n  )\n);\n\n//Primero analizo los votos para verificar si hay nuevos temas\n//si existen nuevos temas se crea la estructura para añadir a los votos que se extrayeron de la base\n//para ello se usa la tabla votos\n\n// 1. Filtrar elementos sin 'id_topic'\nconst filtered = votos_filtered.filter(item => !item.hasOwnProperty('id_topic'));\n// 2. Obtener topics únicos\nconst uniqueTopics = [...new Set(filtered.map(item => item.topic))];\n\n// 3. Crear un Map para asociar cada topic con un ID único generado\nconst topicIdMap = new Map();\n\nuniqueTopics.forEach(topic => {\n    const id = generarIdCorto();\n    topicIdMap.set(topic, id);\n});\n\n\n// 4. Crear el array result con IDs\nconst result = uniqueTopics.map(topic => ({\n    id_topic: topicIdMap.get(topic),\n    topic: topic,\n    sub_topics: []\n}));\n// 5. Actualizar el array original votos agregando id_topic\nvotos_filtered.forEach(item => {\n    if (!item.hasOwnProperty('id_topic') && topicIdMap.has(item.topic)) {\n        item.id_topic = topicIdMap.get(item.topic);\n    }\n});\n/**\n * /COLOCO LAS VOTACIONES DENTRO DE LOS TEMAS LA IDEA ES TENER ESTA ESTRUCTURA\ntemas_reunion: [\n{\n        \"id\": \"101\",\n        \"createdTime\": \"\",\n        \"descripcion\": \"*Nombre del tema*\",\n        \"subtemas\": \"*subtemas separados por saltos de linea*\",\n        \"tabla\": \"temas_reunion\",\n        \"meeting_summary\": \"str\",\n        votes: [\n        {\n            \"id\": \"*id recordAirtable\",\n            \"createdTime\": \"2025-09-10T13:24:44.000Z\",\n            \"votante\": \"MSc. Dania Elena Portelles Cobas\",\n            \"opcion\": \"AF\",\n            \"tema\": \"Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera\",\n            \"tabla\": \"votos\",\n            \"id_tema\": \"101\",\n            \"cargoVotante\": \"Vicerrectora Académica Instituto Superior Tecnológico Yaruquí\"\n          },\n        ]\n }\n,...]\n\n */\nconst id_resolucion = (num_resolution)=>{\n  /*\n   PERMITE OBTENER EL CODIGO DE LA RESOLUCIÓN SEGUN EL INDEX DEL TEMA VISTO\n   DADO QUE HAY VARIOS TEMAS DENTRO DE UNA REUNION, SE VA UTILIZANDO ESTA FUNCION DE ACUERDO AL INDICE DEL TEMA VISTO.\n   */\n  const metadata_resolutions = $('GET_NUMBER_SESSION').first().json\n  const type_session = $('EXTRACT_METADATA').first().json.data[0].meeting_type\n  //primero obtengo el numero de la resolucion\n  const number_session = type_session.toLowerCase() == \"ordinaria\" ? \n    ('00' + (Number(metadata_resolutions.ordinary_session_number) + 1)\n).slice(-3) : \n    ('00' + (Number(metadata_resolutions.extraordinary_session_number) + 1)\n).slice(-3)\n  const resolution_name =  `R-OCS-S${type_session.toLowerCase() == \"ordinaria\" ? \"O\" : \"E\"}-${number_session}-Nro.${num_resolution}-${$today.toString().substring(0, 4)}`\n  return resolution_name\n}\nconst countVotesFunction = (votos) => votos.reduce((acc, { option = \"\", name }) => {\n  const key = option.toLowerCase().includes(\"favor\") ? \"AF\" : option.toLowerCase().includes(\"contra\")  ? \"EC\" : \"AB\";\n  acc[key]++;\n  if (/javier\\W*garzon/i.test(name.normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\"))) acc.RECTOR_VOTE = key;\n  return acc;\n}, { AF: 0, EC: 0, AB: 0, RECTOR_VOTE: null });\n\n\n//Extraigo las notificaciones unicas\nconst uniqueNotifications = votos.filter(item => \n  item.notification !== undefined && item.notification !== null\n);\n\nconsole.log(uniqueNotifications)\n\n\n\n//antes de colocar los votos, agrego los temas nuevos en caso de que existan\nconst temasOriginales = $('EXTRACT_METADATA').first().json.data[0].topics;\nconst temas_reunion = [...temasOriginales, ...result];\n\n\ntemas_reunion.forEach((tema, index) => {\n  const votes = votos_filtered\n    .filter(voto => voto.id_topic == tema.id_topic)\n    .map(voto => {\n      \n      // Primero, crear el objeto base (con opcion si falta)\n      const votoBase = !voto.hasOwnProperty('option') \n        ? { ...voto, opcion: \"Abstencion\" }\n        : voto;\n     \n      return {\n        ...votoBase,\n        role: $('EXTRACT_METADATA').first().json.data[0].attendees.find(integ => integ.name === voto.name)?.role || \"NA\"\n      };\n    });\n\n\n //Aniado norificaciones en caso de que existan\n  const notificacion = uniqueNotifications.find(notif => notif.id_topic == tema.id_topic || notif.topic == tema.topic)?.notification || \"\";\n\n  \n  const resol_code = id_resolucion(index+1+Number($('GET_NUMBER_SESSION').first().json.resolution_number))\n  tema.resolution_code = resol_code\n  tema.vote_count_object = countVotesFunction(votes)\n  tema.votes = votes;\n  tema.approved = tema.vote_count_object.AF -   tema.vote_count_object.EC - tema.vote_count_object.AB > 0;\n  tema.notification = notificacion\n  \n  tema.meeting_summary = \"Lorem ipsum dolor sit amet consectetur adipiscing elit iaculis fringilla, urna fames ridiculus interdum fusce cubilia dictum hendrerit tempus magnis, euismod magna auctor imperdiet cursus pellentesque varius enim. Tristique lacus venenatis iaculis interdum lobortis semper libero, congue suspendisse pretium tempor scelerisque orci ultrices augue, convallis laoreet fringilla condimentum dui ut.\\n Ullamcorper vel tempor conubia ut metus lacus, diam mauris penatibus risus dapibus fringilla mollis, justo vitae volutpat vehicula dis.Erat aptent orci phasellus viverra ligula, justo sodales tristique sem, arcu varius felis molestie. Mollis neque ultrices hac nulla pellentesque est diam phasellus suspendisse justo eget platea, risus hendrerit elementum condimentum vitae a eu tellus nullam vestibulum porttitor tristique feugiat, volutpat consequat curabitur lobortis purus mauris nibh tempor mi ullamcorper duis. Natoque phasellus quis varius vitae accumsan donec et sed sodales luctus imperdiet magna nostra aliquet, ornare porttitor class eget himenaeos dapibus ac mauris inceptos orci egestas habitasse.\";\n});\n\nconst newObj = $('EXTRACT_METADATA').first().json.data[0]\nnewObj.attendances = asistencias\nnewObj.topics = temas_reunion\n\nconst regex = /meeting[^%]*/;\n\n\n//LINK DE REUNION\nnewObj.id_teams_meeting = $('EXTRACT_METADATA')?.first()?.json?.data?.[0]?.meeting_url?.match(regex)?.[0] || '';\n//NUMERO DE SESSIN\nnewObj.number_sessions = $('GET_NUMBER_SESSION').first().json\n\nreturn [{\n  json: newObj\n}];\n\n\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        384,
-        96
+        416,
+        112
       ],
       "id": "deb78c8b-17b0-40f8-9617-320623469a94",
       "name": "estructure_data"
@@ -63,16 +31,555 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "2YgqQ2rGUufv3pSH",
+          "value": "fxK4naUSjlJROArO",
+          "mode": "list",
+          "cachedResultName": "PDF_ACTA"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id_meeting }}",
+            "meeting_datetime_ISO8631": "={{ $json.meeting_datetime_ISO8631 }}",
+            "convocation_date_ISO8631": "={{ $json.convocation_date_ISO8631 }}",
+            "meeting_type": "={{ $json.meeting_type }}",
+            "session_code": "={{ $json.session_code }}",
+            "attendees": "={{ $json.attendees }}",
+            "meeting_topics": "={{ $json.topics }}",
+            "attendances": "={{ $json.attendances }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "meeting_datetime_ISO8631",
+              "displayName": "meeting_datetime_ISO8631",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "convocation_date_ISO8631",
+              "displayName": "convocation_date_ISO8631",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "meeting_type",
+              "displayName": "meeting_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "session_code",
+              "displayName": "session_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "attendees",
+              "displayName": "attendees",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array"
+            },
+            {
+              "id": "meeting_topics",
+              "displayName": "meeting_topics",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array"
+            },
+            {
+              "id": "attendances",
+              "displayName": "attendances",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1776,
+        32
+      ],
+      "id": "2fa80b0d-66c6-4fd6-bb9c-d95fc0375d3d",
+      "name": "PDF_ACTA"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Esto devuelve 3 items (uno por cada topic)\n// se calcula el nuevo numero contador para las resoluciones.\n\nconst meeting_type = $('PutIAdataInObject').first().json.meeting_type.toLowerCase();\nconst number_sessions = $('PutIAdataInObject').first().json.number_sessions;\n\nconst resol_number = number_sessions.resolution_number + $('PutIAdataInObject').first().json.topics.length;\n\nconst ordinary_number_session = number_sessions.ordinary_session_number + (meeting_type === \"ordinaria\" ? 1 : 0);\n\nconst exordinary_number_session = number_sessions.extraordinary_session_number + (meeting_type === \"extraordinaria\" ? 1 : 0);\n\nconst estructure_data =  $('estructure_data').first().json\nreturn $('PutIAdataInObject').first().json.topics.map(topic => ({\n  json: {\n    ...estructure_data,\n    number_sessions_updated : {resol_number, ordinary_number_session, exordinary_number_session},\n    topics: undefined, // o simplemente omitirla\n    topic: topic\n  } \n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2032,
+        -288
+      ],
+      "id": "1d87b1f3-0a7d-4d6a-8376-d7f18769a772",
+      "name": "split_topics"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Analiza los siguientes {{ $json.topics.length }} títulos de resolución y realiza dos acciones:\n1. Reformúlalos eliminando cualquier introducción o frase que anticipe detalles o subpuntos (por ejemplo: 'quedando conformado de la siguiente manera', 'como se detalla a continuación').\n2. Conjuga y da coherencia a la frase.** El título original está expresado como un sustantivo (ej. \"Aprobación de algo...\"). Tu tarea es convertirlo en una oración imperativa que comience con un verbo ('Aprobar algo...'). Para lograrlo, es fundamental que **antepongas el artículo correcto ('el', 'la', 'los', 'las') al sujeto de la oración para que conecte lógicamente la desicion tomada con el tema.**\n\n\nCUMPLE CON ESTO TAMBIEN: \n*Es imperativo que mantengas el orden de entrada de los titulos en lo que generes, no los cambies de orden.\n*Corrige si es necesario los signos de puntuación.\n*Mantén siempre el mismo numero de salidas, si se te coloca 5 titulos, cada elemento del json debe tener un string con 5 elementos separados por el separador que se te indique \nSEPARADOR: vas a separar los titulos generados utilizando una barra vertical (|)\nRESPUESTA:\nDevuelve un json con esta estructura \n{\n\"reformulacion\": \"aquí coloca los {{ $json.topics.length }} titulos separados por el separador indicado\" \n\"desition\": \"Aquí coloca los {{ $json.topics.length }} texto reformulado\"\n}\nNumero de titulos: {{ $json.topics.length }}\nTITULOS: {{ $json.topics.map((tp) => (\"TITULO:\"+tp.topic + \".    DESICION: \" + (tp.approved ? \"Aprobado\" : \"Negado\"))).join(\"\\n\") }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        816,
+        80
+      ],
+      "id": "aeb50226-100b-40b3-bd99-0bca2b1b9e7b",
+      "name": "ValidarTituloResolucion",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0Zr2gDUeSEg2Xe6E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "/*\nEL NODO DE IA ANTERIOR CREA MENSAJES PERSONALIZADOS DE ACUERDO A SI SE ACEPTA,  SE NIEGA LA RESOLUCION, TAMBIEN PERMITE ELIMINAR CUALQUIER INTRODUCCION A ALGUN SUBPUNTO.\nESTA FUNCION PERMITE UNIR NUEVAMENTE ESA SALIDA A CADA TEMA VISTO (LISTA TOPICS)\n*/\n\n// Acceder al primer elemento del nodo 'estructure_data'\nconst structureData = $('estructure_data').first().json;\n\n// Obtener el string JSON desde la entrada\nconst jsonString = $('ValidarTituloResolucion').first().json.candidates[0].content.parts[0].text\nconst jsonString_RESUMEN = $input.first().json.candidates[0].content.parts[0].text\n// Parsear el string a un objeto JavaScript\nconst parsedData = JSON.parse(jsonString);\nconst parsedData_RESUMEN = JSON.parse(jsonString_RESUMEN);\n\n// Dividir las cadenas en arrays usando \" | \" como separador\nconst reformulacionArray = parsedData.reformulacion.split(\"|\");\nconst desitionArray = parsedData.desition.split(\"|\");\nconst RESUMEN_ARRAY = parsedData_RESUMEN.resumenes.split(\"|\");\n\n// Verificar que la cantidad de topics coincida con los arrays\nif (structureData.topics.length !== reformulacionArray.length || structureData.topics.length !== desitionArray.length) {\n  throw new Error(`La cantidad de topics (${structureData.topics.length}) no coincide con la cantidad de elementos en reformulacion (${reformulacionArray.length}) o desition (${desitionArray.length}).`);\n}\n\n// Agregar las propiedades a cada topic\nstructureData.topics.forEach((topic, index) => {\n  topic.reformulacion = reformulacionArray[index];\n  topic.desition = desitionArray[index];\n  topic.meeting_summary = RESUMEN_ARRAY[index]\n});\n\n// Devolver los datos modificados\nreturn structureData;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1552,
+        80
+      ],
+      "id": "fda3b565-073f-437f-abcb-2b1bd026abbc",
+      "name": "PutIAdataInObject"
+    },
+    {
+      "parameters": {
+        "url": "=http://192.168.1.199:5001/run-automation?meeting_id={{ $('estructure_data').first().json.id_teams_meeting }}&filename={{ $('estructure_data').first().json.session_code }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1088,
+        -64
+      ],
+      "id": "f45aa45e-f673-4c0d-9248-b09127751bc9",
+      "name": "get_transcriptions"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-pro",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-pro"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Vas a actuar como un asistente de reunión, para ello te voy a pasar una transcripcion de una reunión, de la cual se tratan {{  $('estructure_data').first().json.topics.length }} temas distintos, vas a identificar los temas dentro de la transcripcion y vas a generar un párrafo describiendo lo que se trató y lo que hicieron por cada uno de los  {{  $('estructure_data').first().json.topics.length }} que se encuentran en la transcripcion, como están mezclados, tienes queidentificar y extraer. \ngeneralmente los temas los tratan en el mismo orden en el que te enumero los temas.\n{{ $('estructure_data').first().json.topics.map((t,i)=>(`TEMA ${i+1}: ${t.topic}\\n`)) }}\n\nTRANSCRIPCIÓN:\n{{ $json.transcript }}\n\nFORMATO DE SALIDA: \nvas a devolver un json con la siguiente estructura \n{\n\"resumenes\": aqui vas a poner todos los resumenes en el mismo orden en el que te enlisté yo, todo eso separado por barras verticales (|)\n}"
+            }
+          ]
+        },
+        "simplify": false,
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1216,
+        80
+      ],
+      "id": "fdafa808-9240-48c8-8ad5-d85a5a28d173",
+      "name": "EXTRAERRESUMENES",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0Zr2gDUeSEg2Xe6E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "event": "fileUpdated",
+        "watch": "selectedFolder",
+        "folderId": {
+          "__rl": true,
+          "value": "01ZX2MQXLIPZG6YCWIRNA2FRDSIYBGHMP5",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOneDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1136,
+        128
+      ],
+      "id": "a1a71e55-12d0-4da6-93ad-7bcde6db0766",
+      "name": "start",
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "Sk09Y3pRv4uy2lLG",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "sessions_resolutions",
+        "limit": 1,
+        "filterType": "none"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        128
+      ],
+      "id": "5a3ed22b-565f-451c-97a5-58ffdbb86d4b",
+      "name": "GET_NUMBER_SESSION",
+      "credentials": {
+        "supabaseApi": {
+          "id": "7iDL76ggTML8vg0b",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "sessions_resolutions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "extraordinary_session_number",
+              "condition": "gt",
+              "keyValue": "0"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "resolution_number",
+              "fieldValue": "={{ $('split_topics').first().json.number_sessions_updated.resol_number }}"
+            },
+            {
+              "fieldId": "extraordinary_session_number",
+              "fieldValue": "={{ $('split_topics').first().json.number_sessions_updated.exordinary_number_session }}"
+            },
+            {
+              "fieldId": "ordinary_session_number",
+              "fieldValue": "={{ $('split_topics').first().json.number_sessions_updated.ordinary_number_session }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3312,
+        -416
+      ],
+      "id": "595aa2d0-59f2-42dd-a8ee-fe454f7af5ce",
+      "name": "UPDATE_SESSION_NUMBER",
+      "credentials": {
+        "supabaseApi": {
+          "id": "7iDL76ggTML8vg0b",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        32,
+        320
+      ],
+      "id": "3197d2d5-376a-4a52-b83c-ae4e5f422aad",
+      "name": "GET_VOTE_DATA"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2432,
+        32
+      ],
+      "id": "a2ccf52e-e8ab-40d6-a8b7-3044bd31783c",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "toRecipients": "={{ $('Loop Over Items').item.json.mail }}",
+        "subject": "=ACTA DE REUNIÓN - {{ $('PutIAdataInObject').first().json.session_code }}",
+        "bodyContent": "=Buenos dias, se solicita su ayuda firmando la siguiente acta de la reunión {{ $('PutIAdataInObject').first().json.meeting_type }} realizada el día {{ DateTime.fromISO($('PutIAdataInObject').first().json.meeting_datetime_ISO8631).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}. \n\nPor favor, únicamente responder a este mensaje con el archivo adjunto firmado.",
+        "additionalFields": {
+          "attachments": {
+            "attachments": [
+              {
+                "binaryPropertyName": "data0"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        2976,
+        208
+      ],
+      "id": "64ab3bff-6ab9-4882-b312-bf6dc8c3e3c5",
+      "name": "SEND_ACTA",
+      "webhookId": "289dd8b7-e12d-4d80-89a2-e947de2d69a8",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "aa1g0ggoDcXs6rTB",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Esto devuelve 3 items (uno por cada topic)\n\nreturn $('PutIAdataInObject').first().json.attendees.map(att => ({\n  json: att\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2176,
+        32
+      ],
+      "id": "a98f0193-932f-4ec4-bf92-42e4da1b785f",
+      "name": "SPLIT_ATTENDEES"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3360,
+        640
+      ],
+      "id": "ca68d553-fab7-411b-b845-68c133002692",
+      "name": "Wait1",
+      "webhookId": "0085fa8a-5bf2-4dc1-855e-1a4ce13991fd"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2daaa46a-0d48-4cff-8f4b-3f1e42e21de2",
+              "leftValue": "={{ $now }}",
+              "rightValue": "={{ $('GET_SEND_EMAIL_METADATA').first().json.remaining_time }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2192,
+        624
+      ],
+      "id": "2dc91e37-e32e-4086-a9dd-1d263c1648c2",
+      "name": "se pasó la hora?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1f399e97-0322-4e85-acbb-c3fffec204fd",
+              "leftValue": "={{ $json.hasAttachments }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1888,
+        608
+      ],
+      "id": "e4cf58a6-fe6c-47cc-af02-b6502eaa6d8c",
+      "name": "la persona contestó?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "700e45cd-e794-4fc4-9b94-6eec524ef9e0",
+              "leftValue": "={{ $('GET_SEND_EMAIL_METADATA').first().json.lives_remaining }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2416,
+        480
+      ],
+      "id": "2d5495f5-3430-4998-b6ca-ffcd5b2f81da",
+      "name": "TIENE VIDAS?"
+    },
+    {
+      "parameters": {
+        "toRecipients": "aatituanav@uce.edu.ec",
+        "subject": "=RESOLUCION - {{ $('split_topics').first().json.topic.resolution_code }}",
+        "bodyContent": "=Se adjunta las resoluciones resultantes de la sesion",
+        "additionalFields": {
+          "attachments": {
+            "attachments": [
+              {
+                "binaryPropertyName": "data"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        2832,
+        -416
+      ],
+      "id": "f729a998-add9-471b-b07c-1e577cd47ed3",
+      "name": "SEND_SECRETARY",
+      "webhookId": "289dd8b7-e12d-4d80-89a2-e947de2d69a8",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "aa1g0ggoDcXs6rTB",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "JZJV9dnowTeIoSYw",
           "mode": "list",
           "cachedResultName": "GENERACION_CONSIDERANDOS"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "resolucion": "={{ $json.topic }}"
+            "resolucion": "={{ $json.topic.topic }}"
           },
-          "matchingColumns": [],
+          "matchingColumns": [
+            "resolucion"
+          ],
           "schema": [
             {
               "id": "resolucion",
@@ -96,259 +603,28 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        1968,
-        112
+        2272,
+        -352
       ],
       "id": "4478ef6b-b573-45c7-af2d-749dfc76ef10",
-      "name": "crear_considerandos"
-    },
-    {
-      "parameters": {
-        "operation": "search",
-        "base": {
-          "__rl": true,
-          "value": "appmLh9OZ0DbIuJDv",
-          "mode": "list",
-          "cachedResultName": "NOTAS_RESOLUCIONES",
-          "cachedResultUrl": "https://airtable.com/appmLh9OZ0DbIuJDv"
-        },
-        "table": {
-          "__rl": true,
-          "value": "tbllQ6axu72nv4mjN",
-          "mode": "list",
-          "cachedResultName": "VOTOS",
-          "cachedResultUrl": "https://airtable.com/appmLh9OZ0DbIuJDv/tbllQ6axu72nv4mjN"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.1,
-      "position": [
-        0,
-        208
-      ],
-      "id": "efd93243-5b27-4812-ada7-a60e96013000",
-      "name": "get_votos",
-      "credentials": {
-        "airtableTokenApi": {
-          "id": "ahIgIA3gHcgLZgKy",
-          "name": "Airtable Personal Access Token account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "download",
-        "fileId": {
-          "__rl": true,
-          "value": "={{ $json.id }}",
-          "mode": "id"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3,
-      "position": [
-        -352,
-        112
-      ],
-      "id": "b10102a7-0a1a-4452-aa13-3d151af0aea1",
-      "name": "Download file",
-      "credentials": {
-        "googleDriveOAuth2Api": {
-          "id": "4WPORFl40y0qlRSc",
-          "name": "Google Drive account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "resource": "fileFolder",
-        "queryString": "={{ $('Airtable Trigger').item.json.fields.id_meeting }}",
-        "limit": 1,
-        "filter": {},
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3,
-      "position": [
-        -512,
-        112
-      ],
-      "id": "f8d8f812-ae0b-4ca0-9d0b-273c6da2b8e4",
-      "name": "Search files and folders",
-      "credentials": {
-        "googleDriveOAuth2Api": {
-          "id": "4WPORFl40y0qlRSc",
-          "name": "Google Drive account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "fromJson",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.extractFromFile",
-      "typeVersion": 1,
-      "position": [
-        -208,
-        112
-      ],
-      "id": "cf3ada1c-3ab2-4200-84cb-05605873781d",
-      "name": "Extract from File"
+      "name": "WHEREAS_CLAUSES"
     },
     {
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "oOHNNGSuiYoOKNdR",
-          "mode": "list",
-          "cachedResultName": "PDF_ACTA"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "attendees": "={{ $json.attendees }}",
-            "id": "={{ $json.id_meeting }}",
-            "meeting_datetime_ISO8631": "={{ $json.meeting_datetime_ISO8631 }}",
-            "convocation_date_ISO8631": "={{ $json.convocation_date_ISO8631 }}",
-            "meeting_type": "={{ $json.meeting_type }}",
-            "session_code": "={{ $json.session_code }}",
-            "meeting_topics": "={{ $json.topics }}",
-            "attendances": "={{ $json.attendances }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "id",
-              "displayName": "id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "meeting_datetime_ISO8631",
-              "displayName": "meeting_datetime_ISO8631",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "convocation_date_ISO8631",
-              "displayName": "convocation_date_ISO8631",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "meeting_type",
-              "displayName": "meeting_type",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "session_code",
-              "displayName": "session_code",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "attendees",
-              "displayName": "attendees",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "array",
-              "removed": false
-            },
-            {
-              "id": "meeting_topics",
-              "displayName": "meeting_topics",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "array",
-              "removed": false
-            },
-            {
-              "id": "attendances",
-              "displayName": "attendances",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "array",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
-      },
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.2,
-      "position": [
-        1488,
-        112
-      ],
-      "id": "2fa80b0d-66c6-4fd6-bb9c-d95fc0375d3d",
-      "name": "PDF_ACTA"
-    },
-    {
-      "parameters": {
-        "jsCode": "// Esto devuelve 3 items (uno por cada topic)\nreturn $('estructure_data').first().json.topics.map(topic => ({\n  json: topic\n}));"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1792,
-        112
-      ],
-      "id": "1d87b1f3-0a7d-4d6a-8376-d7f18769a772",
-      "name": "split_topics"
-    },
-    {
-      "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "GwXuXI64MlNZR3pb",
+          "value": "83mmzuhKo0jvfAhK",
           "mode": "list",
           "cachedResultName": "PDF_RESOLUCION"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "considerandos": "={{ $json.considerandos }}",
-            "cod_resolucion": "=AAAAAAAAAAAAAAAAA",
-            "area_a_notificar": "TALENTO HUMANO",
-            "n_esima": "PRIMERA",
+            "tipo_reunion": "={{ $('split_topics').first().json.meeting_type }}",
+            "fecha_reunion": "={{ $('split_topics').first().json.meeting_datetime_ISO8631 }}",
+            "cod_sesion": "={{ $('split_topics').first().json.session_code }}",
             "tema_reunion": "={{ $('split_topics').item}}",
-            "tipo_reunion": "={{ $('estructure_data').item.json.meeting_type }}",
-            "fecha_reunion": "={{ $('estructure_data').item.json.meeting_datetime_ISO8631 }}",
-            "cod_sesion": "={{ $('estructure_data').item.json.session_code }}"
+            "considerandos": "={{ $json.considerandos }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -359,8 +635,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "fecha_reunion",
@@ -369,40 +644,11 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "cod_sesion",
               "displayName": "cod_sesion",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "cod_resolucion",
-              "displayName": "cod_resolucion",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            },
-            {
-              "id": "area_a_notificar",
-              "displayName": "area_a_notificar",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string"
-            },
-            {
-              "id": "n_esima",
-              "displayName": "n_esima",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -439,52 +685,165 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        2160,
-        96
+        2544,
+        -400
       ],
       "id": "93adacf8-afa8-4d2f-b3e4-7a3a34d75384",
-      "name": "pdf_resolution"
+      "name": "PDF_RESOLVING_CLAUSE"
     },
     {
       "parameters": {
-        "toRecipients": "alvaro.andres1996@hotmail.com",
-        "subject": "=RESOLUCION - {{ $('split_topics').item.json.topic }}",
-        "bodyContent": "=Se adjunta las resoluciones resultantes de la sesion",
-        "additionalFields": {
-          "attachments": {
-            "attachments": [
-              {
-                "binaryPropertyName": "data"
-              }
-            ]
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        3104,
+        -416
+      ],
+      "id": "6027124e-095a-4d6e-9493-e869aae0162b",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "jsCode": "//AQUI SE VALIDA QUE SE ENVÍE EL PDF ENVIADO POR LA PERSONA ANTERIOR (O UNO NUEVO CUANDO ES LA PRIMERAA VEZ)\nlet NewPdfArrival = false\ntry {\n  const getDataPDF = $('GET_SEND_EMAIL_METADATA').first().json\n  NewPdfArrival = true\n} catch (error) {\n  console.log(error)\n}\n\nif (NewPdfArrival) {\n  console.log(\"Se toma el pdf de la persona anterior\")\n  //SE TOMA EL ARCHIVO DE LA PERSONA ANTERIOR.\n  return{\n    json: $('WRONG_FILE_FORWARDED').first().json,\n    binary: $('WRONG_FILE_FORWARDED').first().binary\n  }\n}else{\n  //SE TOMA EL PDF SIN FIRMAR\n    console.log(\"Se toma el pdf INICIAL\")\n\n  return{\n    json: $('PDF_ACTA').first().json,\n    binary: {\n      data0: $('PDF_ACTA').first().binary['data'] \n    }\n  }\n}\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2832,
+        48
+      ],
+      "id": "a96f050d-709d-4301-8959-2323c0962a0c",
+      "name": "GET_BINARY"
+    },
+    {
+      "parameters": {
+        "toRecipients": "={{ $('Loop Over Items').item.json.mail }}",
+        "subject": "=AVISO NO SE RECIBIÓ EL ACTA - {{ $('PutIAdataInObject').first().json.session_code }}",
+        "bodyContent": "=No se recibió el documento firmado, por favor revisar nuevamente y reenviar el archivo por este medio o por el hilo principal.\nNOTA:\nPara poder dar un documento como válido, en su nombre deber contener el mismo nombre del archivo que se le envió anteriormente. ",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        2720,
+        224
+      ],
+      "id": "c2b166f6-10ae-41e6-8387-967fd40ea5c4",
+      "name": "avisar_archivo_mal_enviado",
+      "webhookId": "289dd8b7-e12d-4d80-89a2-e947de2d69a8",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "aa1g0ggoDcXs6rTB",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 10,
+        "output": "fields",
+        "fields": [
+          "body",
+          "bodyPreview",
+          "createdDateTime",
+          "receivedDateTime",
+          "sentDateTime",
+          "subject",
+          "from"
+        ],
+        "filtersUI": {
+          "values": {
+            "filters": {
+              "custom": "=contains(subject, '{{ $('PutIAdataInObject').first().json.session_code }}')",
+              "hasAttachments": true,
+              "sender": "={{ $('Loop Over Items').item.json.mail }}"
+            }
           }
+        },
+        "options": {
+          "attachmentsPrefix": "data",
+          "downloadAttachments": true
         }
       },
       "type": "n8n-nodes-base.microsoftOutlook",
       "typeVersion": 2,
       "position": [
-        2320,
-        96
+        3536,
+        640
       ],
-      "id": "f729a998-add9-471b-b07c-1e577cd47ed3",
-      "name": "Send a message",
-      "webhookId": "289dd8b7-e12d-4d80-89a2-e947de2d69a8"
+      "id": "50ff7eb0-b95e-4dcd-897d-c43a42e6a17d",
+      "name": "REVISAR_BANDEJA_ENTRADA",
+      "webhookId": "d8e3e4a8-34f0-4e5e-8836-6307a8ce30c1",
+      "retryOnFail": false,
+      "maxTries": 5,
+      "waitBetweenTries": 1,
+      "notesInFlow": false,
+      "alwaysOutputData": true,
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "aa1g0ggoDcXs6rTB",
+          "name": "Microsoft Outlook account"
+        }
+      },
+      "notes": "Error sfdasdfasd"
     },
     {
       "parameters": {
-        "operation": "getAll",
-        "tableId": "sessions_resolutions",
-        "limit": 1,
-        "filterType": "none"
+        "mode": "runOnceForEachItem",
+        "jsCode": "\nconst currentId = $json.id;\n//VERIFICO LA LISTA DE CORREOS MAL ENVIADOS\nconst isIdInSavedList = $('GET_SEND_EMAIL_METADATA').first().json.ids_wrong_emails.includes(currentId);\nif (isIdInSavedList) {\n//SI EL CORREO ESTA EN LA LISTA, SE LO FILTRA\nreturn null;\n} else {\nreturn item;\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3712,
+        640
+      ],
+      "id": "0e345e39-3b01-4ff0-9337-69fcc680c321",
+      "name": "FILTRAR_EMAILS",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "email_send_metadata",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "gt",
+              "keyValue": "0"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "ids_wrong_emails",
+              "fieldValue": "={{ [] }}"
+            },
+            {
+              "fieldId": "remaining_time",
+              "fieldValue": "={{ $now.plus({ seconds: $('REMAINING_TIME').first().json.time_on_seconds  }) }}"
+            },
+            {
+              "fieldId": "lives_remaining",
+              "fieldValue": "={{ $('REMAINING_TIME').first().json.times_warning }}"
+            }
+          ]
+        }
       },
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -672,
-        112
+        2640,
+        48
       ],
-      "id": "5a3ed22b-565f-451c-97a5-58ffdbb86d4b",
-      "name": "Get many rows",
+      "id": "1a37050d-ea03-4dcc-ae10-a5463cc0add3",
+      "name": "SET_DATA_EMAIL",
       "credentials": {
         "supabaseApi": {
           "id": "7iDL76ggTML8vg0b",
@@ -494,55 +853,197 @@
     },
     {
       "parameters": {
-        "modelId": {
-          "__rl": true,
-          "value": "models/gemini-2.5-flash",
-          "mode": "list",
-          "cachedResultName": "models/gemini-2.5-flash"
-        },
-        "messages": {
-          "values": [
+        "operation": "getAll",
+        "tableId": "email_send_metadata",
+        "limit": 1,
+        "filters": {
+          "conditions": [
             {
-              "content": "=Analiza los siguientes {{ $json.topics.length }} títulos de resolución y realiza dos acciones:\n1. Reformúlalos eliminando cualquier introducción o frase que anticipe detalles o subpuntos (por ejemplo: 'quedando conformado de la siguiente manera', 'como se detalla a continuación').\n2. Conjuga y da coherencia a la frase.** El título original está expresado como un sustantivo (ej. \"Aprobación de algo...\"). Tu tarea es convertirlo en una oración imperativa que comience con un verbo ('Aprobar algo...'). Para lograrlo, es fundamental que **antepongas el artículo correcto ('el', 'la', 'los', 'las') al sujeto de la oración para que conecte lógicamente la desicion tomada con el tema.**\n\n\nCUMPLE CON ESTO TAMBIEN: \n*Es imperativo que mantengas el orden de entrada de los titulos en lo que generes, no los cambies de orden.\n*Corrige si es necesario los signos de puntuación.\n*Mantén siempre el mismo numero de salidas, si se te coloca 5 titulos, cada elemento del json debe tener un string con 5 elementos separados por el separador que se te indique \nSEPARADOR: vas a separar los titulos generados utilizando una barra vertical (|)\nRESPUESTA:\nDevuelve un json con esta estructura \n{\n\"reformulacion\": \"aquí coloca los {{ $json.topics.length }} titulos separados por el separador indicado\" \n\"desition\": \"Aquí coloca los {{ $json.topics.length }} texto reformulado\"\n}\nNumero de titulos: {{ $json.topics.length }}\nTITULOS: {{ $json.topics.map((tp) => (\"TITULO:\"+tp.topic + \".    DESICION: \" + (tp.approved ? \"Aprobado\" : \"Negado\"))).join(\"\\n\") }}"
+              "keyName": "id",
+              "condition": "gt",
+              "keyValue": "0"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3168,
+        464
+      ],
+      "id": "356966ac-1b35-464a-b624-a5dbd4dcbc84",
+      "name": "GET_SEND_EMAIL_METADATA",
+      "credentials": {
+        "supabaseApi": {
+          "id": "7iDL76ggTML8vg0b",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "email_send_metadata",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "gte",
+              "keyValue": "0"
             }
           ]
         },
-        "simplify": false,
-        "jsonOutput": true,
-        "options": {}
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "ids_wrong_emails",
+              "fieldValue": "={{$('GET_SEND_EMAIL_METADATA').first().json.ids_wrong_emails.append($json.id)}}"
+            }
+          ]
+        }
       },
-      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        560,
-        96
+        2496,
+        224
       ],
-      "id": "aeb50226-100b-40b3-bd99-0bca2b1b9e7b",
-      "name": "ValidarTituloResolucion"
+      "id": "498d9ff9-0b32-402f-8a03-a87109465ce3",
+      "name": "UPDATE_SEM_EMAIL_WRONGS_ID",
+      "credentials": {
+        "supabaseApi": {
+          "id": "7iDL76ggTML8vg0b",
+          "name": "Supabase account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "/*\nEL NODO DE IA ANTERIOR CREA MENSAJES PERSONALIZADOS DE ACUERDO A SI SE ACEPTA,  SE NIEGA LA RESOLUCION, TAMBIEN PERMITE ELIMINAR CUALQUIER INTRODUCCION A ALGUN SUBPUNTO.\nESTA FUNCION PERMITE UNIR NUEVAMENTE ESA SALIDA A CADA TEMA VISTO (LISTA TOPICS)\n*/\n\n// Acceder al primer elemento del nodo 'estructure_data'\nconst structureData = $('estructure_data').first().json;\n\n// Obtener el string JSON desde la entrada\nconst jsonString = $('ValidarTituloResolucion').first().json.candidates[0].content.parts[0].text\nconst jsonString_RESUMEN = $input.first().json.candidates[0].content.parts[0].text\n// Parsear el string a un objeto JavaScript\nconst parsedData = JSON.parse(jsonString);\nconst parsedData_RESUMEN = JSON.parse(jsonString_RESUMEN);\n\n// Dividir las cadenas en arrays usando \" | \" como separador\nconst reformulacionArray = parsedData.reformulacion.split(\"|\");\nconst desitionArray = parsedData.desition.split(\"|\");\nconst RESUMEN_ARRAY = parsedData_RESUMEN.resumenes.split(\"|\");\n\n// Verificar que la cantidad de topics coincida con los arrays\nif (structureData.topics.length !== reformulacionArray.length || structureData.topics.length !== desitionArray.length) {\n  throw new Error(`La cantidad de topics (${structureData.topics.length}) no coincide con la cantidad de elementos en reformulacion (${reformulacionArray.length}) o desition (${desitionArray.length}).`);\n}\n\n// Agregar las propiedades a cada topic\nstructureData.topics.forEach((topic, index) => {\n  topic.reformulacion = reformulacionArray[index];\n  topic.desition = desitionArray[index];\n  topic.meeting_summary = RESUMEN_ARRAY[index]\n});\n\n// Devolver los datos modificados\nreturn structureData;\n"
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4ec58d2b-5d13-4aa4-9d05-fb4831d92cd3",
+              "name": "time_on_seconds",
+              "value": 60,
+              "type": "number"
+            },
+            {
+              "id": "b23e7a20-64e8-4c62-b06a-c00e54c69924",
+              "name": "times_warning",
+              "value": "3",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
       },
-      "type": "n8n-nodes-base.code",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1984,
+        32
+      ],
+      "id": "1fc7cb3f-1eb7-44a8-8779-32725e8efcbf",
+      "name": "REMAINING_TIME"
+    },
+    {
+      "parameters": {
+        "toRecipients": "={{ $('Loop Over Items').item.json.mail }}",
+        "subject": "=Por favor su atencion - {{ $('PutIAdataInObject').first().json.session_code }}",
+        "bodyContent": "=Se solicita su ayuda con la firma del acta de reunión {{ $('PutIAdataInObject').first().json.session_code }}. \nPuede reenviarla por este medio, o respondiendo al correo principal que se le envió previamente. \n\nMuchas gracias.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
       "typeVersion": 2,
       "position": [
-        1312,
-        112
+        2640,
+        368
       ],
-      "id": "fda3b565-073f-437f-abcb-2b1bd026abbc",
-      "name": "PutIAdataInObject"
+      "id": "c6cabd9f-398d-49da-bd7f-365367855362",
+      "name": "SEND_WARNING",
+      "webhookId": "289dd8b7-e12d-4d80-89a2-e947de2d69a8",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "aa1g0ggoDcXs6rTB",
+          "name": "Microsoft Outlook account"
+        }
+      }
     },
     {
       "parameters": {
-        "toRecipients": "alvaro.andres1996@hotmail.com",
-        "subject": "=ACTA DE REUNIÓN - {{ $('PutIAdataInObject').item.json.session_code }}",
-        "bodyContent": "=Se adjunta las resoluciones resultantes de la sesion",
+        "toRecipients": "aatituanav@uce.edu.ec",
+        "subject": "=NOTIFICACIÓN - Acta sin firmar",
+        "bodyContent": "=Buen día, La persona {{ $('Loop Over Items').item.json.name }} con el correo {{ $('Loop Over Items').item.json.mail }} ha superado el máximo de notificaciones, para continuar, favor notificarle personalmente que me ayude reenviando el acta firmada. \nMuchas gracias.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        2640,
+        544
+      ],
+      "id": "8b7c7ba0-edd0-4f69-ae7b-19cbbfc61a06",
+      "name": "WARNING_SECRETARY",
+      "webhookId": "289dd8b7-e12d-4d80-89a2-e947de2d69a8",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "aa1g0ggoDcXs6rTB",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "email_send_metadata",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "gte",
+              "keyValue": "0"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "lives_remaining",
+              "fieldValue": "={{ \n  $('GET_SEND_EMAIL_METADATA').first().json.lives_remaining + \n  ($prevNode.name === \"WARNING_SECRETARY\" ? 0 : -1) \n}}"
+            },
+            {
+              "fieldId": "remaining_time",
+              "fieldValue": "={{ $now.plus({ seconds: $('REMAINING_TIME').first().json.time_on_seconds }) }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2816,
+        464
+      ],
+      "id": "8c2d7af5-cbeb-4b95-91b8-d65fccb2e187",
+      "name": "GIVE_THEM_ANOTHER_OPORTUNITY",
+      "credentials": {
+        "supabaseApi": {
+          "id": "7iDL76ggTML8vg0b",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toRecipients": "aatituanav@uce.edu.ec",
+        "subject": "=ACTA DE REUNIÓN FIRMADA - {{ $('PutIAdataInObject').first().json.session_code }}",
+        "bodyContent": "=Buen día, Se hace la entrega del acta correspondiente a la sesión {{ $('PutIAdataInObject').first().json.meeting_type }} celebrada el día {{ DateTime.fromISO($('PutIAdataInObject').first().json.meeting_datetime_ISO8631).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}. \n\nEn el cual se presentaron los siguentes asistentes: \n{{ $('PutIAdataInObject').first().json.attendees.map(at=>at.name+\" - \"+at.mail+\"\\n\").join(\"\") }}",
         "additionalFields": {
           "attachments": {
             "attachments": [
               {
-                "binaryPropertyName": "data"
+                "binaryPropertyName": "=data0"
               }
             ]
           }
@@ -551,97 +1052,606 @@
       "type": "n8n-nodes-base.microsoftOutlook",
       "typeVersion": 2,
       "position": [
-        1648,
-        112
+        2848,
+        -128
       ],
-      "id": "64ab3bff-6ab9-4882-b312-bf6dc8c3e3c5",
-      "name": "send_document",
-      "webhookId": "289dd8b7-e12d-4d80-89a2-e947de2d69a8"
-    },
-    {
-      "parameters": {
-        "url": "=http://192.168.20.228:5000/run-automation?meeting_id={{ $('estructure_data').item.json.id_teams_meeting }}&filename={{ $('estructure_data').item.json.session_code }}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        848,
-        96
-      ],
-      "id": "f45aa45e-f673-4c0d-9248-b09127751bc9",
-      "name": "get_transcriptions"
-    },
-    {
-      "parameters": {
-        "modelId": {
-          "__rl": true,
-          "value": "models/gemini-2.5-pro",
-          "mode": "list",
-          "cachedResultName": "models/gemini-2.5-pro"
-        },
-        "messages": {
-          "values": [
-            {
-              "content": "=Vas a actuar como un asistente de reunión, para ello te voy a pasar una transcripcion de una reunión, de la cual se tratan {{  $('estructure_data').item.json.topics.length }} temas distintos, vas a identificar los temas dentro de la transcripcion y vas a generar un párrafo describiendo lo que se trató y lo que hicieron por cada uno de los  {{  $('estructure_data').item.json.topics.length }} que se encuentran en la transcripcion, como están mezclados, tienes queidentificar y extraer. \ngeneralmente los temas los tratan en el mismo orden en el que te enumero los temas.\n{{ $('estructure_data').item.json.topics.map((t,i)=>(`TEMA ${i+1}: ${t.topic}\\n`)) }}\n\nTRANSCRIPCIÓN:\n{{ $json.transcript }}\n\nFORMATO DE SALIDA: \nvas a devolver un json con la siguiente estructura \n{\n\"resumenes\": aqui vas a poner todos los resumenes en el mismo orden en el que te enlisté yo, todo eso separado por barras verticales (|)\n}"
-            }
-          ]
-        },
-        "simplify": false,
-        "jsonOutput": true,
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.googleGemini",
-      "typeVersion": 1,
-      "position": [
-        1024,
-        96
-      ],
-      "id": "fdafa808-9240-48c8-8ad5-d85a5a28d173",
-      "name": "EXTRAERRESUMENES"
-    },
-    {
-      "parameters": {
-        "pollTimes": {
-          "item": [
-            {
-              "mode": "everyMinute"
-            }
-          ]
-        },
-        "authentication": "airtableTokenApi",
-        "baseId": {
-          "__rl": true,
-          "value": "appmLh9OZ0DbIuJDv",
-          "mode": "id"
-        },
-        "tableId": {
-          "__rl": true,
-          "mode": "id",
-          "value": "tbll380WCapYxHCK2"
-        },
-        "triggerField": "last_time",
-        "additionalFields": {
-          "formula": "{state} = 'FINALIZADA'"
-        }
-      },
-      "type": "n8n-nodes-base.airtableTrigger",
-      "typeVersion": 1,
-      "position": [
-        -864,
-        112
-      ],
-      "id": "c6dccd47-8a3d-42c5-a02e-8df9dbd71fcf",
-      "name": "Airtable Trigger",
+      "id": "321f6559-c0dd-4f2a-aae1-e797726970aa",
+      "name": "SEND_SIGNED_FILES_TO_SECRETARY",
+      "webhookId": "289dd8b7-e12d-4d80-89a2-e947de2d69a8",
       "credentials": {
-        "airtableTokenApi": {
-          "id": "ahIgIA3gHcgLZgKy",
-          "name": "Airtable Personal Access Token account"
+        "microsoftOutlookOAuth2Api": {
+          "id": "aa1g0ggoDcXs6rTB",
+          "name": "Microsoft Outlook account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": " return{\n    json: $('WRONG_FILE_FORWARDED').first().json,\n    binary: $('WRONG_FILE_FORWARDED').first().binary\n  }\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2656,
+        -128
+      ],
+      "id": "b898f4e0-d781-4ca8-8cb1-7bbc3496b925",
+      "name": "GET_BINARY2"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "folderId": "01ZX2MQXOS5TWC5IXXI5H2DRTRMZAPE6BT"
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        128
+      ],
+      "id": "2fd502c2-ae0f-49d3-b03e-18e96944709c",
+      "name": "GET_METADATA",
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "Sk09Y3pRv4uy2lLG",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1dff6d29-ac1a-4170-b774-748e7296fde1",
+              "leftValue": "={{ $json.name.replace(/_[^_]*\\.[^.]+$/, '') }}",
+              "rightValue": "={{ `OCS-SO-${('00'+Number($('GET_NUMBER_SESSION').first().json.ordinary_session_number+1)).slice(-3)}-${$today.format('yyyy')}` }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "587a2b79-9b44-4691-921b-a0bda8f0939e",
+              "leftValue": "={{ $json.name.replace(/_[^_]*\\.[^.]+$/, '') }}",
+              "rightValue": "={{ `OCS-SO-${('00'+Number($('GET_NUMBER_SESSION').first().json.extraordinary_session_number+1)).slice(-3)}-${$today.format('yyyy')}` }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -352,
+        128
+      ],
+      "id": "aa890042-e6f8-4263-83cc-11e44bf391e9",
+      "name": "FILTER_METADATA"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        128
+      ],
+      "id": "18d705c2-45e4-40a2-b160-e7f5af1a15ce",
+      "name": "DOWNLOAD_METADATA",
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "Sk09Y3pRv4uy2lLG",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        128
+      ],
+      "id": "cf3ada1c-3ab2-4200-84cb-05605873781d",
+      "name": "EXTRACT_METADATA"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "folderId": "01ZX2MQXNBFOLRVNXCXNDLYAWFAZDB5IAI"
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1,
+      "position": [
+        -512,
+        -80
+      ],
+      "id": "e96490e8-4ad3-49bb-a234-f2168f6e6dbe",
+      "name": "GET_ATTENDANCE",
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "Sk09Y3pRv4uy2lLG",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1dff6d29-ac1a-4170-b774-748e7296fde1",
+              "leftValue": "={{ $json.name.replace(/_[^_]*\\.[^.]+$/, '') }}",
+              "rightValue": "={{ `OCS-SO-${('00'+Number($('GET_NUMBER_SESSION').first().json.ordinary_session_number+1)).slice(-3)}-${$today.format('yyyy')}` }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "f272cec3-d27f-43f6-af08-0ffbbe0b878c",
+              "leftValue": "={{ $json.name.replace(/_[^_]*\\.[^.]+$/, '') }}",
+              "rightValue": "={{ `OCS-SO-${('00'+Number($('GET_NUMBER_SESSION').first().json.extraordinary_session_number+1)).slice(-3)}-${$today.format('yyyy')}` }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        -80
+      ],
+      "id": "8619f5a4-1c89-4d40-9969-12f9abf2c5b0",
+      "name": "FILTER_ATTENDANCE"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        -80
+      ],
+      "id": "38e7b218-c701-480e-a334-03b35ca757b2",
+      "name": "DOWNLOAD_ATTENDANCE",
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "Sk09Y3pRv4uy2lLG",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        64,
+        -80
+      ],
+      "id": "afa85e02-0c46-41b7-9a26-a50e1e91e808",
+      "name": "EXTRACT_ATTENDANCE"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        320
+      ],
+      "id": "3a7791a5-16bf-47b4-b093-378fd687457b",
+      "name": "DOWNLOAD_VOTES",
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "Sk09Y3pRv4uy2lLG",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        128
+      ],
+      "id": "91c478b9-0109-4c01-a858-45cc80ab3212",
+      "name": "Aggregate1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1dff6d29-ac1a-4170-b774-748e7296fde1",
+              "leftValue": "={{ $json.name.replace(/_[^_]*\\.[^.]+$/, '') }}",
+              "rightValue": "={{ `OCS-SO-${('00'+Number($('GET_NUMBER_SESSION').first().json.ordinary_session_number+1)).slice(-3)}-${$today.format('yyyy')}` }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "587a2b79-9b44-4691-921b-a0bda8f0939e",
+              "leftValue": "={{ $json.name.replace(/_[^_]*\\.[^.]+$/, '') }}",
+              "rightValue": "={{ `OCS-SO-${('00'+Number($('GET_NUMBER_SESSION').first().json.extraordinary_session_number+1)).slice(-3)}-${$today.format('yyyy')}` }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -368,
+        320
+      ],
+      "id": "729ff226-76a7-4a80-b92b-f5e9f2c8fedd",
+      "name": "FILTER_VOTES"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "folderId": "01ZX2MQXLIPZG6YCWIRNA2FRDSIYBGHMP5"
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        320
+      ],
+      "id": "f34d7b7e-4cba-421d-a634-3b5dcf9f5ea6",
+      "name": "GET_VOTES",
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "Sk09Y3pRv4uy2lLG",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "86f394c0-fd70-4422-9ff3-09e7f463b2d1",
+              "leftValue": "={{ $json.topics.filter(item => item.votes !=\"\").length *  $json.attendances.reduce((contador, objeto) => {\n    return objeto.attendance === \"x\" ? contador + 1 : contador;\n}, 0)}}",
+              "rightValue": "={{ $json.topics.length * $json.attendances.reduce((contador, objeto) => {\n    return objeto.attendance === \"x\" ? contador + 1 : contador;\n}, 0)}}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        592,
+        96
+      ],
+      "id": "cd1e0af2-f0af-469b-ae54-08d0cb3224a4",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5dbf8548-299c-4590-a6dd-572d322e4d2a",
+              "leftValue": "={{ $binary.data0.fileName }}",
+              "rightValue": "={{ $('PutIAdataInObject').first().json.session_code }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "4feca6ff-27a2-415e-867d-77fbd6f38ce0",
+              "leftValue": "={{ $binary.data0.fileName }}",
+              "rightValue": "={{ $('GET_BINARY').item.binary.data0.fileName }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2160,
+        320
+      ],
+      "id": "b2dcc053-d2c3-4a15-ad24-9f557d8fc383",
+      "name": "WRONG_FILE_FORWARDED"
     }
   ],
-  "pinData": {},
+  "pinData": {
+    "SEND_ACTA": [
+      {
+        "json": {
+          "success": true
+        }
+      }
+    ],
+    "start": [
+      {
+        "json": {
+          "id": "01ZX2MQXINMMIJIBGJYFBYVZORKZNRCP6Z",
+          "createdDateTime": "2025-09-19T22:07:41Z",
+          "lastModifiedDateTime": "2025-09-19T23:25:29Z",
+          "name": "COD_GENERADO_MAIN_CONVOCATORIA_VOTOS.xlsx",
+          "webUrl": "https://isty850-my.sharepoint.com/personal/city_isty_edu_ec/_layouts/15/Doc.aspx?sourcedoc=%7B9410630D-C904-43C1-8AE5-D1565B113FD9%7D&file=COD_GENERADO_MAIN_CONVOCATORIA_VOTOS.xlsx&action=default&mobileredirect=true",
+          "size": 18979,
+          "path": "/drive/root:/VOTACIONES",
+          "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        }
+      },
+      {
+        "json": {
+          "id": "01ZX2MQXN5XVYXLERD5VAJEZ4JJEVI355L",
+          "createdDateTime": "2025-09-19T23:06:05Z",
+          "lastModifiedDateTime": "2025-09-19T23:06:05Z",
+          "name": "COD_GENERddddADO_MAIN_CONVOCATORIA_VOTOS.xlsx",
+          "webUrl": "https://isty850-my.sharepoint.com/personal/city_isty_edu_ec/_layouts/15/Doc.aspx?sourcedoc=%7B7571BDBD-2392-40ED-9267-89492A8DF7AB%7D&file=COD_GENERddddADO_MAIN_CONVOCATORIA_VOTOS.xlsx&action=default&mobileredirect=true",
+          "size": 18973,
+          "path": "/drive/root:/VOTACIONES",
+          "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        }
+      },
+      {
+        "json": {
+          "id": "01ZX2MQXO6FYH32ZGJQJFZ2Q5HOCFYBOGA",
+          "createdDateTime": "2025-09-22T03:52:39Z",
+          "lastModifiedDateTime": "2025-09-22T04:12:38Z",
+          "name": "undefined_VOTOS.xlsx",
+          "webUrl": "https://isty850-my.sharepoint.com/personal/city_isty_edu_ec/_layouts/15/Doc.aspx?sourcedoc=%7BBD0F2EDE-C964-4B82-9D43-A7708B80B8C0%7D&file=undefined_VOTOS.xlsx&action=default&mobileredirect=true",
+          "size": 19042,
+          "path": "/drive/root:/VOTACIONES",
+          "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        }
+      },
+      {
+        "json": {
+          "id": "01ZX2MQXIOFT4WQTFA4JFKZ5B7IR2NRK5F",
+          "createdDateTime": "2025-09-22T07:17:09Z",
+          "lastModifiedDateTime": "2025-09-23T17:12:52Z",
+          "name": "OCS-SO-038-2025_VOTOS.xlsx",
+          "webUrl": "https://isty850-my.sharepoint.com/personal/city_isty_edu_ec/_layouts/15/Doc.aspx?sourcedoc=%7B68F92C0E-A04C-4AE2-ACF4-3F4474D8ABA5%7D&file=OCS-SO-038-2025_VOTOS.xlsx&action=default&mobileredirect=true",
+          "size": 7872,
+          "path": "/drive/root:/VOTACIONES",
+          "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        }
+      }
+    ],
+    "ValidarTituloResolucion": [
+      {
+        "json": {
+          "candidates": [
+            {
+              "content": {
+                "parts": [
+                  {
+                    "text": "{\n  \"reformulacion\": \"Aprobación de la designación de los miembros del comité de ética del Instituto Superior Tecnológico Yaruquí.|Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la Información y Comunicación.|Aprobación de cambio de fecha en la ceremonia de graduación del Calendario Académico PAO 2025-I.|Aprobación del periodo de vacaciones docentes 2025-2026.|Aprobación de la compra de nuevos insumos mecánicos.\",\n  \"desition\": \"Aprobar la designación de los miembros del comité de ética del Instituto Superior Tecnológico Yaruquí.|Aprobar la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la Información y Comunicación.|Aprobar el cambio de fecha en la ceremonia de graduación del Calendario Académico PAO 2025-I.|Aprobar el periodo de vacaciones docentes 2025-2026.|Aprobar la compra de nuevos insumos mecánicos.\"\n}"
+                  }
+                ],
+                "role": "model"
+              },
+              "finishReason": "STOP",
+              "index": 0
+            }
+          ],
+          "usageMetadata": {
+            "promptTokenCount": 550,
+            "candidatesTokenCount": 251,
+            "totalTokenCount": 3780,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 550
+              }
+            ],
+            "thoughtsTokenCount": 2979
+          },
+          "modelVersion": "gemini-2.5-flash",
+          "responseId": "n-bSaI32Jrme_uMPsLimkAo"
+        }
+      }
+    ],
+    "EXTRAERRESUMENES": [
+      {
+        "json": {
+          "candidates": [
+            {
+              "content": {
+                "parts": [
+                  {
+                    "text": "{\n  \"resumenes\": \"Se trató la aprobación de la designación de los miembros del comité de ética del Instituto Superior Tecnológico Yaruquí. Durante la sesión, se presentaron los perfiles de los candidatos propuestos y, tras una deliberación sobre su idoneidad y experiencia, los asistentes votaron a favor, quedando el comité conformado de manera oficial para iniciar sus funciones.|Se discutió y aprobó la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán a su cargo como Jefe de la Unidad de Tecnologías de la Información y Comunicación. Se analizaron los términos de su desvinculación y se agradeció su servicio, procediendo a formalizar la aceptación de su renuncia y a iniciar el proceso para buscar su reemplazo.|Se abordó la solicitud de cambio de fecha para la ceremonia de graduación del Calendario Académico PAO 2025-I, presentada mediante el oficio ISTY-VA-DEPC-056-2025. Los miembros evaluaron las justificaciones logísticas y académicas expuestas en el documento y, tras confirmar la disponibilidad de espacios y personal para la nueva fecha propuesta, se aprobó la modificación del calendario.|Se sometió a consideración la aprobación del periodo de vacaciones para los docentes correspondiente al ciclo 2025-2026. Se revisó el cronograma propuesto, asegurando que el receso no interfiriera con las actividades académicas esenciales de fin de semestre. La propuesta fue aprobada por unanimidad, estableciendo las fechas definitivas para el descanso docente.|Se deliberó sobre la necesidad de adquirir nuevos insumos mecánicos para los talleres de la institución. Se presentó un informe detallando los materiales requeridos y su costo estimado. Después de analizar la justificación y la disponibilidad presupuestaria, se aprobó la compra de los insumos para garantizar la continuidad de las prácticas estudiantiles.\"\n}"
+                  }
+                ],
+                "role": "model"
+              },
+              "finishReason": "STOP",
+              "index": 0
+            }
+          ],
+          "usageMetadata": {
+            "promptTokenCount": 349,
+            "candidatesTokenCount": 400,
+            "totalTokenCount": 2632,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 349
+              }
+            ],
+            "thoughtsTokenCount": 1883
+          },
+          "modelVersion": "gemini-2.5-pro",
+          "responseId": "vubSaKfNL7TQ_uMP-vPW0AY"
+        }
+      }
+    ],
+    "WHEREAS_CLAUSES": [
+      {
+        "json": {
+          "considerandos": [
+            "Que, el artículo 57 del Estatuto Isty indica lo siguiente sobre Comité de Ética: \"Comité de Ética - Es el órgano responsable de asegurar el respeto a los principios éticos y a las convicciones morales de carácter universal que sustentan la esencia del Instituto Superior Tecnológico Yaruquí (ISTY). El Comité de Ética será nombrado por el Órgano Colegiado Superior (OCS) y estará constituido por el Rector/a o su representante, quien asumirá la presidencia; el Vicerrector/a Académico; un delegado del personal docente; un delegado del personal administrativo; y un representante del estudiantado. El Comité de Ética sesionará, al menos, una vez en cada periodo académico ordinario, previa convocatoria realizada por su presidente. El Comité de Ética se reunirá, como mínimo, una vez durante cada periodo académico ordinario, tras la convocatoria efectuada por su presidente.\" ",
+            " Que, el artículo 36 del Estatuto Isty indica lo siguiente sobre Atribuciones y responsabilidades del Órgano Colegiado Superior: \"Integrar o crear comisiones de trabajo que se requiera, estas que pueden ser de carácter temporal, permanente o especial para el cumplimiento de la misión, fines, u objetivos del instituto.\" ",
+            " Que, el artículo 50 del Estatuto Isty indica lo siguiente sobre Instancias de Asesoría: \"Instancias de Asesoría - Son instancias de asesoría del Instituto Superior Tecnológico Yaruquí: 1. Procuraduría General 2. Secretaría General 3. Comité Académico Educativo 4. Comité de Ética\" ",
+            " Que, el artículo 58 del Estatuto Isty indica lo siguiente sobre Atribuciones y responsabilidades del Comité de Ética: \"Son deberes y atribuciones del Comité de Ética las siguientes: a. Analizar y dar respuesta a las consultas, quejas y acontecimientos alejados de la disciplina y la ética. b. Tramitar y resolver las denuncias que lleguen a su conocimiento, y de darse el caso, proponer a las autoridades pertinentes la adopción de sanciones procedentes. c. Ordenar la realización de auditorías y evaluaciones del cumplimiento del Código de Ética, así como de elaborar un informe anual de sus actividades que será presentado por Rectorado o su delegado. d. Proponer las modificaciones adecuadas en el Código de Ética que permitan su actualización a nuevas circunstancias. e. Elaborar, actualizar e implementar la normativa interna para la resolución de casos del régimen disciplinario, la que deberá guardar armonía con la normativa que rige al Sistema de Educación Superior, misma que regulará además el recurso de apelación y reconsideración ante el mismo órgano. Se preverá también la instancia que vele por el debido proceso y el derecho a la defensa. Toda resolución deberá estar debidamente motivada. f. Aplicar las sanciones según las faltas cometidas por las y los estudiantes, profesores e investigadores y personal administrativo y de servicios, dependiendo del caso. g. Las demás que se le asigne en el ámbito de sus competencias.\" ",
+            " Que, el artículo 50 del Riesftt Codificado indica lo siguiente sobre Órgano de consulta de los institutos superiores públicos: \"Órgano de consulta de los institutos superiores públicos - Los institutos superiores públicos contarán con un órgano de consulta de formación técnica y tecnológica que estará conformado por: a) La máxima autoridad del instituto superior o su delegado, quien lo presidirá; b) Representantes del personal docente o coordinadores de carreras; c) Representantes de los estudiantes; y, d) Representantes de las instituciones públicas, sectores sociales y productivos públicos y privados del área de influencia del instituto superior.\" ",
+            " Que, el artículo 38 del Riesftt Codificado indica lo siguiente sobre Procedimiento: \"En el caso de los institutos superiores particulares, la designación de autoridades se realizará conforme a su estatuto institucional.\" ",
+            " Que, el artículo 115.6 de la Loes indica lo siguiente sobre Órgano de carácter colegiado de los Institutos Superiores Públicos: \"Todo instituto superior público contará con un órgano colegiado de consulta de formación profesional técnica y tecnológica que tendrá por objeto promover la participación para la toma de decisiones, las recomendaciones de los actores sociales, económico-productivos y miembros de la comunidad educativa del instituto, en relación a la actividad a su cargo. Los criterios estarán previstos en el reglamento de aplicación de esta Ley y la normativa que para el efecto emita el Consejo de Educación Superior.\" ",
+            " Que, el artículo 172 de la Loes indica lo siguiente sobre Código de Ética: \"Los miembros del Consejo, Comité Asesor, las y los funcionarios y las y los servidores del Consejo de Aseguramiento de la Calidad de la Educación Superior deben someterse a su Código de Ética.\" ",
+            " Que, el artículo 65 de la Loes indica lo siguiente sobre Gobierno de los institutos superiores técnicos y tecnológicos, pedagógicos y conservatorios de música y artes: \"Las autoridades del gobierno de los institutos superiores técnicos, tecnológicos, pedagógicos, de artes y conservatorios superiores públicos, serán designadas por el órgano rector de la política pública de educación superior, previo concurso de méritos y oposición, con criterios de equidad y paridad de género, alternancia e igualdad de oportunidades.\" ",
+            " Que, el artículo 133 del Reglamento de Régimen Académico 2023 indica lo siguiente sobre Conformación del Comité de Selección: \"Las IES deberán conformar un Comité de Selección para la admisión de los postulantes, mismo que deberá estar contemplado en la normativa interna que se expida para el efecto, en ejercicio de su autonomía responsable.\" ",
+            " Que, el artículo 3 del Reglamento de Selección, Formación, Capacitación, Evaluación, Seguimiento y Control del Personal Docente indica lo siguiente sobre Principios: \"Los principios en que se sustenta la presente normativa son: e) Ética, integridad y respeto a la normativa vigente\""
+          ]
+        }
+      },
+      {
+        "json": {
+          "considerandos": [
+            "Que, el artículo 7 de la Constitución de la República del Ecuador indica lo siguiente: \"Las resoluciones de los poderes públicos deberán ser motivadas. No habrá motivación si en la resolución no se enuncian las normas o principios jurídicos en que se funda y no se explica la pertinencia de su aplicación a los antecedentes de hecho. Los actos administrativos, resoluciones o fallos que no se encuentren debidamente motivados se considerarán nulos. Las servidoras o servidores responsables serán sancionados.\"",
+            "Que, el artículo 229 de la Constitución de la República del Ecuador indica lo siguiente sobre Serán servidoras o servidores públicos todas las personas que en cualquier forma o a cualquier título trabajen, presten servicios o ejerzan un cargo, función o dignidad dentro del sector público: \"Serán servidoras o servidores públicos todas las personas que en cualquier forma o a cualquier título trabajen, presten servicios o ejerzan un cargo, función o dignidad dentro del sector público - Los derechos de las servidoras y servidores públicos son irrenunciables. La ley definirá el organismo rector en materia de recursos humanos y remuneraciones para todo el sector público y regulará el ingreso, ascenso, promoción, incentivos, régimen disciplinario, estabilidad, sistema de remuneración y cesación de funciones de sus servidores.\"",
+            "Que, el artículo 44 del Estatuto Isty indica lo siguiente sobre Causales de cesación de funciones de máximas autoridades: \"El Rector y/o Vicerrector/a Académico del Instituto cesarán en sus funciones por las siguientes causales: b. Renuncia voluntaria del cargo o jubilación;\"",
+            "Que, el artículo 114 de la Constitución de la República del Ecuador indica lo siguiente sobre Las autoridades de elección popular podrán reelegirse por una sola vez, consecutiva o no, para el mismo cargo: \"Las autoridades de elección popular podrán reelegirse por una sola vez, consecutiva o no, para el mismo cargo. - Las autoridades de elección popular que se postulen para un cargo diferente deberán renunciar al que desempeñan.\"",
+            "Que, el artículo 153 de la Constitución de la República del Ecuador indica lo siguiente sobre Quienes hayan ejercido la titularidad de los ministerios de Estado y las servidoras y servidores públicos de nivel jerárquico superior definidos por la ley: \"Quienes hayan ejercido la titularidad de los ministerios de Estado y las servidoras y servidores públicos de nivel jerárquico superior definidos por la ley - una vez hayan cesado en su cargo y durante los siguientes dos años, no podrán formar parte del directorio o del equipo de dirección, o ser representantes legales o ejercer la procuración de personas jurídicas privadas, nacionales o extranjeras, que celebren contrato con el Estado, bien sea para la ejecución de obras públicas, prestación de servicios públicos o explotación de recursos naturales, mediante concesión, asociación o cualquier otra modalidad contractual, ni ser funcionarias o funcionarios de instituciones financieras internacionales acreedoras del país.\"",
+            "Que, el artículo 87 del Estatuto Isty indica lo siguiente sobre Unidad de Tecnologías de la Información y Comunicación: \"La Unidad de Tecnologías de la Información y Comunicación es la encargada de garantizar la integridad operación, disponibilidad y, confidencialidad de los servicios e infraestructura tecnológica del instituto.\"",
+            "Que, el artículo 88 del Estatuto Isty indica lo siguiente sobre Atribuciones y responsabilidades de la Unidad de Tecnologías de la Información y Comunicación: \"Son atribuciones y responsabilidades de la Unidad de Tecnologías de la Información y Comunicación: a. Asesorar a las autoridades en la implementación de sistemas de información y nuevas tecnologías para los procesos académicos, de vinculación, investigación y de gestión administrativa institucional; b. Desarrollar, analizar, implementar diseñar, y dar soporte a los componentes, herramientas, sistemas informáticos y aplicativos para la gestión institucional que permitan manejar correctamente los procesos administrativos y académicos; c. Gestionar la infraestructura tecnológica, la seguridad informática, y las redes de comunicación del instituto; d. Mantener la disponibilidad y operatividad de la infraestructura tecnológica; e. Presentar al Órgano Colegiado Superior los planes de contingencia pertinentes con el fin de mantener la continuidad de las operaciones de software, de hardware y redes de comunicación del instituto; f. Resguardar la infraestructura tecnológica, bases de datos, aplicaciones e información del instituto; g. Planificar y ejecutar acciones de mantenimiento tecnológico preventivo y correctivo de la infraestructura de la institución; h. Proponer, dentro de tiempos pertinentes, proyectos de mejora y actualización de componentes y partes de telecomunicaciones de infraestructura tecnológica del instituto; i. Dar soporte técnico sobre los servicios informáticos y herramientas a usuarios internos y externos de la institución; j. Velar por la seguridad de la información del instituto, previniendo su pérdida total o parcial, su alteración o el acceso no autorizado a la misma; k. Promover la cultura del cuidado, conservación, eficiencia y buen uso de los equipos y sistemas informáticos; y, l. Las demás que se le asigne en el ámbito de sus competencias.\"",
+            "Que, el artículo 3 del Reglamento Selección, Formación, Capacitación, Evaluación, Seguimiento y Control del Personal Docente indica lo siguiente sobre Principios: \"Los principios en que se sustenta la presente normativa son: e) Ética, integridad y respeto a la normativa vigente\""
+          ]
+        }
+      },
+      {
+        "json": {
+          "considerandos": [
+            "Que, el artículo 63 del Reglamento de Titulación indica lo siguiente sobre Ceremonia de Graduación: \"Ceremonia de Graduación - Las fechas para las ceremonias de graduación (una por cada período académico ISTY) serán establecidas por el Órgano Colegiado Superior bajo aprobación de Rectorado, al ser la máxima autoridad delegará una comisión para trabajar en esta ceremonia. Las autoridades que entregan los títulos profesionales en la ceremonia estarán establecidas por la comisión, se considerarán: Rectorado, Vicerrectorado Académico, Dirección de Carreras, Coordinador(a) de carrera, autoridad invitada. Secretaría General notificará a los nuevos profesionales la fecha de su ceremonia de graduación.\" ",
+            " Que, el artículo 40 del Reglamento de Admisión, Matrícula, Registro, Acompañamiento Académico, Formación en Valores, Evaluación y Estímulos Positivos indica lo siguiente sobre De la Difusión: \"El calendario académico y las notas de evaluación serán publicados de manera oportuna en el Sistema Académico para conocimiento de las y los estudiantes.\" ",
+            " Que, el artículo 10 del Reglamento de Educación Continua indica lo siguiente sobre Reformas a la planificación y/o asignación presupuestaria: \"En caso de resultar necesario efectuar reformas a la planificación y/o asignación presupuestaria de la educación continua del ISTY, la Dirección de Carreras y la Coordinación de Educación Continua deberán presentar una solicitud fundamentada ante el Vicerrector académico quien valorará y enviará al Rector para su consideración y posterior remisión al OCS para su resolución.\" ",
+            " Que, el artículo 13 del Reglamento de Evaluación Estudiantil indica lo siguiente sobre De la Difusión: \"El calendario académico y las notas de evaluación serán publicados de manera oportuna en el Sistema Académico para conocimiento de las y los estudiantes.\" ",
+            " Que, el artículo 118 del Estatuto Isty indica lo siguiente sobre Derechos de los Estudiantes: \"Son derechos de los estudiantes del Instituto Superior Tecnológico Yaruquí además de los previstos en la LOES, los siguientes: a. Realizar todos los procesos académicos y administrativos necesarios para poder obtener su título de tercer nivel sin ninguna clase de discriminación; b. Acceder en igualdad de oportunidades a una formación de calidad y calidez, que le permita iniciar una carrera profesional en igualdad de oportunidades; c. Acceder a recursos apropiados para su educación; d. Ser partícipes en los procesos de acreditación y evaluación de su carrera; e. Participar como elector en las representaciones estudiantiles, además de poder integrar el cogobierno como candidato; f. Tener libertad de asociación y libertad de expresión; g. Recibir una educación superior laica, intercultural, democrática, incluyente y diversa, que impulse la equidad de género, la justicia y la paz conforme lo dispuesto por la Constitución de la República; h. Poder aplicar a becas, apoyos económicos o similares conforme a sus méritos académicos y situación socio económica; i. Permanecer en la institución y titularse sin discriminación, conforme a sus méritos académicos; j. Ser atendidos de manera debida por los estamentos de la institución, de conformidad con las leyes, sus reglamentos, este Estatuto y demás normativas vigentes; k. Recibir al inicio del año académico el calendario de actividades y las programaciones de cada materia, debidamente aprobados; l. Exigir que los docentes asistan puntualmente a clases y que los traten con respeto; m. Recibir orientación e información sobre el Estatuto, reglamentos, normas y procedimientos mediante el acceso virtual de los mismos; y, n. Los demás establecidas en los Reglamento Internos y resoluciones de autoridad competente.\""
+          ]
+        }
+      },
+      {
+        "json": {
+          "considerandos": [
+            "Que, el artículo 383 de la Constitución de la República del Ecuador indica lo siguiente sobre Se garantiza el derecho de las personas y las colectividades al tiempo libre, la ampliación de las condiciones físicas, sociales y ambientales para su disfrute, y la promoción de actividades para el esparcimiento, descanso y desarrollo de la personalidad.: \"Se garantiza el derecho de las personas y las colectividades al tiempo libre, la ampliación de las condiciones físicas, sociales y ambientales para su disfrute, y la promoción de actividades para el esparcimiento, descanso y desarrollo de la personalidad.\"",
+            "Que, el artículo 349 de la Constitución de la República del Ecuador indica lo siguiente sobre El Estado garantizará al personal docente, en todos los niveles y modalidades, estabilidad, actualización, formación continua y mejoramiento pedagógico y académico: \"El Estado garantizará al personal docente, en todos los niveles y modalidades, estabilidad, actualización, formación continua y mejoramiento pedagógico y académico; una remuneración justa, de acuerdo a la profesionalización, desempeño y méritos académicos. - La ley regulará la carrera docente y el escalafón; establecerá un sistema nacional de evaluación del desempeño y la política salarial en todos los niveles. Se establecerán políticas de promoción, movilidad y alternancia docente.\"",
+            "Que, el artículo 158 de la Ley Orgánica de Educación Superior (LOES) indica lo siguiente sobre Período Sabático: \"Período Sabático - Luego de seis años de labores ininterrumpidas, los profesores o profesoras titulares principales con dedicación a tiempo completo podrán solicitar hasta doce meses de permiso para realizar estudios o trabajos de investigación. La máxima instancia colegiada académica de la institución analizará y aprobará el proyecto o plan académico que presente el profesor o la profesora e investigador o investigadora. En este caso, la institución pagará las remuneraciones y los demás emolumentos que le corresponden percibir mientras haga uso de este derecho. Una vez cumplido el período, en caso de no reintegrarse a sus funciones sin que medie debida justificación, deberá restituir los valores recibidos por este concepto, con los respectivos intereses legales. Culminado el período de estudio o investigación el profesor o investigador deberá presentar ante la misma instancia colegiada el informe de sus actividades y los productos obtenidos. Los mismos deberán ser socializados en la comunidad académica.\"",
+            "Que, el artículo 104 del Estatuto del Instituto Superior Tecnológico Yaruquí indica lo siguiente sobre Garantía del otorgamiento de licencias con sueldo y año sabático al personal académico: \"Se reconoce a los profesores las facilidades para que realicen investigaciones pasantías y estudios, a través de licencias con o sin sueldo, siempre y cuando utilicen los conocimientos adquiridos en favor del instituto.\"",
+            "Que, el artículo 156 de la Ley Orgánica de Educación Superior (LOES) indica lo siguiente sobre Capacitación y perfeccionamiento permanente de los profesores o profesoras e investigadores o investigadoras: \"En el Reglamento de Carrera y Escalafón del Profesor e Investigador del Sistema de Educación Superior se garantizará para las universidades públicas su capacitación y perfeccionamiento permanentes. En los presupuestos de las instituciones del sistema de educación superior constarán de manera obligatoria partidas especiales destinadas a financiar planes de becas o ayudas económicas para especialización o capacitación y año sabático.\""
+          ]
+        }
+      },
+      {
+        "json": {
+          "considerandos": [
+            "Que, el artículo 288 de la Constitución de la República del Ecuador indica lo siguiente sobre Las compras públicas cumplirán con criterios de eficiencia, transparencia, calidad, responsabilidad ambiental y social: \"Las compras públicas cumplirán con criterios de eficiencia, transparencia, calidad, responsabilidad ambiental y social - Se priorizarán los productos y servicios nacionales, en particular los provenientes de la economía popular y solidaria, y de las micro, pequeñas y medianas unidades productivas.\"",
+            "Que, el artículo 23.1 de la Ley Orgánica de Educación Superior (LOES) indica lo siguiente sobre Régimen especial de compras públicas: \"Las instituciones de educación superior públicas tendrán un Régimen especial de compras públicas, el mismo que será regulado por el órgano técnico rector de la contratación pública en coordinación con los organismos públicos de educación superior.\"",
+            "Que, el artículo 9 del Reglamento de Relaciones Interinstitucionales del Isty indica lo siguiente sobre Evidencias y documentación: \"Toda relación interinstitucional deberá contar con: a) Instrumentos jurídicos formales b) Informes de ejecución y resultados c) Registros de participantes y beneficiarios d) Evidencias de impacto en las funciones sustantivas\"",
+            "Que, el artículo 233 de la Constitución de la República del Ecuador indica lo siguiente sobre Ninguna servidora ni servidor público estará exento de responsabilidades por los actos realizados en el ejercicio de sus funciones o por omisiones, y serán responsable administrativa, civil y penalmente por el manejo y administración de fondos, bienes o recursos públicos: \"Ninguna servidora ni servidor público estará exento de responsabilidades por los actos realizados en el ejercicio de sus funciones o por omisiones, y serán responsable administrativa, civil y penalmente por el manejo y administración de fondos, bienes o recursos públicos - Las servidoras o servidores públicos y los delegados o representantes a los cuerpos colegiados a las instituciones del Estado, estarán sujetos a las sanciones establecidas por delitos de peculado, cohecho, concusión y enriquecimiento ilícito.\"",
+            "Que, el artículo 297 de la Constitución de la República del Ecuador indica lo siguiente sobre Todo programa financiado con recursos públicos tendrá objetivos, metas y un plazo predeterminado para ser evaluado, en el marco de lo establecido en el Plan Nacional de Desarrollo: \"Todo programa financiado con recursos públicos tendrá objetivos, metas y un plazo predeterminado para ser evaluado, en el marco de lo establecido en el Plan Nacional de Desarrollo. - Las instituciones y entidades que reciban o transfieran bienes o recursos públicos se someterán a las normas que las regulan y a los principios y procedimientos de transparencia, rendición de cuentas y control público.\"",
+            "Que, el artículo 36 del Estatuto del Isty indica lo siguiente sobre Atribuciones y responsabilidades del Órgano Colegiado Superior: \"Aprobar el presupuesto anual del Instituto Superior Tecnológico Yaruquí y su liquidación al término de cada ejercicio económico; o. Aprobar, reformar y derogar Reglamentos Internos del Instituto Superior Tecnológico Yaruquí, para su correcto funcionamiento. p. Conocer y resolver los asuntos que le sean sometidos por otras áreas de gobierno de la institución como órgano de última instancia y ejercer todas aquellas atribuciones que no se encuentren asignadas a otros organismos y autoridades del instituto.\"",
+            "Que, el artículo 289 de la Constitución de la República del Ecuador indica lo siguiente sobre La contratación de deuda pública en todos los niveles del Estado se regirá por las directrices de la respectiva planificación y presupuesto, y será autorizada por un comité de deuda y financiamiento de acuerdo con la ley, que definirá su conformación y funcionamiento: \"La contratación de deuda pública en todos los niveles del Estado se regirá por las directrices de la respectiva planificación y presupuesto, y será autorizada por un comité de deuda y financiamiento de acuerdo con la ley, que definirá su conformación y funcionamiento.\"",
+            "Que, el artículo 13 del Reglamento para el Representante Estudiantil del Isty indica lo siguiente sobre De las actas y resoluciones: \"El/la representante de los estudiantes y su miembro de equipo deberán llevar junto a su secretario/a un respaldo documental en el que conste: la convocatoria, la recepción de esta con las respectivas firmas de cada presidente de curso, el acta de la sesión y la resolución de cada punto tratado.\"",
+            "Que, el artículo 29 del Reglamento de Planificación Estratégica y Aseguramiento de la Calidad del Isty indica lo siguiente sobre Presupuesto del Plan Estratégico: \"El presupuesto del Plan Estratégico estará en concordancia de la misión y visión de la institución y en función de las prioridades.\"",
+            "Que, el artículo 9 del Reglamento de Educación Continua indica lo siguiente sobre Asignación presupuestaria: \"La asignación presupuestaria para educación continua será aprobada por el Órgano Colegiado Superior, con base en el análisis al que refiere el artículo precedente.\"",
+            "Que, el artículo 49 del Reglamento de Régimen Académico del Isty indica lo siguiente sobre De la resolución: \"Con base en el informe del Vicerrectorado Académico, el Órgano Colegiado Superior del ISTY resolverá conceder o negar el pedido formulado por el estudiante, resolución de la cual no cabe recurso alguno en la institución por ser el OCS la última instancia de decisión.\"",
+            "Que, la Constitución de la República del Ecuador indica lo siguiente: \"Las resoluciones de los poderes públicos deberán ser motivadas. No habrá motivación si en la resolución no se enuncian las normas o principios jurídicos en que se funda y no se explica la pertinencia de su aplicación a los antecedentes de hecho.\"",
+            "Que, el artículo 3 del Reglamento de Relaciones Interinstitucionales del Isty indica lo siguiente sobre Principios: \"El presente reglamento se basa en los siguientes principios: a) Transparencia y equidad b) Pertinencia y calidad c) Innovación y cooperación d) Responsabilidad institucional e) Mejora continua\"",
+            "Que, el artículo 287 de la Constitución de la República del Ecuador indica lo siguiente sobre Toda norma que cree una obligación financiada con recursos públicos establecerá la fuente de financiamiento correspondiente: \"Toda norma que cree una obligación financiada con recursos públicos establecerá la fuente de financiamiento correspondiente - Solamente las instituciones de derecho público podrán financiarse con tasas y contribuciones especiales establecidas por ley.\"",
+            "Que, el artículo 4 del Reglamento de Planificación Estratégica y Aseguramiento de la Calidad del Isty indica lo siguiente sobre Principios Rectores: \"El presente reglamento se orienta bajo los principios de: Pertinencia, Participación, Transparencia, Mejora continua, Enfoque estratégico y Sostenibilidad.\"",
+            "Que, el artículo 8 del Reglamento del RIESFTT Codificado indica lo siguiente sobre Requisitos y contenido del proyecto de creación: \"En el caso de los institutos superiores públicos, la certificación correspondiente por parte del Ministerio de Economía y Finanzas de que se contará con los fondos suficientes que garanticen el funcionamiento del instituto superior, en su infraestructura física, tecnológica y académica.\""
+          ]
+        }
+      }
+    ]
+  },
   "connections": {
     "Merge1": {
       "main": [
@@ -654,82 +1664,11 @@
         ]
       ]
     },
-    "get_asistencia": {
-      "main": [
-        [
-          {
-            "node": "Merge1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "estructure_data": {
       "main": [
         [
           {
-            "node": "ValidarTituloResolucion",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "crear_considerandos": {
-      "main": [
-        [
-          {
-            "node": "pdf_resolution",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "get_votos": {
-      "main": [
-        [
-          {
-            "node": "Merge1",
-            "type": "main",
-            "index": 1
-          }
-        ]
-      ]
-    },
-    "Download file": {
-      "main": [
-        [
-          {
-            "node": "Extract from File",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Search files and folders": {
-      "main": [
-        [
-          {
-            "node": "Download file",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extract from File": {
-      "main": [
-        [
-          {
-            "node": "get_asistencia",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "get_votos",
+            "node": "If",
             "type": "main",
             "index": 0
           }
@@ -740,7 +1679,12 @@
       "main": [
         [
           {
-            "node": "send_document",
+            "node": "REMAINING_TIME",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "split_topics",
             "type": "main",
             "index": 0
           }
@@ -751,29 +1695,7 @@
       "main": [
         [
           {
-            "node": "crear_considerandos",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "pdf_resolution": {
-      "main": [
-        [
-          {
-            "node": "Send a message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get many rows": {
-      "main": [
-        [
-          {
-            "node": "Search files and folders",
+            "node": "WHEREAS_CLAUSES",
             "type": "main",
             "index": 0
           }
@@ -784,7 +1706,7 @@
       "main": [
         [
           {
-            "node": "get_transcriptions",
+            "node": "EXTRAERRESUMENES",
             "type": "main",
             "index": 0
           }
@@ -802,26 +1724,9 @@
         ]
       ]
     },
-    "send_document": {
-      "main": [
-        [
-          {
-            "node": "split_topics",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "get_transcriptions": {
       "main": [
-        [
-          {
-            "node": "EXTRAERRESUMENES",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "EXTRAERRESUMENES": {
@@ -835,11 +1740,479 @@
         ]
       ]
     },
-    "Airtable Trigger": {
+    "start": {
       "main": [
         [
           {
-            "node": "Get many rows",
+            "node": "GET_NUMBER_SESSION",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET_NUMBER_SESSION": {
+      "main": [
+        [
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET_VOTE_DATA": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "GET_BINARY2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SET_DATA_EMAIL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SEND_ACTA": {
+      "main": [
+        [
+          {
+            "node": "GET_SEND_EMAIL_METADATA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SPLIT_ATTENDEES": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "REVISAR_BANDEJA_ENTRADA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "se pasó la hora?": {
+      "main": [
+        [
+          {
+            "node": "TIENE VIDAS?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "la persona contestó?": {
+      "main": [
+        [
+          {
+            "node": "WRONG_FILE_FORWARDED",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "se pasó la hora?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TIENE VIDAS?": {
+      "main": [
+        [
+          {
+            "node": "SEND_WARNING",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "WARNING_SECRETARY",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SEND_SECRETARY": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WHEREAS_CLAUSES": {
+      "main": [
+        [
+          {
+            "node": "PDF_RESOLVING_CLAUSE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDF_RESOLVING_CLAUSE": {
+      "main": [
+        [
+          {
+            "node": "SEND_SECRETARY",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        []
+      ]
+    },
+    "GET_BINARY": {
+      "main": [
+        [
+          {
+            "node": "SEND_ACTA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "avisar_archivo_mal_enviado": {
+      "main": [
+        [
+          {
+            "node": "GET_SEND_EMAIL_METADATA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "REVISAR_BANDEJA_ENTRADA": {
+      "main": [
+        [
+          {
+            "node": "FILTRAR_EMAILS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FILTRAR_EMAILS": {
+      "main": [
+        [
+          {
+            "node": "la persona contestó?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET_DATA_EMAIL": {
+      "main": [
+        [
+          {
+            "node": "GET_BINARY",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET_SEND_EMAIL_METADATA": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UPDATE_SEM_EMAIL_WRONGS_ID": {
+      "main": [
+        [
+          {
+            "node": "avisar_archivo_mal_enviado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "REMAINING_TIME": {
+      "main": [
+        [
+          {
+            "node": "SPLIT_ATTENDEES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SEND_WARNING": {
+      "main": [
+        [
+          {
+            "node": "GIVE_THEM_ANOTHER_OPORTUNITY",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WARNING_SECRETARY": {
+      "main": [
+        [
+          {
+            "node": "GIVE_THEM_ANOTHER_OPORTUNITY",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GIVE_THEM_ANOTHER_OPORTUNITY": {
+      "main": [
+        [
+          {
+            "node": "GET_SEND_EMAIL_METADATA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET_BINARY2": {
+      "main": [
+        [
+          {
+            "node": "SEND_SIGNED_FILES_TO_SECRETARY",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET_METADATA": {
+      "main": [
+        [
+          {
+            "node": "FILTER_METADATA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FILTER_METADATA": {
+      "main": [
+        [
+          {
+            "node": "DOWNLOAD_METADATA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DOWNLOAD_METADATA": {
+      "main": [
+        [
+          {
+            "node": "EXTRACT_METADATA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EXTRACT_METADATA": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "GET_ATTENDANCE": {
+      "main": [
+        [
+          {
+            "node": "FILTER_ATTENDANCE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FILTER_ATTENDANCE": {
+      "main": [
+        [
+          {
+            "node": "DOWNLOAD_ATTENDANCE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DOWNLOAD_ATTENDANCE": {
+      "main": [
+        [
+          {
+            "node": "EXTRACT_ATTENDANCE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EXTRACT_ATTENDANCE": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DOWNLOAD_VOTES": {
+      "main": [
+        [
+          {
+            "node": "GET_VOTE_DATA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate1": {
+      "main": [
+        [
+          {
+            "node": "GET_ATTENDANCE",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GET_METADATA",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GET_VOTES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FILTER_VOTES": {
+      "main": [
+        [
+          {
+            "node": "DOWNLOAD_VOTES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET_VOTES": {
+      "main": [
+        [
+          {
+            "node": "FILTER_VOTES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "ValidarTituloResolucion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WRONG_FILE_FORWARDED": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "UPDATE_SEM_EMAIL_WRONGS_ID",
             "type": "main",
             "index": 0
           }
@@ -851,10 +2224,18 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "95b19d61-33f4-4e5a-ac19-160a8a3318c6",
+  "versionId": "b6f6c5a8-c86d-42c5-ab98-6d8a14184bc5",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"
   },
   "id": "E1VxJCtNCmSJnhvG",
-  "tags": []
+  "tags": [
+    {
+      "createdAt": "2025-09-19T21:36:18.579Z",
+      "updatedAt": "2025-09-19T21:36:18.579Z",
+      "id": "hIfCdV5CCo0ZPgJJ",
+      "name": "MAIN"
+    }
+  ]
 }

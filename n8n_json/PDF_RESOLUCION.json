@@ -67,6 +67,15 @@
       "parameters": {
         "method": "POST",
         "url": "http://gotenberg:3000/forms/chromium/convert/html",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Gotenberg-Output-Filename",
+              "value": "={{ $('Code').item.json.tema_reunion.json.resolution_code }}"
+            }
+          ]
+        },
         "sendBody": true,
         "contentType": "multipart-form-data",
         "bodyParameters": {
@@ -144,12 +153,12 @@
     },
     {
       "parameters": {
-        "html": "<!DOCTYPE html>\n<html>\n   <body style=\"text-align: justify\">\n      <div id=\"paguina\">\n         <p style=\"text-align: center;\"><strong>RESOLUCI&Oacute;N: {{ $json.tema_reunion.json.resolution_code }}</strong></p>\n         <p style=\"text-align: center;\"><strong>EL &Oacute;RGANO COLEGIADO SUPERIOR DEL INSTITUTO SUPERIOR TECNOL&Oacute;GICO YARUQU&Iacute;</strong></p>\n         <p style=\"text-align: center;\">&nbsp;</p>\n         <p style=\"text-align: center;\"><strong>CONSIDERANDO</strong></p>\n         <div id=\"considerandos\" style=\"text-indent: -20px; padding-left: 20px\">\n            <p>Que, el art&iacute;culo 350 de la Constituci&oacute;n de la Rep&uacute;blica del Ecuador, establece que: <em>\"El sistema de Educaci&oacute;n Superior tiene como finalidad la formaci&oacute;n acad&eacute;mica y profesional con visi&oacute;n cient&iacute;fica y human&iacute;stica; la investigaci&oacute;n cient&iacute;fica y tecnol&oacute;gica; la innovaci&oacute;n, promoci&oacute;n, desarrollo y difuci&oacute;n de los saberes y las culturas; la construcci&oacute;n de soluciones para los problemas del pa&iacute;s, en relaci&oacute;n con los objetivos del r&eacute;gimen de desarrollo\";</em></p>\n            <p>Que, el art&iacute;culo 17 de la Ley Org&aacute;nica de Educaci&oacute;n Superior establece lo siguiente sobre el Reconocimiento de la autonom&iacute;a responsable, <em>\"El Estado reconoce a las universidades y escuelas polit&eacute;cnicas autonom&iacute;a acad&eacute;mica, administrativa, financiera y org&aacute;nica, acorde con los principios establecidos en la Constituci&oacute;n de la Rep&uacute;blica. <br><br> En el ejercicio de autonom&iacute;a responsable, las universidades y escuelas polit&eacute;cnicas mantendr&aacute;n relaciones de reciprocidad y cooperaci&oacute;n entre ellas y de estas con el estado y la sociedad; adem&aacute;s observar&aacute;n los principios de justicia, equidad, solidaridad, participaci&oacute;n ciudadana, responsabilidad social y rendici&oacute;n de cuentas.\"</em></p>\n            <p>Que, el art&iacute;culo 115 de la Ley Org&aacute;nica de Educaci&oacute;n superior, indica lo siguiente <em>\"Son instituciones de educaci&oacute;n superior t&eacute;cnica tecnol&oacute;gica, los institutos superiores t&eacute;cnicos, tecnol&oacute;gicos, pedag&oacute;gicos, y de artes\".</em></p>\n            <p>Que, el art&iacute;culo 118 de la Ley Org&aacute;nica de Educaci&oacute;n Superior establece lo siguiente, literal a) <em>\"El tercer nivel t&eacute;cnico-tecnol&oacute;gico superior, orientado al desarrollo de las habilidades y destrezas relacionadas con la aplicaci&oacute;n, adaptaci&oacute;n e innovaci&oacute;n tecnol&oacute;gica en procesos relacionados con la producci&oacute;n de bienes servicios; corresponden a este nivel los t&iacute;tulos profesionales de t&eacute;cnico superior, tecn&oacute;logo superior o su equivalente y tecn&oacute;logo superior universitario o su equivalente (...)\"</em></p>\n            <p>Que, el art&iacute;culo 4 del Reglamento de las Instituciones de Educaci&oacute;n Superior de formaci&oacute;n T&eacute;cnica y Tecnol&oacute;gica la establece lo siguiente literal b) sobre los institutos superiores tecnol&oacute;gicos <em>\"Son instituciones de educaci&oacute;n superior dedicadas a la formaci&oacute;n acad&eacute;mica y orientadas a la aplicaci&oacute;n, coordinaci&oacute;n y adaptaci&oacute;n de t&eacute;cnicas especializadas y del dise&ntilde;o, ejecuci&oacute;n y evaluaci&oacute;n de funciones y procesos relacionados con la producci&oacute;n de bienes y servicios.\"</em></p>\n            {{ $json.considerandosHTML }}\n         </div>\n         <p>Que, en sesi&oacute;n {{ $json.tipo_reunion.toLowerCase() }} del {{ DateTime.fromISO($json.fecha_reunion).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}, el &Oacute;rgano Colegiado Superior del Instituto Superior Tecnol&oacute;gico Yaruqu&iacute; trat&oacute; la {{ $json.tema_reunion.json.topic }}. En base a la normativa expuesta y en ejercicio de las atribuciones conferidas por la Ley Org&aacute;nica de Educaci&oacute;n Superior y el Reglamento de las Instituciones de Educaci&oacute;n Superior de Formaci&oacute;n T&eacute;cnica y Tecnol&oacute;gica.</p>\n         <p style=\"text-align: center;\"><strong>RESUELVE</strong></p>\n         <p><strong>Art&iacute;culo 1.-</strong> {{ $json.tema_reunion.json.approved?\"\":\"No\" }} {{ $json.tema_reunion.json.topic }}</p>\n         {{ $json.subtemasHTML }}\n         {{ $json.area_a_notificar ? `<p><strong>Art&iacute;culo 2.-</strong> Notificar la presente resoluci&oacute;n a los miembros del ${$json.area_a_notificar}, para el cumplimiento responsable de sus funciones.</p>` : '' }}\n         <p>&nbsp;</p>\n         <p style=\"text-align: center;\"><strong>DISPOSICIONES FINALES</strong></p>\n         <p><strong>PRIMERA.-</strong> La presente resoluci&oacute;n entrar&aacute; en vigencia a partir de la fecha de suscripci&oacute;n de la misma.</p>\n         <p><strong>SEGUNDA.-</strong> Comun&iacute;quese y c&uacute;mplase.</p>\n         <p>Dado en la ciudad de Quito, el {{ DateTime.fromISO($json.fecha_reunion).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}, en la {{ $json.ordinal_number_session }} sesi&oacute;n extraordinaria del Organo Colegiado superior del Instituto Superior Tecnol&oacute;gico Yaruqu&iacute;.</p>\n         <p>&nbsp;</p>\n         <p>&nbsp;</p>\n         <p>Mgtr. Javier Hernando Harz&oacute;n Espinoza</p>\n         <p><strong>RECTOR</strong></p>\n         <p>En mi calidad de secretaria del &Oacute;rgano Colegiado superior del Instituto Superior Tecnol&oacute;gico Yaruqu&iacute;, CERTIFICO que la presente resoluci&oacute;n fue discutida y aprobada en sesi&oacute;n {{ $json.tipo_reunion }} Nro. {{ $json.cod_sesion }} desarrollada el {{ DateTime.fromISO($json.fecha_reunion).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}.&nbsp;</p>\n         <p>Lo certifico.-&nbsp;</p>\n         <p>&nbsp;</p>\n         <p>&nbsp;</p>\n         <p>Srta Camila Alexandra Pisu&ntilde;a Chizaiza</p>\n         <p><strong>SECRETARIA</strong></p>\n         <p><strong>&Oacute;RGANO COLEGIADO SUPERIOR</strong></p>\n      </div>\n   </body>\n</html>"
+        "html": "<!DOCTYPE html>\n<html>\n   <body style=\"text-align: justify\">\n      <div id=\"paguina\">\n         <p style=\"text-align: center;\"><strong>RESOLUCI&Oacute;N: {{ $json.tema_reunion.json.topic.resolution_code }}</strong></p>\n         <p style=\"text-align: center;\"><strong>EL &Oacute;RGANO COLEGIADO SUPERIOR DEL INSTITUTO SUPERIOR TECNOL&Oacute;GICO YARUQU&Iacute;</strong></p>\n         <p style=\"text-align: center;\">&nbsp;</p>\n         <p style=\"text-align: center;\"><strong>CONSIDERANDO</strong></p>\n         <div id=\"considerandos\" style=\"text-indent: -20px; padding-left: 20px\">\n            <p>Que, el art&iacute;culo 350 de la Constituci&oacute;n de la Rep&uacute;blica del Ecuador, establece que: <em>\"El sistema de Educaci&oacute;n Superior tiene como finalidad la formaci&oacute;n acad&eacute;mica y profesional con visi&oacute;n cient&iacute;fica y human&iacute;stica; la investigaci&oacute;n cient&iacute;fica y tecnol&oacute;gica; la innovaci&oacute;n, promoci&oacute;n, desarrollo y difuci&oacute;n de los saberes y las culturas; la construcci&oacute;n de soluciones para los problemas del pa&iacute;s, en relaci&oacute;n con los objetivos del r&eacute;gimen de desarrollo\";</em></p>\n            <p>Que, el art&iacute;culo 17 de la Ley Org&aacute;nica de Educaci&oacute;n Superior establece lo siguiente sobre el Reconocimiento de la autonom&iacute;a responsable, <em>\"El Estado reconoce a las universidades y escuelas polit&eacute;cnicas autonom&iacute;a acad&eacute;mica, administrativa, financiera y org&aacute;nica, acorde con los principios establecidos en la Constituci&oacute;n de la Rep&uacute;blica. <br><br> En el ejercicio de autonom&iacute;a responsable, las universidades y escuelas polit&eacute;cnicas mantendr&aacute;n relaciones de reciprocidad y cooperaci&oacute;n entre ellas y de estas con el estado y la sociedad; adem&aacute;s observar&aacute;n los principios de justicia, equidad, solidaridad, participaci&oacute;n ciudadana, responsabilidad social y rendici&oacute;n de cuentas.\"</em></p>\n            <p>Que, el art&iacute;culo 115 de la Ley Org&aacute;nica de Educaci&oacute;n superior, indica lo siguiente <em>\"Son instituciones de educaci&oacute;n superior t&eacute;cnica tecnol&oacute;gica, los institutos superiores t&eacute;cnicos, tecnol&oacute;gicos, pedag&oacute;gicos, y de artes\".</em></p>\n            <p>Que, el art&iacute;culo 118 de la Ley Org&aacute;nica de Educaci&oacute;n Superior establece lo siguiente, literal a) <em>\"El tercer nivel t&eacute;cnico-tecnol&oacute;gico superior, orientado al desarrollo de las habilidades y destrezas relacionadas con la aplicaci&oacute;n, adaptaci&oacute;n e innovaci&oacute;n tecnol&oacute;gica en procesos relacionados con la producci&oacute;n de bienes servicios; corresponden a este nivel los t&iacute;tulos profesionales de t&eacute;cnico superior, tecn&oacute;logo superior o su equivalente y tecn&oacute;logo superior universitario o su equivalente (...)\"</em></p>\n            <p>Que, el art&iacute;culo 4 del Reglamento de las Instituciones de Educaci&oacute;n Superior de formaci&oacute;n T&eacute;cnica y Tecnol&oacute;gica la establece lo siguiente literal b) sobre los institutos superiores tecnol&oacute;gicos <em>\"Son instituciones de educaci&oacute;n superior dedicadas a la formaci&oacute;n acad&eacute;mica y orientadas a la aplicaci&oacute;n, coordinaci&oacute;n y adaptaci&oacute;n de t&eacute;cnicas especializadas y del dise&ntilde;o, ejecuci&oacute;n y evaluaci&oacute;n de funciones y procesos relacionados con la producci&oacute;n de bienes y servicios.\"</em></p>\n            {{ $json.considerandosHTML }}\n         </div>\n         <p>Que, en sesi&oacute;n {{ $json.tipo_reunion.toLowerCase() }} del {{ DateTime.fromISO($json.fecha_reunion).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}, el &Oacute;rgano Colegiado Superior del Instituto Superior Tecnol&oacute;gico Yaruqu&iacute; trat&oacute; la {{ $json.tema_reunion.json.topic }}. En base a la normativa expuesta y en ejercicio de las atribuciones conferidas por la Ley Org&aacute;nica de Educaci&oacute;n Superior y el Reglamento de las Instituciones de Educaci&oacute;n Superior de Formaci&oacute;n T&eacute;cnica y Tecnol&oacute;gica.</p>\n         <p style=\"text-align: center;\"><strong>RESUELVE</strong></p>\n         <p><strong>Art&iacute;culo 1.-</strong>{{ $json.tema_reunion.json.topic.desition }} </p>\n         {{ $json.subtemasHTML }}\n{{ $json.tema_reunion.json.topic.notification && $json.tema_reunion.json.topic.notification !== \"\" ? '<p><strong>Art&iacute;culo 2.-</strong> ' + $json.tema_reunion.json.topic.notification + '</p>' : '' }}         <p>&nbsp;</p>\n         <p style=\"text-align: center;\"><strong>DISPOSICIONES FINALES</strong></p>\n         <p><strong>PRIMERA.-</strong> La presente resoluci&oacute;n entrar&aacute; en vigencia a partir de la fecha de suscripci&oacute;n de la misma.</p>\n         <p><strong>SEGUNDA.-</strong> Comun&iacute;quese y c&uacute;mplase.</p>\n         <p>Dado en la ciudad de Quito, el {{ DateTime.fromISO($json.fecha_reunion).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}, en la {{ $json.ordinal_number_session }} sesi&oacute;n extraordinaria del Organo Colegiado superior del Instituto Superior Tecnol&oacute;gico Yaruqu&iacute;.</p>\n         <p>&nbsp;</p>\n         <p>&nbsp;</p>\n         <p>Mgtr. Javier Hernando Harz&oacute;n Espinoza</p>\n         <p><strong>RECTOR</strong></p>\n         <p>En mi calidad de secretaria del &Oacute;rgano Colegiado superior del Instituto Superior Tecnol&oacute;gico Yaruqu&iacute;, CERTIFICO que la presente resoluci&oacute;n fue discutida y aprobada en sesi&oacute;n {{ $json.tipo_reunion }} Nro. {{ $json.cod_sesion }} desarrollada el {{ DateTime.fromISO($json.fecha_reunion).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}.&nbsp;</p>\n         <p>Lo certifico.-&nbsp;</p>\n         <p>&nbsp;</p>\n         <p>&nbsp;</p>\n         <p>Srta Camila Alexandra Pisu&ntilde;a Chizaiza</p>\n         <p><strong>SECRETARIA</strong></p>\n         <p><strong>&Oacute;RGANO COLEGIADO SUPERIOR</strong></p>\n      </div>\n   </body>\n</html>"
       },
       "type": "n8n-nodes-base.html",
       "typeVersion": 1.2,
       "position": [
-        0,
+        16,
         368
       ],
       "id": "fc6e257e-1aec-47cc-a276-f57d3d89068f",
@@ -167,7 +176,7 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        176,
+        208,
         368
       ],
       "id": "f80a4b6b-73f6-4409-87c4-ea2879b7516b",
@@ -176,12 +185,12 @@
     {
       "parameters": {
         "inputSource": "jsonExample",
-        "jsonExample": "{\n  \"tipo_reunion\": \"Ordinaria\",\n  \"fecha_reunion\": \"1996-12-12T12:00:00.0000000\",\n  \"cod_sesion\": \"OCS-SO-008-2025\",\n  \"tema_reunion\": {\n    \"json\": {\n      \"id\": \"mfmpyj9gxr5l03epzcm\",\n      \"topic\": \"Eliminacion de materias de vinculacion con la sociedad\",\n      \"sub_topics\": [],\n      \"resolution_code\": \"R-OCS-SO-013-Nro.123-2025\",\n      \"vote_count_object\": {\n        \"AF\": 1,\n        \"EC\": 1,\n        \"AB\": 0,\n        \"RECTOR_VOTE\": \"AF\"\n      },\n      \"votes\": [\n        {\n          \"id\": \"recPGuzvEh4j4LODg\",\n          \"createdTime\": \"2025-09-16T12:55:02.000Z\",\n          \"name\": \"Matthew Jaramillo\",\n          \"option\": \"En contra\",\n          \"topic\": \"Eliminacion de materias de vinculacion con la sociedad\",\n          \"table\": \"votos\",\n          \"id_topic\": \"mfmpyj9gxr5l03epzcm\",\n          \"role\": \"Representante de profesores\"\n        },\n        {\n          \"id\": \"recdYJ1oY3N15h1G5\",\n          \"createdTime\": \"2025-09-16T12:54:56.000Z\",\n          \"name\": \"Javier Garzón\",\n          \"option\": \"A favor\",\n          \"topic\": \"Eliminacion de materias de vinculacion con la sociedad\",\n          \"table\": \"votos\",\n          \"id_topic\": \"mfmpyj9gxr5l03epzcm\",\n          \"role\": \"NA\"\n        }\n      ],\n      \"approved\": false,\n      \"meeting_summary\": \"Lorem ipsum dolor sit amet consectetur adipiscing elit iaculis fringilla, urna fames ridiculus interdum fusce cubilia dictum hendrerit tempus magnis, euismod magna auctor imperdiet cursus pellentesque varius enim. Tristique lacus venenatis iaculis interdum lobortis semper libero, congue suspendisse pretium tempor scelerisque orci ultrices augue, convallis laoreet fringilla condimentum dui ut.\\n Ullamcorper vel tempor conubia ut metus lacus, diam mauris penatibus risus dapibus fringilla mollis, justo vitae volutpat vehicula dis.Erat aptent orci phasellus viverra ligula, justo sodales tristique sem, arcu varius felis molestie. Mollis neque ultrices hac nulla pellentesque est diam phasellus suspendisse justo eget platea, risus hendrerit elementum condimentum vitae a eu tellus nullam vestibulum porttitor tristique feugiat, volutpat consequat curabitur lobortis purus mauris nibh tempor mi ullamcorper duis. Natoque phasellus quis varius vitae accumsan donec et sed sodales luctus imperdiet magna nostra aliquet, ornare porttitor class eget himenaeos dapibus ac mauris inceptos orci egestas habitasse.\"\n    },\n    \"pairedItem\": {\n      \"item\": 0\n    }\n  },\n  \"considerandos\": [\n    \"Que, el Reglamento de Régimen Académico establece que la vinculación con la sociedad, como función sustantiva, genera capacidades e intercambio de conocimientos acorde a los dominios académicos de las IES para garantizar la construcción de respuestas efectivas a las necesidades y desafíos de su entorno.\",\n    \"Que, el Reglamento de Régimen Académico indica que la vinculación con la sociedad se articula con la función sustantiva de docencia, para la formación integral de los estudiantes, que complementan la teoría con la práctica en los procesos de enseñanza-aprendizaje, promoviendo espacios de experiencia vivencial y reflexión crítica.\",\n    \"Que, el Artículo 3, literal b) del Reglamento de Régimen Académico indica lo siguiente 'Articular y fortalecer la investigación; la formación académica y profesional; y la vinculación con la sociedad, en un marco de calidad, innovación y sostenibilidad que propenda al mejoramiento continuo;'\",\n    \"Que, el Artículo 43, literal b) del Reglamento de Régimen Académico indica lo siguiente 'Para las prácticas de servicio comunitario se deberá contar con un mínimo de sesenta horas;'\",\n    \"Que, el literal e) del Estatuto Isty establece el principio de Pertinencia, indicando que el Instituto Superior Tecnológico Yaruquí articulará su oferta académica, su programa de investigación y vinculación a las necesidades de desarrollo local, regional y nacional.\"\n  ]\n}"
+        "jsonExample": "{\n  \"tipo_reunion\": \"Ordinaria\",\n  \"fecha_reunion\": \"2025-09-24T13:00:00.0000000\",\n  \"cod_sesion\": \"OCS-SO-038-2025\",\n  \"tema_reunion\": {\n    \"json\": {\n      \"id_meeting\": \"e03dc9b9-f26f-4ff5-a0b6-7a464f908ed4\",\n      \"meeting_url\": \"https://teams.microsoft.com/l/meetup-join/19%3ameeting_YjFmOGRkMGItNmI4Ni00YmI3LTgyNjgtZjg2NmI1ZGNlNGRj%40thread.v2/0?context=%7b%22Tid%22%3a%229d91e1e7-5249-4205-8c19-8d1d9e333a60%22%2c%22Oid%22%3a%228cb570fb-7f11-4fc7-9acf-8c1f5c0d22fa%22%7d\",\n      \"meeting_datetime_ISO8631\": \"2025-09-24T13:00:00.0000000\",\n      \"convocation_date_ISO8631\": \"2025-09-22\",\n      \"meeting_type\": \"Ordinaria\",\n      \"session_code\": \"OCS-SO-038-2025\",\n      \"attendees\": [\n        {\n          \"name\": \"Andrés Tituana\",\n          \"mail\": \"alvaro.andres1996@hotmail.com\",\n          \"role\": \"Papá\",\n          \"id_assistant\": \"mfumbx9avyrqw3jqn3i\"\n        },\n        {\n          \"name\": \"Jennifer Tituana\",\n          \"mail\": \"carloswringo@gmail.com\",\n          \"role\": \"Hermana\",\n          \"id_assistant\": \"mfumbx9atwt1x8tbvjf\"\n        },\n        {\n          \"name\": \"Mister Wringo\",\n          \"mail\": \"mrwringo@hotmail.com\",\n          \"role\": \"Hermano\",\n          \"id_assistant\": \"mfumbx9avpefdvo2np\"\n        }\n      ],\n      \"attendances\": [\n        {\n          \"name\": \"Andrés Tituana\",\n          \"role\": \"Representante de Estudiantes\",\n          \"attendance\": \"\",\n          \"table\": \"asistencia\"\n        },\n        {\n          \"name\": \"Jennifer Tituana\",\n          \"role\": \"Miembro de la comisión de Etica\",\n          \"attendance\": \"\",\n          \"table\": \"asistencia\"\n        },\n        {\n          \"name\": \"Matthew Jaramillo\",\n          \"role\": \"Representante de profesores\",\n          \"attendance\": \"\",\n          \"table\": \"asistencia\"\n        }\n      ],\n      \"id_teams_meeting\": \"meeting_YjFmOGRkMGItNmI4Ni00YmI3LTgyNjgtZjg2NmI1ZGNlNGRj\",\n      \"number_sessions\": {\n        \"extraordinary_session_number\": 8,\n        \"ordinary_session_number\": 37,\n        \"resolution_number\": 193\n      },\n      \"number_sessions_updated\": {\n        \"resol_number\": 196,\n        \"ordinary_number_session\": 38,\n        \"exordinary_number_session\": 8\n      },\n      \"topic\": {\n        \"topic\": \"Aprobación de cambio de fecha en la ceremonia de graduación del Calendario Académico PAO 2025-I en base al oficio ISTY-VA-DEPC-056-2025.\",\n        \"sub_topics\": [],\n        \"id_topic\": \"mfumbx9bc8unb103lz\",\n        \"resolution_code\": \"R-OCS-SO-038-Nro.196-2025\",\n        \"vote_count_object\": {\n          \"AF\": 0,\n          \"EC\": 0,\n          \"AB\": 0,\n          \"RECTOR_VOTE\": null\n        },\n        \"votes\": [],\n        \"approved\": false,\n        \"meeting_summary\": \"Lorem ipsum dolor sit amet consectetur adipiscing elit iaculis fringilla, urna fames ridiculus interdum fusce cubilia dictum hendrerit tempus magnis, euismod magna auctor imperdiet cursus pellentesque varius enim. Tristique lacus venenatis iaculis interdum lobortis semper libero, congue suspendisse pretium tempor scelerisque orci ultrices augue, convallis laoreet fringilla condimentum dui ut.\\n Ullamcorper vel tempor conubia ut metus lacus, diam mauris penatibus risus dapibus fringilla mollis, justo vitae volutpat vehicula dis.Erat aptent orci phasellus viverra ligula, justo sodales tristique sem, arcu varius felis molestie. Mollis neque ultrices hac nulla pellentesque est diam phasellus suspendisse justo eget platea, risus hendrerit elementum condimentum vitae a eu tellus nullam vestibulum porttitor tristique feugiat, volutpat consequat curabitur lobortis purus mauris nibh tempor mi ullamcorper duis. Natoque phasellus quis varius vitae accumsan donec et sed sodales luctus imperdiet magna nostra aliquet, ornare porttitor class eget himenaeos dapibus ac mauris inceptos orci egestas habitasse.\"\n      }\n    },\n    \"pairedItem\": {\n      \"item\": 0\n    }\n  },\n  \"considerandos\": [\n    \"Que, el artículo 353 de la Constitución de la República del Ecuador indica lo siguiente 'El sistema de educación superior se regirá por: 1. Un organismo público de planificación, regulación y coordinación interna del sistema y de la relación entre sus distintos actores con la Función Ejecutiva (...)'\",\n    \"Que, el artículo 14 de la Ley Orgánica de Educación Superior (LOES) indica lo siguiente 'El sistema de educación superior estará integrado por universidades y escuelas politécnicas; institutos superiores técnicos, tecnológicos y pedagógicos; y conservatorios de música y artes, debidamente acreditados y evaluados. Estas instituciones, sean públicas o particulares, no tendrán fines de lucro.'\"\n  ]\n}"
       },
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -592,
+        -400,
         176
       ],
       "id": "99d99bcd-a76d-499b-beb6-a87222962ac9",
@@ -194,7 +203,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -176,
+        -160,
         368
       ],
       "id": "96c7f830-b85d-45d7-8867-3ef5102f90df",
@@ -206,55 +215,117 @@
       {
         "json": {
           "tipo_reunion": "Ordinaria",
-          "fecha_reunion": "1996-12-12T12:00:00.0000000",
-          "cod_sesion": "OCS-SO-008-2025",
+          "fecha_reunion": "2025-09-24T13:00:00.0000000",
+          "cod_sesion": "OCS-SO-038-2025",
           "tema_reunion": {
             "json": {
-              "id": "mfmpyj9gxr5l03epzcm",
-              "topic": "Eliminacion de materias de vinculacion con la sociedad",
-              "sub_topics": [],
-              "resolution_code": "R-OCS-SO-013-Nro.123-2025",
-              "vote_count_object": {
-                "AF": 1,
-                "EC": 1,
-                "AB": 0,
-                "RECTOR_VOTE": "AF"
-              },
-              "votes": [
+              "id_meeting": "d70873b1-71c3-496e-af88-d686662dec3f",
+              "meeting_url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_MThjZmZiN2YtZGIyZi00NzNjLWFhNWEtZWM2MGVjYjlkZDcw%40thread.v2/0?context=%7b%22Tid%22%3a%229d91e1e7-5249-4205-8c19-8d1d9e333a60%22%2c%22Oid%22%3a%228cb570fb-7f11-4fc7-9acf-8c1f5c0d22fa%22%7d",
+              "meeting_datetime_ISO8631": "2025-09-24T13:00:00.0000000",
+              "convocation_date_ISO8631": "2025-09-22",
+              "meeting_type": "Ordinaria",
+              "session_code": "OCS-SO-038-2025",
+              "attendees": [
                 {
-                  "id": "recPGuzvEh4j4LODg",
-                  "createdTime": "2025-09-16T12:55:02.000Z",
-                  "name": "Matthew Jaramillo",
-                  "option": "En contra",
-                  "topic": "Eliminacion de materias de vinculacion con la sociedad",
-                  "table": "votos",
-                  "id_topic": "mfmpyj9gxr5l03epzcm",
-                  "role": "Representante de profesores"
+                  "name": "Andrés Tituana",
+                  "mail": "alvaro.andres1996@hotmail.com",
+                  "role": "Papá",
+                  "id_assistant": "mfuvy9vk670gl5b1me8"
                 },
                 {
-                  "id": "recdYJ1oY3N15h1G5",
-                  "createdTime": "2025-09-16T12:54:56.000Z",
-                  "name": "Javier Garzón",
-                  "option": "A favor",
-                  "topic": "Eliminacion de materias de vinculacion con la sociedad",
-                  "table": "votos",
-                  "id_topic": "mfmpyj9gxr5l03epzcm",
-                  "role": "NA"
+                  "name": "Jennifer Tituana",
+                  "mail": "carloswringo@gmail.com",
+                  "role": "Hermana",
+                  "id_assistant": "mfuvy9vkw2fbl2jptsd"
+                },
+                {
+                  "name": "Mister Wringo",
+                  "mail": "mrwringo@hotmail.com",
+                  "role": "Hermano",
+                  "id_assistant": "mfuvy9vklwldkppht7l"
                 }
               ],
-              "approved": false,
-              "meeting_summary": "Lorem ipsum dolor sit amet consectetur adipiscing elit iaculis fringilla, urna fames ridiculus interdum fusce cubilia dictum hendrerit tempus magnis, euismod magna auctor imperdiet cursus pellentesque varius enim. Tristique lacus venenatis iaculis interdum lobortis semper libero, congue suspendisse pretium tempor scelerisque orci ultrices augue, convallis laoreet fringilla condimentum dui ut.\n Ullamcorper vel tempor conubia ut metus lacus, diam mauris penatibus risus dapibus fringilla mollis, justo vitae volutpat vehicula dis.Erat aptent orci phasellus viverra ligula, justo sodales tristique sem, arcu varius felis molestie. Mollis neque ultrices hac nulla pellentesque est diam phasellus suspendisse justo eget platea, risus hendrerit elementum condimentum vitae a eu tellus nullam vestibulum porttitor tristique feugiat, volutpat consequat curabitur lobortis purus mauris nibh tempor mi ullamcorper duis. Natoque phasellus quis varius vitae accumsan donec et sed sodales luctus imperdiet magna nostra aliquet, ornare porttitor class eget himenaeos dapibus ac mauris inceptos orci egestas habitasse."
+              "attendances": [
+                {
+                  "id_assistant": "mfuvy9vk670gl5b1me8",
+                  "name": "Andrés Tituana",
+                  "role": "Papá",
+                  "attendance": "x",
+                  "table": "asistencia"
+                },
+                {
+                  "id_assistant": "mfuvy9vkw2fbl2jptsd",
+                  "name": "Jennifer Tituana",
+                  "role": "Hermana",
+                  "attendance": "",
+                  "table": "asistencia"
+                },
+                {
+                  "id_assistant": "mfuvy9vklwldkppht7l",
+                  "name": "Mister Wringo",
+                  "role": "Hermano",
+                  "attendance": "x",
+                  "table": "asistencia"
+                }
+              ],
+              "id_teams_meeting": "meeting_MThjZmZiN2YtZGIyZi00NzNjLWFhNWEtZWM2MGVjYjlkZDcw",
+              "number_sessions": {
+                "id": 1,
+                "extraordinary_session_number": 8,
+                "ordinary_session_number": 37,
+                "resolution_number": 118
+              },
+              "number_sessions_updated": {
+                "resol_number": 123,
+                "ordinary_number_session": 38,
+                "exordinary_number_session": 8
+              },
+              "topic": {
+                "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
+                "sub_topics": [
+                  "Msc. Alfredo Armando Rodríquez Guzman, representante del Rector, como presidente del comité.",
+                  "Adm. Carlos Eduardo Esterlla Carrera, docente de la carrera de Gastronomía en calidad de delegado del personal docente."
+                ],
+                "id_topic": "mfuvy9vk8eo9hagjtrv",
+                "resolution_code": "R-OCS-SO-038-Nro.119-2025",
+                "vote_count_object": {
+                  "AF": 0,
+                  "EC": 1,
+                  "AB": 1,
+                  "RECTOR_VOTE": null
+                },
+                "votes": [
+                  {
+                    "name": "Andrés Tituana",
+                    "id_topic": "mfuvy9vk8eo9hagjtrv",
+                    "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
+                    "option": "en contra",
+                    "table": "votos",
+                    "role": "Papá"
+                  },
+                  {
+                    "name": "Mister Wringo",
+                    "id_topic": "mfuvy9vk8eo9hagjtrv",
+                    "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
+                    "table": "votos",
+                    "opcion": "Abstencion",
+                    "role": "Hermano"
+                  }
+                ],
+                "approved": false,
+                "notification": "Notificar al área de talento Humano para su posterior procesamiento",
+                "meeting_summary": "Se trató la aprobación de la designación de los miembros del comité de ética del Instituto Superior Tecnológico Yaruquí. Durante la sesión, se presentaron los perfiles de los candidatos propuestos y, tras una deliberación sobre su idoneidad y experiencia, los asistentes votaron a favor, quedando el comité conformado de manera oficial para iniciar sus funciones.",
+                "reformulacion": "Aprobación de la designación de los miembros del comité de ética del Instituto Superior Tecnológico Yaruquí.",
+                "desition": "Aprobar la designación de los miembros del comité de ética del Instituto Superior Tecnológico Yaruquí."
+              }
             },
             "pairedItem": {
               "item": 0
             }
           },
           "considerandos": [
-            "Que, el Reglamento de Régimen Académico establece que la vinculación con la sociedad, como función sustantiva, genera capacidades e intercambio de conocimientos acorde a los dominios académicos de las IES para garantizar la construcción de respuestas efectivas a las necesidades y desafíos de su entorno.",
-            "Que, el Reglamento de Régimen Académico indica que la vinculación con la sociedad se articula con la función sustantiva de docencia, para la formación integral de los estudiantes, que complementan la teoría con la práctica en los procesos de enseñanza-aprendizaje, promoviendo espacios de experiencia vivencial y reflexión crítica.",
-            "Que, el Artículo 3, literal b) del Reglamento de Régimen Académico indica lo siguiente 'Articular y fortalecer la investigación; la formación académica y profesional; y la vinculación con la sociedad, en un marco de calidad, innovación y sostenibilidad que propenda al mejoramiento continuo;'",
-            "Que, el Artículo 43, literal b) del Reglamento de Régimen Académico indica lo siguiente 'Para las prácticas de servicio comunitario se deberá contar con un mínimo de sesenta horas;'",
-            "Que, el literal e) del Estatuto Isty establece el principio de Pertinencia, indicando que el Instituto Superior Tecnológico Yaruquí articulará su oferta académica, su programa de investigación y vinculación a las necesidades de desarrollo local, regional y nacional."
+            "Que, el artículo 353 de la Constitución de la República del Ecuador indica lo siguiente 'El sistema de educación superior se regirá por: 1. Un organismo público de planificación, regulación y coordinación interna del sistema y de la relación entre sus distintos actores con la Función Ejecutiva (...)'",
+            "Que, el artículo 14 de la Ley Orgánica de Educación Superior (LOES) indica lo siguiente 'El sistema de educación superior estará integrado por universidades y escuelas politécnicas; institutos superiores técnicos, tecnológicos y pedagógicos; y conservatorios de música y artes, debidamente acreditados y evaluados. Estas instituciones, sean públicas o particulares, no tendrán fines de lucro.'"
           ]
         }
       }
@@ -375,7 +446,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "a368dae6-65fb-4ae9-8d52-18cbfe25fe64",
+  "versionId": "4e0b55c3-c179-4e0d-be3e-6f772cbdcc16",
   "meta": {
     "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"
   },

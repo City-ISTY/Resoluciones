@@ -2,6 +2,7 @@
 Library    SeleniumLibrary
 Library    OperatingSystem
 Library    RequestsLibrary
+Variables   ./env_loader.py
 
 *** Variables ***
 ${SUPABASE_URL}    https://uxikkcrsgpojdywpljwa.supabase.co
@@ -56,44 +57,44 @@ DESCARGAR TRANSCRIPCION
     ${locator}=    Set Variable    xpath=//button[@data-tid='joinOnWeb']
     ${elemento}=    Get Web Element    ${locator}
     # Espera a que el botón esté visible y listo para ser clickeado
-    Wait Until Element Is Visible    ${locator}    timeout=30s
-    Wait Until Element Is Enabled    ${locator}    timeout=30s
+    Wait Until Element Is Visible    ${locator}    timeout=120s
+    Wait Until Element Is Enabled    ${locator}    timeout=120s
     Execute Javascript    arguments[0].click();    ARGUMENTS    ${elemento}
     #Log To Console      Página de inicio de sesión cargada correctamente.
     # Ingresar credenciales 
-    Wait Until Element Is Visible    id=i0116    timeout=30s
-    Wait Until Element Is Enabled    id=i0116    timeout=30s
-    Input Text    id=i0116    andres.tituana@isty.edu.ec
+    Wait Until Element Is Visible    id=i0116    timeout=120s
+    Wait Until Element Is Enabled    id=i0116    timeout=120s
+    Input Text    id=i0116    ${ISTY_USERNAME}
     #Log To Console    ✅ CORREO COLOCADO correctamente
 
-    Wait Until Element Is Visible    id=idSIButton9    timeout=30s
-    Wait Until Element Is Enabled    id=idSIButton9    timeout=30s
+    Wait Until Element Is Visible    id=idSIButton9    timeout=120s
+    Wait Until Element Is Enabled    id=idSIButton9    timeout=120s
     Click Element    id=idSIButton9
     #Log To Console    ✅ bOTON INICIAR SESION clickeado correctamente
 
 
     # Esperar y completar contraseña
-    Wait Until Element Is Visible    id=i0118    timeout=30s
-    Wait Until Element Is Enabled    id=i0118    timeout=30s
-    Input Text    id=i0118    Aez@kmiqwa123
+    Wait Until Element Is Visible    id=i0118    timeout=120s
+    Wait Until Element Is Enabled    id=i0118    timeout=120s
+    Input Text    id=i0118    ${ISTY_PASSWORD}
     #Log To Console    ✅ contrasenia aniadida correctamente
 
-    Wait Until Element Is Visible    id=idSIButton9    timeout=30s
-    Wait Until Element Is Enabled    id=idSIButton9    timeout=30s
+    Wait Until Element Is Visible    id=idSIButton9    timeout=120s
+    Wait Until Element Is Enabled    id=idSIButton9    timeout=120s
     Click Element    id=idSIButton9
     #Log To Console    ✅ BOTON iniciar  clickeado correctamente
 
     # Manejar "¿Quieres mantener la sesión iniciada?"
-    Wait Until Element Is Visible    id=idSIButton9    timeout=30s
-    Wait Until Element Is Enabled    id=idSIButton9    timeout=30s
+    Wait Until Element Is Visible    id=idSIButton9    timeout=120s
+    Wait Until Element Is Enabled    id=idSIButton9    timeout=120s
     Click Element    id=idSIButton9
     #Log To Console    ✅ Botón ¿Quieres mantener la sesión iniciada? clickeado correctamente
 
 # Esperar a que el botón esté disponible
     #${locator}=    Set Variable    xpath=//button[@aria-label='Transcript']
     ${locator}=    Set Variable    css:button.artifactsButtonContainer span.fui-Text
-    Wait Until Element Is Visible    ${locator}    timeout=30s
-    Wait Until Element Is Enabled    ${locator}    timeout=30s
+    Wait Until Element Is Visible    ${locator}    timeout=120s
+    Wait Until Element Is Enabled    ${locator}    timeout=120s
     # Hacer clic en el botón
     Click Element    ${locator}
     #Log To Console    ✅ Botón Transcript clickeado correctamente
@@ -102,8 +103,8 @@ DESCARGAR TRANSCRIPCION
 
 # Esperar a que el botón esté disponible
     ${locator}=    Set Variable    id=downloadTranscript
-    Wait Until Element Is Visible    ${locator}    timeout=30s
-    Wait Until Element Is Enabled    ${locator}    timeout=30s
+    Wait Until Element Is Visible    ${locator}    timeout=120s
+    Wait Until Element Is Enabled    ${locator}    timeout=120s
     
     # Hacer clic en el botón
     Click Element    ${locator}
@@ -112,13 +113,13 @@ DESCARGAR TRANSCRIPCION
 
 # Esperar a que el botón esté disponible
     ${locator}=    Set Variable    id=downloadAsVtt
-    Wait Until Element Is Visible    ${locator}    timeout=30s
-    Wait Until Element Is Enabled    ${locator}    timeout=30s
+    Wait Until Element Is Visible    ${locator}    timeout=120s
+    Wait Until Element Is Enabled    ${locator}    timeout=120s
     
     # Hacer clic en el botón
     Click Element    ${locator}
     #Log To Console    ✅ Botón tovvt clickeado correctamente
-    Wait Until Keyword Succeeds    30s    2s    La Carpeta De Descargas Debería Contener Un Archivo VTT
+    Wait Until Keyword Succeeds    120s    2s    La Carpeta De Descargas Debería Contener Un Archivo VTT
     #Log To Console    ✅ ¡Archivo .vtt descargado con éxito!
     Close Browser
 

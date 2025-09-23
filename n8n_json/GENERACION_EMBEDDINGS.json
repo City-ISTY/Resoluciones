@@ -10,7 +10,14 @@
             }
           ]
         },
-        "simple": false
+        "simple": false,
+        "watchFolder": true,
+        "folderId": {
+          "__rl": true,
+          "value": "01ZX2MQXPX3EFJBW4PLBCKEUF7GCGHRL3D",
+          "mode": "id"
+        },
+        "options": {}
       },
       "type": "n8n-nodes-base.microsoftOneDriveTrigger",
       "typeVersion": 1,
@@ -52,28 +59,10 @@
     },
     {
       "parameters": {
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
-      "typeVersion": 1,
-      "position": [
-        1728,
-        112
-      ],
-      "id": "a46a1c49-9f7d-41f0-bf9a-eaea1068bdb0",
-      "name": "DeepSeek Chat Model",
-      "credentials": {
-        "deepSeekApi": {
-          "id": "3UFgNLDytpRNxPz0",
-          "name": "DeepSeek account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "promptType": "define",
         "text": "=ACTÚA COMO UN REFINADOR Y ESTRACTOR DE TEXTO\nNecesito que hagas dos cosas\nContexto: Se te proporcionará un texto extraído de una página de un documento normativo mediante OCR. Este texto puede contener el inicio de un nuevo artículo, el final de un artículo de la página anterior, o una combinación de ambos.\n\n# TAREA PRINCIPAL\nTu objetivo es analizar el texto, identificar y extraer los artículos o fragmentos de artículos, corregir errores de OCR y ortografía, y devolver la información en un formato JSON estructurado.\n\n# LÓGICA DE EXTRACCIÓN Y REGLAS\nSigue estas reglas en orden estricto:\n1.  **IDENTIFICAR EL FRAGMENTO INICIAL:** Barre el texto desde el principio. Todo el contenido que aparezca ANTES del primer marcador de artículo (como \"Art. 14\", \"Articulo 15\", etc.) debe ser considerado como un único bloque cohesivo. Este bloque es la continuación de un artículo de la página anterior. Agrupa todo este contenido inicial en un solo objeto JSON.\n    * En este objeto, los campos `numero` y `titulo` deben estar vacíos (`\"\"`).\n    * Todo el texto de este bloque debe ir dentro del campo `norma`.\n2.  **EXTRAER ARTÍCULOS COMPLETOS:** A partir del primer marcador de artículo encontrado, cada nuevo bloque que comience con un patrón como \"Art. #\", \"Articulo #\", etc., debe ser extraído como un objeto JSON individual.\n    * Identifica y extrae el `numero` del artículo.\n    * Identifica y extrae el `titulo`, que es la frase corta que sigue al número del artículo, y que termina justo antes del comienzo de la descripción principal de la norma. La estructura suele ser: Art [Número] [Separador]  [Título del artículo] [Separador] [Inicio del cuerpo de la norma].\n    * El resto del texto del artículo conformará la `norma`.\n3. EXTRAER DISPOSICIONES: Busca en el texto fragmentos numerados con ordinales en formato de texto (ej. PRIMERA, SEGUNDA, TERCERA).\n    *Para estos casos vas a asignar asi los campos.\n    El campo numero será el ordinal en texto (ej. \"PRIMERA\").\n    El campo titulo vas a poner \"DISPOSICIONES\"\n    El campo norma será el texto completo que sigue al número ordinal.\n4. EXTRAER CONSIDERANDOS: Los considerandos siempre inician con la palabra \"Que\", y luego hacen referencia a algun artículo, ten cuidado, ya que esto no es un artículo en sí. para estos vas a colocar en el campo `titulo` la palabra \"CONSIDERANDO\"\n4.  **CASO SIN ARTÍCULOS:** Si el texto proporcionado NO CONTIENE ningún marcador de artículo en absoluto, trata todo el texto como un único fragmento. En este caso, crea un solo objeto JSON donde todo el contenido esté en el campo `norma`, y los campos `numero` y `titulo` estén vacíos.\n5.  **CORRECCIÓN Y LIMPIEZA:** Durante la extracción, corrige errores evidentes de ortografía y OCR (ej. \"ArL\" por \"Art.\", \"proclamaci6n\" por \"proclamación\") y elimina saltos de línea, encabezados y pies de páguina. NO cambies el sentido original del texto.\n\nSALIDA: \nVas a devolver un array donde vas a encontrar cada artículo encontrado\n\n[\n    {\n        \"numero\": \"1\",\n        \"titulo\": \"El título que siempre viene luego del identificador de artículo (Articulo n)\",\n        \"norma\": \"El texto corregido y completo del artículo.\"\n    }\n]\n\n\nTEXTO A ANALIZAR: \n{{ $json.text }}",
         "hasOutputParser": true,
+        "needsFallback": true,
         "batching": {
           "batchSize": 20
         }
@@ -96,7 +85,7 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        1872,
+        1952,
         112
       ],
       "id": "fcf9a5cb-e60e-4e0d-bef9-eb4f669beeac",
@@ -321,7 +310,8 @@
         "sortFieldsUi": {
           "sortField": [
             {
-              "fieldName": "lastModifiedDateTime"
+              "fieldName": "lastModifiedDateTime",
+              "order": "=ascending"
             }
           ]
         },
@@ -547,6 +537,66 @@
       ],
       "id": "4cb521de-f201-442d-80b8-d81bfd984db7",
       "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/me/drive/root/children",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        112,
+        -224
+      ],
+      "id": "cbfca825-9f0b-4422-8d04-ffd27bfe2817",
+      "name": "VER_CARPETAS",
+      "credentials": {
+        "microsoftOAuth2Api": {
+          "id": "Y5GP57FlaZyiBK8B",
+          "name": "Microsoft account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1728,
+        128
+      ],
+      "id": "7f92853e-0fb8-441a-875f-4b8456745441",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0Zr2gDUeSEg2Xe6E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        128
+      ],
+      "id": "c3542080-13e6-45bd-a7ff-3d043526b9b8",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0Zr2gDUeSEg2Xe6E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -573,17 +623,6 @@
           {
             "node": "HTTP Request",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "DeepSeek Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Basic LLM Chain",
-            "type": "ai_languageModel",
             "index": 0
           }
         ]
@@ -838,13 +877,35 @@
           }
         ]
       ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "38503f5e-9f61-4b20-98e5-354b46e503a8",
+  "versionId": "54c35b26-5a71-4aea-8c60-5b63a025df60",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"

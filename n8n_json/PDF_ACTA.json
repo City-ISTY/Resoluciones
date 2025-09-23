@@ -67,6 +67,15 @@
       "parameters": {
         "method": "POST",
         "url": "http://gotenberg:3000/forms/chromium/convert/html",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Gotenberg-Output-Filename",
+              "value": "={{ $('start').item.json.session_code }}"
+            }
+          ]
+        },
         "sendBody": true,
         "contentType": "multipart-form-data",
         "bodyParameters": {
@@ -573,7 +582,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "cce3350b-b37d-408b-b087-a1282eda8eb1",
+  "versionId": "4c56f0e7-95a8-43d2-b13f-2163baca61aa",
   "meta": {
     "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"
   },

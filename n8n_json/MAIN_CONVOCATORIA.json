@@ -30,11 +30,17 @@
       ],
       "id": "334e8ef4-8ee0-408e-9130-8bec51aa6d73",
       "name": "Microsoft Outlook Trigger",
-      "alwaysOutputData": false
+      "alwaysOutputData": false,
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "aa1g0ggoDcXs6rTB",
+          "name": "Microsoft Outlook account"
+        }
+      }
     },
     {
       "parameters": {
-        "toRecipients": "={{ $('Microsoft Outlook Trigger').item.json.from.emailAddress.address }}",
+        "toRecipients": "={{ $('Microsoft Outlook Trigger').first().json.from.emailAddress.address }}",
         "subject": "=Revisión de Convocatoria - {{ $json.uuid }}",
         "bodyContent": "=Buenos días, se necesita su autorización para el agendamiento de la Convocatoria.\n\n-----PARÁMETROS PROPUESTOS-----\n{{ $json.message.replace(/^[\\r\\n]+|[\\r\\n]+$/g, '') }}\n----------\n\nPOR FAVOR RESPONDER:\n- Para continuar: Responda con \"APROBADO\" en el cuerpo del mensaje (No cambiar el asunto)\n- Para realizar nuevos cambios, indicar el punto a cambiar, y el cambio que solicita.\n \nEn caso de haber más cambios, le contestaré en un minuto para que se verifique nuevamente.\n\nMuchas gracias y que tenga una buena tarde.\nAtte. Bruno ",
         "additionalFields": {}
@@ -48,7 +54,13 @@
       "id": "5b6573b5-c3d0-4521-b2e3-e2fc3813c2d6",
       "name": "Send a message",
       "webhookId": "ace6381b-ed18-445b-bc12-f00450c6438d",
-      "alwaysOutputData": false
+      "alwaysOutputData": false,
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "aa1g0ggoDcXs6rTB",
+          "name": "Microsoft Outlook account"
+        }
+      }
     },
     {
       "parameters": {
@@ -89,7 +101,7 @@
         "operation": "reply",
         "messageId": {
           "__rl": true,
-          "value": "={{ $('ExtractLastMailResponse').item.json.id }}",
+          "value": "={{ $('ExtractLastMailResponse').first().json.id }}",
           "mode": "id"
         },
         "message": "=<div>\nListo, por favor verificar que los cambios se hayan realizado correctamente\n<br>\n-----PARÁMETROS PROPUESTOS-----<br>\n{{ $json.acta }}<br>\n----------\n<br><br>\nPOR FAVOR RESPONDER:\n<br>\n- Para continuar: Responda con \"APROBADO\" en el cuerpo del mensaje (No cambiar el asunto)<br>\n- Para realizar nuevos cambios, indicar el punto a cambiar, y el cambio que solicita.<br>\nEn caso de haber más cambios, le contestaré en 30 segundos para que se verifique nuevamente.<br>\nMuchas gracias y que tenga una buena tarde.<br>\nAtte. Bruno \n</div>",
@@ -103,11 +115,17 @@
       ],
       "id": "22e4e2cb-a677-42bd-b725-527abc5feabd",
       "name": "Reply to a message",
-      "webhookId": "425d96da-f199-4725-b573-3bfdbd624f35"
+      "webhookId": "425d96da-f199-4725-b573-3bfdbd624f35",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "aa1g0ggoDcXs6rTB",
+          "name": "Microsoft Outlook account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "// Ordenar todos los mensajes por fecha (más reciente primero)\nconst sortedMessages = $input.all().sort((a, b) => {\n    const dateA = new Date(a.json.sentDateTime).getTime();\n    const dateB = new Date(b.json.sentDateTime).getTime();\n    return dateB - dateA;\n});\n\nif (sortedMessages.length === 0 || \n    (sortedMessages.length === 1 && Object.keys(sortedMessages[0].json).length === 0)) {\n    return [{\"finded\": false}];\n}else if(sortedMessages[0].json.from.emailAddress.address === \"andres.tituana@isty.edu.ec\"){\n  return [{\"finded\": false}];\n}\n\nsortedMessages[0].json.finded = true;\nreturn sortedMessages[0];\n\n"
+        "jsCode": "// Ordenar todos los mensajes por fecha (más reciente primero)\nconst sortedMessages = $input.all().sort((a, b) => {\n    const dateA = new Date(a.json.sentDateTime).getTime();\n    const dateB = new Date(b.json.sentDateTime).getTime();\n    return dateB - dateA;\n});\n\nif (sortedMessages.length === 0 || \n    (sortedMessages.length === 1 && Object.keys(sortedMessages[0].json).length === 0)) {\n    return [{\"finded\": false}];\n}else if(sortedMessages[0].json.from.emailAddress.address === \"city@isty.edu.ec\"){\n  return [{\"finded\": false}];\n}\n\nsortedMessages[0].json.finded = true;\nreturn sortedMessages[0];\n\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -137,7 +155,7 @@
         "filtersUI": {
           "values": {
             "filterBy": "search",
-            "search": "=UUID_TEST01"
+            "search": "={{ $('createUUID').first().json.uuid }}"
           }
         },
         "options": {}
@@ -156,6 +174,12 @@
       "waitBetweenTries": 1,
       "notesInFlow": false,
       "alwaysOutputData": true,
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "aa1g0ggoDcXs6rTB",
+          "name": "Microsoft Outlook account"
+        }
+      },
       "notes": "Error sfdasdfasd"
     },
     {
@@ -171,36 +195,6 @@
       "id": "142a9890-55f9-49d5-9ce4-b97847e9e58b",
       "name": "Wait",
       "webhookId": "370dc68f-704b-4296-bc9c-118522873b2c"
-    },
-    {
-      "parameters": {
-        "modelId": {
-          "__rl": true,
-          "value": "models/gemini-2.5-pro",
-          "mode": "list",
-          "cachedResultName": "models/gemini-2.5-pro"
-        },
-        "messages": {
-          "values": [
-            {
-              "content": "Eres un sistema especializado en formateo y extracción de datos, se te da la entrada, y únicamente devuelves la información extraida de acuerdo al usuario.",
-              "role": "model"
-            },
-            {
-              "content": "=Tu tarea va a ser la de extraer la información en un determinado formato, para ello tu vas a recibir un mensaje crudo que son los datos para agendar una reunión.\nEl mensaje consta de la siguiente estructura: \n1. Fecha: La fecha y hora de la reunión\n2. Tipo: Ordinaria/Extraordinaria\n3. Asistentes: Las personas que participan en la reunión, se va a ir mostrando 3.1, 3.2, con forme el numero de personas.\n4. Temas a resolver: Un listado estructurado de temas.\n\nREALIZAR: \n1. En el punto 1, CONVIERTE la fecha a formato  ISO 8601 <AAAA-MM-DDTHH:MM>, si en ese punto no existe ninguna hora, coloca 12:00 por defecto\n2. Verifica los nombres de personas, deberan tener la primera letra mayuscula.\n3. Asegúrate que en el punto \"asistentes\", la estructura sea: nombre - correo - (campo opcional)\n4. Unicamente haz los ajustes necesarios, no cambies la estructura, ni la numeración, devuelve el texto sin formato.\nel texto es el siguiente \n5. PARSEA CUALQUIER SEPARADOR DE ÍNDICES (espacios, puntos, guiones, etc.) Y ESTANDARÍZALOS AL PIPE \"|\". \n  TOMA CUALQUIER FORMATO DE INDICE, POR EJEMPLO:\n  - \"n Texto\"\n  - \"n - Texto\" \n  - \"n: Texto\"\n  - \"n* Texto\"\n  Y CONVIÉRTELO A:\n  - \"n| Texto\"\nEso hazlo para absolutamente todos los indices.\n\n---TEXTO A ANALIZAR---\n {{ $json.previous_act_formatted }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.googleGemini",
-      "typeVersion": 1,
-      "position": [
-        0,
-        0
-      ],
-      "id": "de7650da-6b9f-4fbb-8a88-22d92aa3c915",
-      "name": "Formatea Datos"
     },
     {
       "parameters": {
@@ -230,11 +224,17 @@
         400
       ],
       "id": "1170d867-fdd7-4a27-8676-5a562552f7ed",
-      "name": "Realizar Cambios"
+      "name": "Realizar Cambios",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0Zr2gDUeSEg2Xe6E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "\n// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfunction convertirTextoAObjeto(textoEstructurado) {\n\n  // 1. Inicialización del objeto resultado\n  const resultado = {\n    fecha: \"\",\n    tipo: \"\",\n    asistentes: [],\n    temas: []\n  };\n\n  // 2. Procesamiento del texto: dividirlo en líneas\n  const lineas = textoEstructurado.split('\\n').map(str => str.trim());\n\n  // 3. Iteración sobre cada línea\n  lineas.forEach(linea => {\n    // Separar el índice del contenido\n    const partes = linea.split('|');\n    if (partes.length < 2) return; // Ignorar líneas sin el separador \"|\"\n\n    const indiceStr = partes[0].trim();\n    const contenido = partes[1].trim();\n    const niveles = indiceStr.split('.'); // Separar los niveles del índice\n\n    // 4. Lógica de asignación según el primer nivel del índice\n    switch (niveles[0]) {\n      case '1':\n        // Asigna la fecha, eliminando el texto descriptivo\n        resultado.fecha = contenido.replace('Fecha: ', '');\n        break;\n      case '2':\n        // Asigna el tipo, eliminando el texto descriptivo\n        resultado.tipo = contenido.replace('Tipo: ', '');\n        break;\n      case '3':\n        // Si es un subnivel (ej: 3.1), es un asistente\n        if (niveles.length > 1) {\n          const [nombre, email, cargo] = contenido.split('-').map(s => s.trim());\n          resultado.asistentes.push({\n            name: nombre,\n            mail: email,\n            role: cargo\n          });\n        }\n        break;\n      case '4':\n        // Si tiene 2 niveles (ej: 4.1), es un tema principal\n        if (niveles.length === 2) {\n          resultado.temas.push({\n            topic: contenido,\n            sub_topics: [] // Preparamos un array para posibles sub_topics\n          });\n        }\n        // Si tiene 3 niveles (ej: 4.1.1), es un subtema del último tema agregado\n        else if (niveles.length === 3) {\n          // Obtenemos el último tema agregado para añadirle el subtema\n          const temaPadre = resultado.temas[resultado.temas.length - 1];\n          if (temaPadre) {\n            temaPadre.sub_topics.push(contenido);\n          }\n        }\n        break;\n    }\n  });\n\n  //Solo por ahora, como la reunion dura 2 horas en teoria se los voy a poner\n    console.log(resultado.fecha)\n  const fechaInicio = new Date(resultado.fecha);\n  console.log(fechaInicio)\n  const fechaFin = new Date(fechaInicio);\n\n\n  fechaFin.setHours(fechaInicio.getHours() + 2);\n  resultado.fechaFin = fechaFin.toISOString().slice(0, 16);\n  \n\n  const number_session = resultado.tipo.toLowerCase() == \"ordinaria\" ? \n    ('00' + (Number($input.first().json.ordinary_session_number)+1)).slice(-3) : \n    ('00' + (Number($input.first().json.extraordinary_session_number)+1)).slice(-3)\n  \n  //if \n  resultado.session_code = `OCS-S${resultado.tipo.toLowerCase() == \"ordinaria\" ? \"O\" : \"E\"}-${number_session}-${$today.toString().substring(0, 4)}`\n  \n  return resultado;\n}\noutput_data = convertirTextoAObjeto($('Formatea Datos').first().json.content.parts[0].text)\nconsole.log(output_data)\n\noutput_data.body = output_data.body || {};\noutput_data.body.isOnlineMeeting = true\noutput_data.body.onlineMeetingProvider = \"teamsForBusiness\"\noutput_data.body.subject = `Sesion ${output_data.tipo} ${output_data.session_code}`\noutput_data.body.start = {\n    \"dateTime\": output_data.fecha,\n    \"timeZone\": \"America/Guayaquil\"\n}\noutput_data.body.end = {\n    \"dateTime\": output_data.fechaFin,\n    \"timeZone\": \"America/Guayaquil\"\n}\noutput_data.body.attendees = output_data.asistentes.map((at)=>{\n  return({ \"emailAddress\": {\"address\": at.mail, \"name\": at.name}, \n  \"type\": \"optional\"})\n})\n\n\nreturn [{ \"output\": output_data }];\n"
+        "jsCode": "const output_data = $('Information Extractor').first().json.output\n\nconst teamsDataMeeting = {}\n\nteamsDataMeeting.isOnlineMeeting = true\nteamsDataMeeting.onlineMeetingProvider = \"teamsForBusiness\"\n\n\n\n\nconst fechaInicio = new Date(output_data.fecha);\nif (fechaInicio.getMinutes() === 0) {\n    fechaInicio.setHours(13, 0, 0, 0);\n}\n\nconst fechaFin = new Date(fechaInicio);\nfechaFin.setHours(fechaInicio.getHours() + 2);\n\n\nteamsDataMeeting.start = {\n    \"dateTime\": fechaInicio,\n    \"timeZone\": \"America/Guayaquil\"\n}\n\nteamsDataMeeting.end = {\n    \"dateTime\": fechaFin,\n    \"timeZone\": \"America/Guayaquil\"\n}\nteamsDataMeeting.attendees = output_data.asistentes.map((at)=>{\n  return({ \"emailAddress\": {\"address\": at.mail, \"name\": at.name}, \n  \"type\": \"optional\"})\n})\n\noutput_data.body =teamsDataMeeting\n\n\n\n\n\nconst number_session = output_data.tipo.toLowerCase() == \"ordinaria\" ? \n    ('00' + (Number($input.first().json.ordinary_session_number)+1)).slice(-3) : \n    ('00' + (Number($input.first().json.extraordinary_session_number)+1)).slice(-3)\n  \n  //if \n  output_data.session_code = `OCS-S${output_data.tipo.toLowerCase() == \"ordinaria\" ? \"O\" : \"E\"}-${number_session}-${$today.toString().substring(0, 4)}`\n\nteamsDataMeeting.subject = `Sesion ${output_data.tipo} ${output_data.session_code}`\n\n\nreturn [{ \"output\": output_data }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -244,31 +244,6 @@
       ],
       "id": "fc4be84e-822b-415e-98ad-ea6cca4fc31f",
       "name": "formatDataForMeeting"
-    },
-    {
-      "parameters": {
-        "toRecipients": "={{ $('formatDataForMeeting').item.json.output.asistentes.map(asistente => asistente.mail).join(', ') }}",
-        "subject": "Convocatoria Sessión",
-        "bodyContent": "Buen día, se solicita su presencia en la sesión, por favor remitir el documento firmado.",
-        "additionalFields": {
-          "attachments": {
-            "attachments": [
-              {
-                "binaryPropertyName": "data"
-              }
-            ]
-          }
-        }
-      },
-      "type": "n8n-nodes-base.microsoftOutlook",
-      "typeVersion": 2,
-      "position": [
-        1056,
-        128
-      ],
-      "id": "397f7fbd-67d2-40bf-b4e9-06782cc1170c",
-      "name": "sendDocument",
-      "webhookId": "2e2dc7da-ecfe-405f-81dd-051e53bdc105"
     },
     {
       "parameters": {
@@ -361,7 +336,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -400,
+        -416,
         144
       ],
       "id": "0ba98d9b-04db-4a7c-8c5f-7f0ba957f25b",
@@ -391,7 +366,7 @@
         "jsonHeaders": "{\n  \"Content-Type\": \"application/json\",\n  \"Accept\": \"application/json\"\n}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ $('formatDataForMeeting').item.json.output.body }}",
+        "jsonBody": "={{ $('formatDataForMeeting').first().json.output.body }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -401,26 +376,31 @@
         128
       ],
       "id": "2782aea3-023b-4a73-a62b-655680ff72dc",
-      "name": "create_teams_meeting"
+      "name": "create_teams_meeting",
+      "credentials": {
+        "microsoftOAuth2Api": {
+          "id": "Y5GP57FlaZyiBK8B",
+          "name": "Microsoft account"
+        }
+      }
     },
     {
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "Jr6M8Bl9qnNshRks",
-          "mode": "list",
-          "cachedResultName": "PDF_CONVOCATORIA"
+          "value": "Cx1WvsvMR6tSQYi5",
+          "mode": "id"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "meeting_type": "={{ $('formatDataForMeeting').item.json.output.tipo }}",
+            "meeting_type": "={{ $('formatDataForMeeting').first().json.output.tipo }}",
             "meeting_datetime_ISO8631": "={{ $json.start.dateTime }}",
-            "convocation_date_ISO8631": "={{ $('formatDataForMeeting').item.json.output.fecha }}",
-            "attendees": "={{ $('formatDataForMeeting').item.json.output.asistentes }}",
+            "convocation_date_ISO8631": "={{ $today }}",
+            "session_code": "={{ $('formatDataForMeeting').first().json.output.session_code }}",
+            "attendees": "={{ $('formatDataForMeeting').first().json.output.asistentes }}",
             "teams_link": "={{ $json.onlineMeeting.joinUrl }}",
-            "meeting_topics": "={{ $('formatDataForMeeting').item.json.output.temas }}",
-            "session_code": "={{ $('formatDataForMeeting').item.json.output.session_code }}"
+            "meeting_topics": "={{ $('formatDataForMeeting').first().json.output.temas }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -431,8 +411,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "meeting_datetime_ISO8631",
@@ -441,8 +420,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "convocation_date_ISO8631",
@@ -451,8 +429,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "session_code",
@@ -461,8 +438,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "attendees",
@@ -471,8 +447,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "array",
-              "removed": false
+              "type": "array"
             },
             {
               "id": "teams_link",
@@ -481,8 +456,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "meeting_topics",
@@ -491,11 +465,10 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "array",
-              "removed": false
+              "type": "array"
             }
           ],
-          "attemptToConvertTypes": true,
+          "attemptToConvertTypes": false,
           "convertFieldsToString": true
         },
         "options": {
@@ -515,21 +488,21 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "4PAizFbIt54ospAr",
+          "value": "k6Op54V8oySaHd25",
           "mode": "list",
-          "cachedResultName": "GUARDAR_DATOS_REUNION"
+          "cachedResultName": "SAVE_METADATA"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "topics": "={{ $('formatDataForMeeting').item.json.output.temas }}",
-            "meeting_datetime_ISO8631": "={{ $('create_teams_meeting').item.json.start.dateTime }}",
+            "topics": "={{ $('formatDataForMeeting').first().json.output.temas }}",
+            "meeting_datetime_ISO8631": "={{ $('create_teams_meeting').first().json.start.dateTime }}",
             "convocation_date_ISO8631": "={{ $today.setLocale('es').toISODate() }}",
-            "meeting_type": "={{ $('formatDataForMeeting').item.json.output.tipo }}",
-            "attendees": "={{ $('formatDataForMeeting').item.json.output.asistentes }}",
+            "meeting_type": "={{ $('formatDataForMeeting').first().json.output.tipo }}",
+            "attendees": "={{ $('formatDataForMeeting').first().json.output.asistentes }}",
             "id_meeting": "={{ $('createUUID').first().json.uuid }}",
-            "session_code": "={{ $('formatDataForMeeting').item.json.output.session_code }}",
-            "meeting_url": "={{ $('create_teams_meeting').item.json.onlineMeeting.joinUrl }}"
+            "session_code": "={{ $('formatDataForMeeting').first().json.output.session_code }}",
+            "meeting_url": "={{ $('create_teams_meeting').first().json.onlineMeeting.joinUrl }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -623,7 +596,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        1232,
+        1088,
         128
       ],
       "id": "c8e01250-ac9e-4ed7-b4c3-b1ecb1399b69",
@@ -639,23 +612,172 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        320,
-        112
+        336,
+        128
       ],
       "id": "3e8b2cb3-8c96-4b49-b622-f700acd61ff7",
-      "name": "Get many rows"
+      "name": "GET_RESOLUTIONS",
+      "credentials": {
+        "supabaseApi": {
+          "id": "7iDL76ggTML8vg0b",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        112
+      ],
+      "id": "6fd77a2d-2585-4edb-8290-1821773e8032",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0Zr2gDUeSEg2Xe6E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "\n{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"fecha\": {\n\t\t\t\"type\": \"string\",\n            \"format\": \"date-time\"\n        },\n\t\t\"tipo\":{\n\t\t\t\"type\": \"string\"\n\t\t},\n\t\t\"asistentes\":{\n\t\t\t\"type\": \"array\",\n\t\t\t\"items\": {\n\t\t\t\t\"type\": \"object\",\n\t\t\t\t\"properties\": {\n\t\t\t\t\t\"name\": {\n\t\t\t\t\t\t\"type\":\"string\"\n\t\t\t\t\t},\n\t\t\t\t\t\"mail\": {\n\t\t\t\t\t\t\"type\":\"string\",\n                        \"format\": \"email\"\n\t\t\t\t\t},\n\t\t\t\t\t\"role\": {\n\t\t\t\t\t\t\"type\":\"string\"\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t},\n\t\t\"temas\":{\n\t\t\t\"type\": \"array\",\n\t\t\t\"items\": {\n\t\t\t\t\"type\": \"object\",\n\t\t\t\t\"properties\": {\n\t\t\t\t\t\"topic\":{\n\t\t\t\t\t\t\"type\": \"string\"\n\t\t\t\t\t},\n\t\t\t\t\t\"sub_topics\":{\n\t\t\t\t\t\t\"type\": \"array\",\n\t\t\t\t\t\t\"items\": {\n\t\t\t\t\t\t\t\"type\": \"string\"\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        -272
+      ],
+      "id": "76fe9cc3-03d1-4104-b637-1d8ab9acf60a",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        -240
+      ],
+      "id": "34e7cf6c-3603-4a52-8e6e-a8bf5e9aaa86",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0Zr2gDUeSEg2Xe6E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\n\nHere is the text\n{{ $json.previous_act_formatted }}",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": " You are an expert extraction algorithm. Only extract relevant information from the text. If you do not know the value of an attribute asked to extract, you may omit the attribute's value. You must always return valid JSON fenced by a markdown code block. Do not return any additional text.     System: You are an expert extraction algorithm.\\nOnly extract relevant information from the text.\\nIf you do not know the value of an attribute asked to extract, you may omit the attribute's value.\\nYou must always return valid JSON fenced by a markdown code block. Do not return any additional text.\\nYou must format your output as a JSON value that adheres to a given \"JSON Schema\" instance.\\n\\n\"JSON Schema\" is a declarative language that allows you to annotate and validate JSON documents.\\n\\nFor example, the example \"JSON Schema\" instance {{\"properties\": {{\"foo\": {{\"description\": \"a list of test words\", \"type\": \"array\", \"items\": {{\"type\": \"string\"}}}}}}, \"required\": [\"foo\"]}}}}\\nwould match an object with one required property, \"foo\". The \"type\" property specifies \"foo\" must be an \"array\", and the \"description\" property semantically describes it as \"a list of test words\". The items within \"foo\" must be strings.\\nThus, the object {{\"foo\": [\"bar\", \"baz\"]}} is a well-formatted instance of this example \"JSON Schema\". The object {{\"properties\": {{\"foo\": [\"bar\", \"baz\"]}}}} is not well-formatted.\\n\\nYour output will be parsed and type-checked according to the provided schema instance, so make sure all fields in your output match the schema exactly and there are no trailing commas!"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -16,
+        -96
+      ],
+      "id": "d0d80c8f-5844-4549-b036-5228d0aa8b2a",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        144,
+        112
+      ],
+      "id": "a792637b-8e8d-4de2-b157-b4a77ffc8061",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0Zr2gDUeSEg2Xe6E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toRecipients": "={{ $('formatDataForMeeting').first().json.output.asistentes.map(asistente => asistente.mail).join(', ') }}",
+        "subject": "Convocatoria Sessión",
+        "bodyContent": "=Buen día, se solicita su presencia en la sesión, por favor remitir el documento firmado.\n\nSe adjunta los links para la toma de asistencia y votos: \nASISTENCIA: \n{{ $('SAVE_METADATA').item.json.url_attendances }}\nVOTOS:\n{{ $('SAVE_METADATA').item.json.urt_votes }}",
+        "additionalFields": {
+          "attachments": {
+            "attachments": [
+              {
+                "binaryPropertyName": "data"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        128
+      ],
+      "id": "397f7fbd-67d2-40bf-b4e9-06782cc1170c",
+      "name": "SEND_SECRETARY",
+      "webhookId": "2e2dc7da-ecfe-405f-81dd-051e53bdc105",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "aa1g0ggoDcXs6rTB",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": " return{\n    json: $('PDF_CONVOCATORIA').first().json,\n    binary: $('PDF_CONVOCATORIA').first().binary\n  }\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        128
+      ],
+      "id": "bb744c60-60f3-4c26-a7e4-9efd0505b670",
+      "name": "GET_BINARY"
     }
   ],
   "pinData": {
     "Microsoft Outlook Trigger": [
       {
         "json": {
-          "@odata.etag": "W/\"CQAAABYAAABp+BPEgka1RYOOtkWcCwxJAAAEb78R\"",
-          "id": "AAMkADliNjk4NDAzLTY2NzYtNGVjMi05YjIyLTBmZWQwZmJlY2JhOQBGAAAAAADErCGzx_TkTI9Izs2IzL6lBwBp_BPEgka1RYOOtkWcCwxJAAAAAAEMAABp_BPEgka1RYOOtkWcCwxJAAAEcnBnAAA=",
+          "@odata.etag": "W/\"CQAAABYAAACJa4iwinkBQoNKizXKF/TOAAAMDNQn\"",
+          "id": "AAMkADU1MzgzMmM3LWVjYWItNGFkOS1hMjdhLTA4YTU2OWY2ZTJmMABGAAAAAAAQkpiSgVnUQZ6WjxACOvTnBwCJa4iwinkBQoNKizXKF-TOAAAAAAEMAACJa4iwinkBQoNKizXKF-TOAAAMDiIwAAA=",
           "subject": "revisar",
           "body": {
             "contentType": "html",
-            "content": "<html><head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><style type=\"text/css\" style=\"display:none\">\r\n<!--\r\np\r\n\t{margin-top:0;\r\n\tmargin-bottom:0}\r\n-->\r\n</style></head><body dir=\"ltr\"><div class=\"elementToProof\" style=\"font-family:Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\">1 Fecha: 12/12/1996<br>2* Tipo: Ordinaria<br>3. Asistentes:<br>&nbsp;&nbsp; 3.1 Andrés Tituana - alvaro.andres1996@hotmail.com - Representante de Estudiantes<br>&nbsp;&nbsp; 3.2 Jennifer Tituana - mrwringo@hotmail.com - Miembro de la comisión de Etica<br>&nbsp;&nbsp; 3.3 Matthew Jaramillo - mnjaramillo@hotmail.com - Representante de profesores<br>4 Temas a resolver<br>&nbsp;&nbsp; 4.1 Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4.1.1 Msc. Alfredo Armando Rodríquez Guzman, representante del Rector, como presidente del comité.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4.2.2 Msc Dania Elena Portelles Cobas, Vicerrectora Académica<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4.3.3 Adm. Carlos Eduardo Esterlla Carrera, docente de la carrera de Gastronomía en calidad de delegado del personal docente.<br>&nbsp;&nbsp; 4.2 Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación.<br>&nbsp;&nbsp; 4.3 Aprobación de la actualización del Calendario Académico PAO 2025-II</div><div class=\"elementToProof\" style=\"font-family:Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\"><br></div></body></html>"
+            "content": "<html><head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><style type=\"text/css\" style=\"display:none\">\r\n<!--\r\np\r\n\t{margin-top:0;\r\n\tmargin-bottom:0}\r\n-->\r\n</style></head><body dir=\"ltr\"><div class=\"elementToProof\" style=\"font-family:Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\">1| Fecha: 24 de septiembre del 2025 a las 4 de la tarde <br>2| Tipo: Ordinaria<br>3| Asistentes:<br>&nbsp;&nbsp; 3.1| Andrés Tituana - alvaro.andres1996@hotmail.com - Papá<br>&nbsp;&nbsp; 3.2| Jennifer Tituana - carloswringo@gmail.com - Hermana<br>&nbsp;&nbsp; 3.3&nbsp; Mister Wringo - mrwringo@hotmail.com - Hermano<br>4| Temas a resolver<br>&nbsp;&nbsp; 4.1| Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4.1.1| Msc. Alfredo Armando Rodríquez Guzman, representante del Rector, como presidente del comité.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4.1.2| Adm. Carlos Eduardo Esterlla Carrera, docente de la carrera de Gastronomía en calidad de delegado del personal docente.<br>&nbsp;&nbsp; 4.2| Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación considerando lo siguiente:<br>    4.2.1 Que el docente llevaba mucho tiempo fuera de la institución<br>    4.2.2 Que la normativa autoriza a la institución a presentar la oportuna renuncia del Ingeniero.<br>4.3   Aprobación de cambio de fecha en la ceremonia de graduación del Calendario Académico PAO 2025-I en base al oficio ISTY-VA-DEPC-056-2025.</div><div class=\"elementToProof\" style=\"font-family:Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\"><br></div></body></html>"
           },
           "from": {
             "emailAddress": {
@@ -663,22 +785,6 @@
               "address": "alvaro.andres1996@hotmail.com"
             }
           }
-        }
-      }
-    ],
-    "Formatea Datos": [
-      {
-        "json": {
-          "content": {
-            "parts": [
-              {
-                "text": "1| Fecha Tentativa: 1996-12-12T12:00\n2| Tipo de sesión: Ordinaria\n3| Asistentes:\n   3.1| Andrés Tituana - alvaro.andres1996@hotmail.com - Representante de Estudiantes\n   3.2| Jennifer Tituana - carloswringo@gmail.com - Miembro de la comisión de Etica\n4| Temas a resolver\n   4.1| Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera\n      4.1.1| Msc. Alfredo Armando Rodríquez Guzman, representante del Rector, como presidente del comité.\n      4.2.2| Msc Dania Elena Portelles Cobas, Vicerrectora Académica\n      4.3.3| Adm. Carlos Eduardo Esterlla Carrera, docente de la carrera de Gastronomía en calidad de delegado del personal docente.\n   4.2| Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación.\n   4.3| Aprobación de la actualización del Calendario Académico PAO 2025-II"
-              }
-            ],
-            "role": "model"
-          },
-          "finishReason": "STOP",
-          "index": 0
         }
       }
     ]
@@ -768,17 +874,6 @@
         ]
       ]
     },
-    "Formatea Datos": {
-      "main": [
-        [
-          {
-            "node": "Get many rows",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Realizar Cambios": {
       "main": [
         [
@@ -827,7 +922,7 @@
       "main": [
         [
           {
-            "node": "Formatea Datos",
+            "node": "Information Extractor",
             "type": "main",
             "index": 0
           }
@@ -874,17 +969,6 @@
         ]
       ]
     },
-    "sendDocument": {
-      "main": [
-        [
-          {
-            "node": "SAVE_METADATA",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "create_teams_meeting": {
       "main": [
         [
@@ -900,18 +984,100 @@
       "main": [
         [
           {
-            "node": "sendDocument",
+            "node": "SAVE_METADATA",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Get many rows": {
+    "GET_RESOLUTIONS": {
       "main": [
         [
           {
             "node": "formatDataForMeeting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "GET_RESOLUTIONS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "SAVE_METADATA": {
+      "main": [
+        [
+          {
+            "node": "GET_BINARY",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SEND_SECRETARY": {
+      "main": [
+        []
+      ]
+    },
+    "GET_BINARY": {
+      "main": [
+        [
+          {
+            "node": "SEND_SECRETARY",
             "type": "main",
             "index": 0
           }
@@ -923,10 +1089,18 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "d288f61d-f48c-40e8-859a-8f48c4c2077c",
+  "versionId": "8d238cd1-bbb5-417c-ab2d-22d197b556f1",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"
   },
   "id": "SLVqwK2jzeuGVdkf",
-  "tags": []
+  "tags": [
+    {
+      "createdAt": "2025-09-19T21:36:18.579Z",
+      "updatedAt": "2025-09-19T21:36:18.579Z",
+      "id": "hIfCdV5CCo0ZPgJJ",
+      "name": "MAIN"
+    }
+  ]
 }
