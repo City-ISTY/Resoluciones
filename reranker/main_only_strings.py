@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import List
 from mxbai_rerank import MxbaiRerankV2
 import logging
+import torch  # <--- 1. IMPORTAR TORCH
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -38,15 +39,17 @@ class RankingRequest(BaseModel):
     query: str
     documents: List[str]
 
-def process_batch(query: str, documents_batch: List[str], batch_size: int = 10):
+def process_batch(query: str, documents_batch: List[str]): # Ya no necesitas pasar batch_size aquí
     """Procesa un lote de documentos con el modelo de reranking"""
     try:
-        results = model.rank(
-            query, 
-            documents_batch, 
-            return_documents=True, 
-            top_k=min(len(documents_batch), 10)
-        )
+        # --- 2. USAR EL CONTEXTO torch.no_grad() ---
+        with torch.no_grad():
+            results = model.rank(
+                query, 
+                documents_batch, 
+                return_documents=True
+                # El parámetro top_k se puede omitir si quieres todos los resultados del lote
+            )
         return results
     except Exception as e:
         logger.error(f"Error procesando lote: {str(e)}")
@@ -60,7 +63,7 @@ async def rerank_documents(request: RankingRequest):
         
         query = request.query
         documents = request.documents
-        batch_size = 10
+        batch_size = 10 # Puedes ajustar este valor según tu hardware
         
         if not documents:
             return RankingResponse(
@@ -75,12 +78,12 @@ async def rerank_documents(request: RankingRequest):
         # Procesar documentos en lotes
         for i in range(0, len(documents), batch_size):
             batch = documents[i:i + batch_size]
-            batch_results = process_batch(query, batch, batch_size)
+            batch_results = process_batch(query, batch) # Llamada a la función modificada
             all_results.extend(batch_results)
             processed_batches += 1
             logger.info(f"Procesado lote {processed_batches} con {len(batch)} documentos")
         
-        # Convertir a formato de respuesta y ordenar por score (descendente)
+        # Convertir a formato de respuesta
         ranking_results = [
             RankingResult(score=result.score, text=result.document)
             for result in all_results

@@ -1,6 +1,6 @@
 # 1. Imagen base
 # Se utiliza la misma imagen y versión que tenías en tu docker-compose.
-FROM n8nio/n8n: 1.111.1
+FROM n8nio/n8n:1.111.1
 
 # --- Instalación de dependencias para el nodo Tesseract ---
 # Se necesita el motor Tesseract OCR en el sistema.

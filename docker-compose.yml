@@ -1,13 +1,10 @@
-version: "3.9"
 
 services:
   n8n:
-    # En lugar de 'image', ahora usamos 'build' para construir la imagen
-    # a partir de nuestro Dockerfile local.
     build:
       context: .
       dockerfile: Dockerfile
-    image: n8n-custom  # Opcional: le damos un nombre a la imagen que se creará.
+    image: n8n-custom
     container_name: N8N
     ports:
       - "5678:5678"
@@ -16,14 +13,45 @@ services:
     restart: unless-stopped
     networks:
       - app-network
-    depends_on:
-      - gotenberg
 
   gotenberg:
     image: gotenberg/gotenberg:latest
     container_name: gotenberg
     ports:
       - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  pdf_reader:
+    build:
+      context: ./pdf_reader
+      dockerfile: Dockerfile
+    container_name: pdf_reader
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  reranker:
+    build:
+      context: ./reranker
+      dockerfile: Dockerfile
+    container_name: reranker
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  whereas_selector:
+    build:
+      context: ./whereas_selector
+      dockerfile: Dockerfile
+    container_name: whereas_selector
+    ports:
+      - "3001:3001"
     restart: unless-stopped
     networks:
       - app-network
