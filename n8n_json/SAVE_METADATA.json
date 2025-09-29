@@ -9,8 +9,8 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -64,
-        16
+        -208,
+        -208
       ],
       "id": "223b422c-7957-4768-a54e-4144d451960f",
       "name": "start"
@@ -34,28 +34,6 @@
     },
     {
       "parameters": {
-        "fileName": "={{ $('PARSER1').first().json.session_code+\"_METADATA.json\" }}",
-        "parentId": "01ZX2MQXOS5TWC5IXXI5H2DRTRMZAPE6BT",
-        "binaryData": true,
-        "binaryPropertyName": "file"
-      },
-      "type": "n8n-nodes-base.microsoftOneDrive",
-      "typeVersion": 1,
-      "position": [
-        512,
-        -208
-      ],
-      "id": "5f607efe-0583-42f1-a54c-83b09995bf6e",
-      "name": "Upload a file",
-      "credentials": {
-        "microsoftOneDriveOAuth2Api": {
-          "id": "Sk09Y3pRv4uy2lLG",
-          "name": "Microsoft Drive account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "workflowId": {
           "__rl": true,
           "value": "sOKBJYRMRjAcRKTh",
@@ -65,7 +43,7 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "array": "={{ \n    (() => {\n      \n        const attendees = $('PARSER1').first().json.attendees\n        const topics = $('PARSER1').first().json.topics\n        const combinedArray = [];\n\n        attendees.forEach(person => {\n            topics.forEach(topicObj => {\n                combinedArray.push({\n                    name: person.name,\n                    id_topic: topicObj.id_topic,\n                    topic: topicObj.topic,\n                    option: '',\n                    table: \"votos\",\n                    meeting_finished: \"\"\n                });\n            });\n        });\n\n        return combinedArray.sort((a, b) => a.topic.localeCompare(b.topic));\n    })()\n}}",
+            "array": "={{ \n    (() => {\n      \n        const attendees = $('PARSER1').first().json.attendees\n        const topics = $('PARSER1').first().json.topics\n        const combinedArray = [];\n\n        attendees.forEach(person => {\n            topics.forEach(topicObj => {\n                combinedArray.push({\n                    name: person.name,\n                    id_topic: topicObj.id_topic,\n                    topic: topicObj.topic,\n                    option: '',\n                    table: \"votos\",\n                    notification: \"\",\n                    meeting_finished: \"\"\n                });\n            });\n        });\n\n        return combinedArray.sort((a, b) => a.topic.localeCompare(b.topic));\n    })()\n}}",
             "file_name": "={{ $('start').first().json.session_code+\"_VOTOS\" }}",
             "parent_folder": "01ZX2MQXLIPZG6YCWIRNA2FRDSIYBGHMP5"
           },
@@ -172,7 +150,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        512,
+        528,
         16
       ],
       "id": "96d83fd9-ebd6-43a3-b8dd-b7d0cf6026f9",
@@ -180,13 +158,13 @@
     },
     {
       "parameters": {
-        "jsCode": "const object = $('start').first().json\n\nconst id = () => Date.now().toString(36) + Math.random().toString(36).slice(2);\n\nconst attendes = $input.first().json.attendees\nconst attendesId = attendes.map(attendee=>({...attendee, id_assistant: id()}))\n\nconst topics = $input.first().json.topics\nconst topicsId = topics.map(tp=>({...tp, id_topic: id()}))\n\nreturn [{...object,\n         topics: topicsId,\n         attendees:attendesId\n        }];"
+        "jsCode": "const object = $('start').first().json\n\nconst id = () => Date.now().toString(36) + Math.random().toString(36).slice(2);\n\nconst attendes = $('start').first().json.attendees\nconst attendesId = attendes.map(attendee=>({...attendee, id_assistant: id()}))\n\nconst topics = $('start').first().json.topics\nconst topicsId = topics.map(tp=>({...tp, id_topic: id()}))\n//actualizo numeros de sesion\n\nconst ordinary_number_session = $input.first().json.ordinary_session_number + ($('start').first().json.meeting_type.toLocaleLowerCase() === \"ordinaria\" ? 1 : 0);\n\nconst exordinary_number_session = $input.first().json.extraordinary_session_number + ($('start').first().json.meeting_type.toLowerCase() === \"extraordinaria\" ? 1 : 0);\n\n\nreturn [{...object,\n         topics: topicsId,\n         attendees:attendesId,\n         ordinary_number_session,\n         exordinary_number_session\n        }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        128,
-        16
+        144,
+        -208
       ],
       "id": "a53852d1-d272-4554-92ff-340e5eb6c85f",
       "name": "PARSER1"
@@ -219,52 +197,107 @@
       ],
       "id": "bf80fc15-9e00-4215-bd9c-7b25648b68ef",
       "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "sessions_resolutions",
+        "limit": 1,
+        "filterType": "none"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        -208
+      ],
+      "id": "67fd4210-0f0e-4ddd-929b-b7226a7ffa39",
+      "name": "GET_NUMBER_SESSION",
+      "credentials": {
+        "supabaseApi": {
+          "id": "7iDL76ggTML8vg0b",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileName": "={{ $('PARSER1').first().json.session_code+\"_METADATA.json\" }}",
+        "parentId": "01ZX2MQXOS5TWC5IXXI5H2DRTRMZAPE6BT",
+        "binaryData": true,
+        "binaryPropertyName": "file"
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1,
+      "position": [
+        512,
+        -208
+      ],
+      "id": "5f607efe-0583-42f1-a54c-83b09995bf6e",
+      "name": "SAVE_METADATA",
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "Sk09Y3pRv4uy2lLG",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.microsoft.com/v1.0/me/drive/root/children",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "microsoftOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        816,
+        -256
+      ],
+      "id": "168b0e7f-fe3b-46d7-8a30-380250abead8",
+      "name": "VER_CARPETAS",
+      "credentials": {
+        "microsoftOAuth2Api": {
+          "id": "Y5GP57FlaZyiBK8B",
+          "name": "Microsoft account"
+        }
+      }
     }
   ],
   "pinData": {
     "start": [
       {
         "json": {
-          "id_meeting": "e03dc9b9-f26f-4ff5-a0b6-7a464f908ed4",
-          "meeting_url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_YjFmOGRkMGItNmI4Ni00YmI3LTgyNjgtZjg2NmI1ZGNlNGRj%40thread.v2/0?context=%7b%22Tid%22%3a%229d91e1e7-5249-4205-8c19-8d1d9e333a60%22%2c%22Oid%22%3a%228cb570fb-7f11-4fc7-9acf-8c1f5c0d22fa%22%7d",
-          "meeting_datetime_ISO8631": "2025-09-24T13:00:00.0000000",
-          "convocation_date_ISO8631": "2025-09-22",
-          "meeting_type": "Ordinaria",
-          "session_code": "OCS-SO-038-2025",
+          "id_meeting": "5110183e-05e2-4f60-a35b-effb998d2efc",
+          "meeting_url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_ZjI1YTU2MmMtNmMyMC00ZDk4LTg2ZWMtYjcyMmQ4MmZiZjhk%40thread.v2/0?context=%7b%22Tid%22%3a%229d91e1e7-5249-4205-8c19-8d1d9e333a60%22%2c%22Oid%22%3a%228cb570fb-7f11-4fc7-9acf-8c1f5c0d22fa%22%7d",
+          "meeting_datetime_ISO8631": "2025-10-24T13:00:00.0000000",
+          "convocation_date_ISO8631": "2025-09-24",
+          "meeting_type": "Extraordinaria",
+          "session_code": "OCS-SE-014-2025",
           "attendees": [
             {
-              "name": "Andrés Tituana",
-              "mail": "alvaro.andres1996@hotmail.com",
-              "role": "Papá"
-            },
-            {
               "name": "Jennifer Tituana",
-              "mail": "carloswringo@gmail.com",
+              "mail": "alvaro.andres1996@hotmail.com",
               "role": "Hermana"
-            },
-            {
-              "name": "Mister Wringo",
-              "mail": "mrwringo@hotmail.com",
-              "role": "Hermano"
             }
           ],
           "topics": [
             {
-              "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí",
+              "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
               "sub_topics": [
-                "Msc. Alfredo Armando Rodríquez Guzman, representante del Rector, como presidente del comité.",
-                "Adm. Carlos Eduardo Esterlla Carrera, docente de la carrera de Gastronomía en calidad de delegado del personal docente."
+                "Msc. Alfredo Armando Rodríquez Guzman, representante del Rector, como presidente del comité."
               ]
             },
             {
-              "topic": "Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación",
+              "topic": "Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación considerando lo siguiente:",
               "sub_topics": [
                 "Que el docente llevaba mucho tiempo fuera de la institución",
                 "Que la normativa autoriza a la institución a presentar la oportuna renuncia del Ingeniero."
               ]
             },
             {
-              "topic": "Aprobación de cambio de fecha en la ceremonia de graduación del Calendario Académico PAO 2025-I en base al oficio ISTY-VA-DEPC-056-2025.",
+              "topic": "Aprobación de la actualización en",
               "sub_topics": []
             }
           ]
@@ -277,7 +310,7 @@
       "main": [
         [
           {
-            "node": "PARSER1",
+            "node": "GET_NUMBER_SESSION",
             "type": "main",
             "index": 0
           }
@@ -288,7 +321,7 @@
       "main": [
         [
           {
-            "node": "Upload a file",
+            "node": "SAVE_METADATA",
             "type": "main",
             "index": 0
           }
@@ -328,7 +361,18 @@
         ]
       ]
     },
-    "Upload a file": {
+    "GET_NUMBER_SESSION": {
+      "main": [
+        [
+          {
+            "node": "PARSER1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SAVE_METADATA": {
       "main": [
         [
           {
@@ -344,7 +388,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "ca703aeb-bac5-48c1-ac6b-8673719d6dbc",
+  "versionId": "5a127402-63d3-4a42-a36e-c9c1c6c89f23",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"

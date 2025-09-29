@@ -1,93 +1,511 @@
 import * as React from "react";
+import { useState, useEffect } from 'react'
 import { List, arrayMove, arrayRemove } from 'react-movable';
-
-const initialState = [
-  "Que, el artículo 76 de la Constitución de la República del Ecuador asegura el derecho al debido proceso que incluirá las siguientes garantías básicas: \"En todo proceso en el que se determinen derechos y obligaciones de cualquier orden, se asegurará el derecho al debido proceso que incluirá las siguientes garantías básicas: 1. Corresponde a toda autoridad administrativa o judicial, garantizar el cumplimiento de las normas y los derechos de las partes. 7. El derecho de las personas a la defensa incluirá las siguientes garantías: a) Nadie podrá ser privado del derecho a la defensa en ninguna etapa o grado del procedimiento. c) Ser escuchado en el momento oportuno y en igualdad de condiciones. k) Ser juzgado por una jueza o juez independiente, imparcial y competente. Nadie será juzgado por tribunales de excepción o por comisiones especiales creadas para el efecto. m) Recurrir el fallo o resolución en todos los procedimientos en los que se decida sobre sus derechos. Universal de Derechos Humanos y el artículo 8 de la Convención Americana sobre Derechos Humanos o Pacto de San José. Para Arturo Hoyos, a través del debido proceso '''debe asegurarse a las partes oportunidad razonable de ser oídas por un tribunal competente, predeterminado por la ley, independiente e imparcial de pronunciarse respecto de las pretensiones y manifestaciones de la parte contraria, de aportar pruebas lícitas relacionadas con el objeto del proceso y de contradecir las aportadas por la contraparte, de hacer uso de los medios de impugnación consagrados por la ley contra resoluciones judiciales motivadas y conformes a derecho, de tal manera que las personas puedan defender efectivamente sus derechos'''. En este sentido, Carlos Bernal Pulido manifiesta que de la extensa lista de derechos fundamentales contenidos en las constituciones actuales, se podría reducir a cinco los derechos fundamentales generales, estos son: el derecho general de libertad, el de igualdad, el de protección,\"",
-  "Que, el artículo 59 del Estatuto ISTY indica lo siguiente sobre Garantías del debido proceso: \"Los estudiantes y/o docentes que hayan incurrido en las faltas tipificadas por la Ley, este Estatuto y/u otras normas vigentes se someterán, ante el Órgano Colegiado Superior, al procedimiento establecido en el Reglamento Especial de Faltas y Sanciones del Instituto Superior Tecnológico Yaruquí. En todos los procesos disciplinarios se garantizará el debido proceso, el derecho a la defensa y las instancias de revisión y/o apelación. CAPÍTULO III NIVEL SUSTANTIVO\"",
-  "Que, el artículo 123 de la Ley Orgánica de Educación Superior (LOES) indica lo siguiente sobre Reglamento sobre el Régimen Académico: \"El Consejo de Educación Superior aprobará el Reglamento de Régimen Académico que regule los títulos y grados académicos, el tiempo de duración, número de créditos de cada opción y demás aspectos relacionados con grados y títulos, buscando la armonización y la promoción de la movilidad estudiantil, de profesores o profesoras e investigadores o investigadoras.\"",
-  "Que, el artículo 26 del Reglamento de Régimen Académico 2023 indica lo siguiente sobre Requisitos y opciones de titulación en el tercer nivel: \"Cada IES determinará en su normativa interna los requisitos para acceder a la titulación, así como las opciones para su aprobación. Los créditos correspondientes a las opciones de titulación estarán incluidos en la totalidad de créditos de la carrera. Se podrá emitir el título respectivo únicamente cuando el estudiante apruebe todos los requisitos académicos y administrativos establecidos por las IES, lo que constará en el acta consolidada de finalización de estudios, de conformidad con el artículo 85 de este Reglamento.\"",
-  "Que, el artículo 73 del Reglamento de Régimen Académico del ISTY indica lo siguiente sobre Obtención del título profesional: \"Los estudiantes que hayan cumplido con todos los requisitos académicos, aprobado la opción de titulación; así como con todas sus obligaciones administrativas con la Institución, serán habilitados para la obtención de su título profesional. Para la determinación de los estudiantes que se encuentran habilitados para la obtención del título profesional, la Dirección de Carreras se encargará de elaborar un listado, el que será revisado por el Vicerrectorado Académico, una vez concluida la revisión, esta instancia lo remitirá a la Secretaría General para que se proceda con la elaboración del acta de grado.\"",
-  "Que, el artículo 25 del Reglamento para el Reconocimiento y Homologación de Estudios indica lo siguiente sobre De la Titulación: \"Una vez que el estudiante de validación de conocimientos haya homologado las asignaturas correspondientes de la malla curricular, deberá Realizar un examen complexivo teórico-práctico cuyo objetivo es evaluar de manera integral el conocimiento, las habilidades y competencias adquiridas al final de la carrera. Este examen podrá ser presencial o virtual en correspondencia con la modalidad de estudio de cada carrera y respondiendo a los intereses institucionales. CAPÍTULO V VALIDACIÓN POR EJERCICIO PROFESIONAL\"",
-  "Que, el artículo 13 del Reglamento de Evaluación Estudiantil indica lo siguiente sobre De la Difusión: \"El calendario académico y las notas de evaluación serán publicados de manera oportuna en el Sistema Académico para conocimiento de las y los estudiantes.\"",
-  "Que, el artículo 10 del Reglamento de Admisión, Matrícula, Registro, Acompañamiento Académico, Formación en Valores, Evaluación y Estímulos Positivos indica lo siguiente sobre Admisión extraordinaria: \"Se podrá admitir fuera de convocatoria por razones justificadas (traslados, convenios, casos fortuitos), previa resolución del Órgano Colegiado Superior.\"",
-  "Que, la Disposición Segunda del Reglamento de Régimen Académico 2023 indica lo siguiente sobre Disposiciones: \"Los estudiantes que no hayan podido titularse en los tiempos establecidos para el efecto, podrán continuar sus estudios acogiéndose a los mecanismos de reconocimiento y homologación de asignaturas, cursos o sus equivalentes, según corresponda, en los plazos y términos establecidos en la norma.\"",
-  "Que, el artículo 28 del Reglamento de Régimen Académico 2023 indica lo siguiente sobre Prórroga para opciones de titulación en cuarto nivel: \"La IES en su normativa interna establecerá el plazo adicional que tiene el estudiante para desarrollar su opción de titulación y los derechos y aranceles que deberá pagar para el efecto en el caso de solicitar prórrogas. La primera prórroga no requerirá de pago por concepto de derechos o aranceles, ni valor similar. Cuando el estudiante haya cumplido y aprobado la totalidad del plan de estudios excepto la opción de titulación y una vez transcurridos los plazos establecidos por la IES, deberá matricularse y tomar los cursos, asignaturas o equivalentes para la actualización de conocimientos en los plazos y condiciones que establezca la IES, siempre y cuando no hayan transcurrido diez (10) años desde que se cumplió y aprobó la totalidad del plan de estudios.\"",
-  "Que, el artículo 9 del Reglamento de Aranceles, Matrículas indica lo siguiente sobre Criterio para la fijación del valor de los derechos: \"El valor de los derechos será fijado en función del arancel y será independiente del número de horas de las asignaturas, cursos o sus equivalentes que registre el estudiante. El valor que la IES cobrará por los derechos por la rendición de cada examen fuera del período académico ordinario de evaluación, así como por los exámenes de gracia, ubicación y recuperación será como máximo el diez por ciento (10%) del valor más alto de la matrícula ordinaria establecida del correspondiente período académico. Este valor no será aplicable en el caso de estudiantes que por circunstancias de caso fortuito, fuerza mayor, calamidad doméstica o enfermedad, debidamente justificadas, no hayan rendido los exámenes en el tiempo oportuno.\"",
-  "Que, el artículo 68 del Reglamento de Régimen Académico del ISTY indica lo siguiente sobre Justificación de asistencia en asignaturas: \"Excepcionalmente, en casos de enfermedad grave, calamidad doméstica, caso fortuito o fuerza mayor, los estudiantes del ISTY podrán solicitar la justificación de faltas, para lo cual, deberán dirigir una solicitud a la Dirección de Carreras, en el término de 3 días hábiles luego de que el estudiante retorne a sus actividades académicas, debiendo adjuntar los documentos que justifiquen la causal alegada y el pago del rubro correspondiente. Recibida la solicitud, la Dirección de Carreras deberá analizarla y verificar la veracidad de los justificativos entregados por el estudiante en el término máximo de 3 días hábiles y emitir la resolución correspondiente y notificar a las instancias institucionales respectivas para su registro en el sistema académico. Únicamente se podrá justificar un máximo de $ faltas por periodo académico, considerando todas las asignaturas cursadas por el estudiante en el mismo.\"",
-  "Que, el artículo 114 del Reglamento de Régimen Académico 2023 indica lo siguiente sobre Período académico extraordinario: \"Las IES podrán implementar, adicionalmente, períodos académicos extraordinarios de mínimo cuatro (4) semanas. En este período extraordinario se podrá contratar al personal académico y administrativo que se requiera según la planificación de las IES. Los períodos académicos extraordinarios no podrán ser implementados para adelantar la titulación de los estudiantes.\"",
-  "Que, la Disposición Tercera del Reglamento de Elecciones de Representantes de Docentes y Estudiantes al OCS indica lo siguiente sobre Disposiciones: \"Los casos no previstos en el presente Reglamento serán resueltos por el Órgano Colegiado Superior.\"",
-  "Que, la Disposición Primera del Reglamento de Educación Continua indica lo siguiente sobre Disposiciones: \"Todo aquello que no se encuentre previsto en el presente Reglamento será resuelto por el Órgano Colegiado Superior.\""
-]
+import { WhereasClause, WhereasClauseIA } from './types'
+import SearchIcon from '@mui/icons-material/Search';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import SendIcon from '@mui/icons-material/Send';
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+// Workaround for React 19 compatibility with react-icons
+import { generateEmbedding } from './services/geminiService'
+import { supabase } from './configuration/supabaseClient'
 
 const RemovableByMove: React.FC = () => {
-  const [items, setItems] = React.useState(initialState);
+  const [openPopup, setOpenPopup] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(""); // 1. Estado para el input de búsqueda
+  const [popupItems, setPopupItems] = useState<string[]>([]); // 2. Estado para los ítems, inicia vacío
+
+  const [loadingPopupSearch, setLadingPopupSearch] = useState(false)
+
+  const [showSendButton, setShowSendButton] = useState(false)
+
+  const rawData = React.useRef<WhereasClauseIA[]>([]); // Se usa useRef para mantener los datos originales sin causar re-renderizados
+  const [data, setData] = useState<WhereasClause[]>([])   //Aqui se guardan los datos etitquetados.
+  const [loading, setLoading] = useState(true)
+
+  const [index, setIndex] = useState(0)
+  const [iaWhereas, setIaWhereas] = useState<string[]>([]);
+
+
+  const [resolution, setResolution] = useState("");
+  const [userWhereas, setUserWhereas] = useState<string[]>([]);
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { data: whereasData, error } = await supabase
+          .from('whereas_clauses')
+          .select('*')
+
+        if (error) {
+          console.error('Error:', error)
+          return
+        }
+        // Asignar datos a los estados correspondientes
+
+        if (whereasData.length > 0) {
+          setIndex(0)
+          setIaWhereas(whereasData[0].whereasia || [])
+          setResolution(whereasData[0].resolution || "")
+          setUserWhereas(whereasData[0].whereasuser || [])
+
+        }
+        rawData.current = whereasData || [] // se llena con los datos iniciales, al final se llena whereasfinalchoice y seguarda el registro para entrenaminto 
+        setData(whereasData || [])
+        //configuro botones
+        setShowSendButton(whereasData.length === 1)
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+
+  const getVectorialData = async () => {
+    //Me permite traer los embeddings más similares
+    const search_embedding = await generateEmbedding(searchTerm)
+    // 2. Llamar a la función mastch_documents en Supabase
+    const { data: documents, error } = await supabase
+      .rpc('match_documents', {
+        query_embedding: search_embedding, // el vector de tu consulta
+        match_count: 10, // número de resultados deseados
+        filter: {} // filtros opcionales en metadata
+      });
+
+    if (error) {
+      console.error('Error en búsqueda vectorial:', error);
+    }
+    return documents
+  }
+
+
+  //Funcion para mover resultados de la caja de sugerencias a los artículos elegidos
+  const move_results = ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
+    // setPopupItems(
+    //   newIndex === -1
+    //     ? arrayRemove(popupItems, oldIndex)
+    //     : arrayMove(popupItems, oldIndex, newIndex),
+    // );
+
+
+    if (newIndex === -1) {
+      setUserWhereas([...userWhereas, popupItems[oldIndex]]);
+    }
+    setPopupItems(newIndex === -1 ? arrayRemove(popupItems, oldIndex) : arrayMove(popupItems, oldIndex, newIndex));
+
+
+  }
+  // Función que se ejecuta al presionar "Buscar"
+  const handleSearch = async () => {
+    setLadingPopupSearch(true)
+    // En un caso real, aquí usarías 'searchTerm' para filtrar o hacer una llamada a una API.
+    // Por ahora, solo poblamos la lista con los datos iniciales.
+    const documents = await getVectorialData()
+
+    setPopupItems(documents.map((elm: any) => {
+
+      return ("LEY: " + elm.content + "\nTITULO: " + elm.metadata.titulo + "\nARTICULO #: " + elm.metadata.articulo + "\nEXTRAIDO DE: " + elm.metadata.document_name)
+    }));
+    setLadingPopupSearch(false)
+  };
+
+  // Función para cerrar y resetear el popup
+  const closeAndResetPopup = () => {
+    setOpenPopup(false);
+    setSearchTerm("");
+    setPopupItems([]); // Resetea la lista al cerrar
+  };
+
+  const sendData = async () => {
+    const confirm = window.confirm('¿Está seguro que desea continuar?\n Las resoluciones se generarán con los artículos elegidos.\n Ya no podrá editar esta información.');
+    if (!confirm) return;
+    //Guardo userWhereas y iaWhereas en data[index]
+    const updatedData = [...data];
+    updatedData[index] = {
+      ...updatedData[index],
+      whereasia: iaWhereas,
+      whereasuser: userWhereas
+    };
+    setData(updatedData);
+
+    rawData.current[index] = { ...rawData.current[index], whereasfinalchoice: userWhereas }
+
+
+    //Envio todo el array data a la base de datos
+    try {
+      //Primero elimino todo
+      const { error: deleteError } = await supabase
+        .from('whereas_clauses')
+        .delete()
+        .gt('id', -1)
+      //Luego inserto todo
+      if (!deleteError) {
+        const { error: insertError } = await supabase
+          .from('whereas_clauses')
+          .insert(updatedData)
+        const { error: insertErrore } = await supabase
+          .from('whereas_clauses_datatraining')
+          .insert(rawData.current)
+        if (insertError) {
+          alert('Error al guardar datos, Intentelo de nuevo')
+          console.error('Error inserting data:', insertError)
+          return
+        }
+      } else {
+        console.error('Error deleting data, aborting insert:', deleteError)
+        return
+      }
+      alert('Datos enviados correctamente')
+    } catch (error) {
+      console.error('Error sending data:', error)
+    }
+  }
+
+  const changeToLeft = () => {
+    //Primero guardo userWhereas y iaWhereas en data[index]
+    if (index > 0) {
+      //configuro botones
+      setShowSendButton(false)
+      const updatedData = [...data];
+      updatedData[index] = {
+        ...updatedData[index],
+        whereasia: iaWhereas,
+        whereasuser: userWhereas
+      };
+      setData(updatedData);
+      rawData.current[index] = {
+        ...rawData.current[index], whereasfinalchoice: userWhereas
+      }
+
+      //Luego cargo los datos del nuevo index
+      setIaWhereas(data[index - 1].whereasia);
+      setUserWhereas(data[index - 1].whereasuser);
+      setResolution(data[index - 1].resolution);
+      //Finalmente actualizo el indice
+      setIndex(currentIndex => currentIndex - 1)
+    }
+  }
+  const changeToRight = () => {
+    if (index < data.length - 1) {
+      //configuro botones
+      setShowSendButton(index === data.length - 2)
+      //Primero guardo userWhereas y iaWhereas en data[index]
+      const updatedData = [...data];
+      updatedData[index] = {
+        ...updatedData[index],
+        whereasia: iaWhereas,
+        whereasuser: userWhereas
+      };
+      setData(updatedData);
+      rawData.current[index] = {
+        ...rawData.current[index], whereasfinalchoice: userWhereas
+      }
+      //Luego cargo los datos del nuevo index
+      setIaWhereas(data[index + 1].whereasia);
+      setUserWhereas(data[index + 1].whereasuser);
+      setResolution(data[index + 1].resolution);
+      //Finalmente actualizo el indice
+      setIndex(currentIndex => currentIndex + 1)
+    }
+  }
+
+  if (loading) return <div>Cargando...</div>
 
   return (
     <div
       style={{
-        maxWidth: "1000px",
+        maxWidth: "1200px",
         margin: "0px auto",
-        backgroundColor: "#FFF",
-        padding: "3em",
+        padding: "1em",
         textAlign: "center",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        boxSizing: "border-box",
       }}
-    >
-      <List
-        removableByMove
-        values={items}
-        onChange={({ oldIndex, newIndex }) => {
-          setItems(
-            newIndex === -1
-              ? arrayRemove(items, oldIndex)
-              : arrayMove(items, oldIndex, newIndex),
-          );
+    ><h3 style={{ margin: 0 }}>{resolution}</h3>
+      <div style={{
+        display: "flex",
+        gap: "2em",
+        justifyContent: "space-between",
+        flex: 1,                // 👈 ocupa SOLO lo que queda después del h3
+        overflow: "auto"        // scroll solo aquí si el contenido desborda
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <button
+            onClick={changeToLeft}
+            style={{
+              background: "none",   // sin fondo
+              border: "none",       // sin borde
+              cursor: "pointer",    // que parezca clickeable
+              padding: 0,           // quita padding
+            }}
+          >
+            <NavigateBeforeIcon style={{ fontSize: 30 }} />
+          </button>
+        </div>
+
+        {/* Lista IA (izquierda) con nuevos estilos */}
+        <div style={{ flex: '1 1 50%', maxWidth: '50%', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+          <h3>Artículos Propuestos IA</h3>
+          <List
+            removableByMove
+            values={iaWhereas}
+            onChange={({ oldIndex, newIndex, targetRect }) => {
+              if (newIndex === -1) {
+                const listElement = document.querySelector('[data-testid="ia-list"]');
+                if (listElement) {
+                  const listRect = listElement.getBoundingClientRect();
+                  const listCenter = listRect.left + (listRect.width / 2);
+                  if (targetRect.left > listCenter) {
+                    setUserWhereas([...userWhereas, iaWhereas[oldIndex]]);
+                  }
+                }
+              }
+              setIaWhereas(newIndex === -1 ? arrayRemove(iaWhereas, oldIndex) : arrayMove(iaWhereas, oldIndex, newIndex));
+            }}
+            renderList={({ children, props, isDragged }) => (
+              <ul
+                {...props}
+                data-testid="ia-list"
+                style={{
+                  // ✨ Estilos del contenedor actualizados
+                  flex: 1,
+                  padding: "1em",
+                  whiteSpace: 'pre-line',
+                  cursor: isDragged ? "grabbing" : undefined,
+                  overflowY: "auto",
+                  backgroundColor: "#f7f7f7",
+                  borderRadius: "8px",
+                  border: "1px solid #ddd"
+                }}
+              >
+                {children}
+              </ul>
+            )}
+            renderItem={({ value, props, isDragged, isSelected, isOutOfBounds }) => (
+              <li
+                {...props}
+                style={{
+                  ...props.style,
+                  // ✨ Estilos de los ítems actualizados
+                  padding: "1em",
+                  margin: "0.5em 0",
+                  textAlign: "left",
+                  listStyleType: "none",
+                  cursor: isDragged ? "grabbing" : "grab",
+                  border: "1px solid #ddd",
+                  boxShadow: "2px 2px 5px rgba(0,0,0,0.08)",
+                  color: "#333",
+                  borderRadius: "5px",
+                  backgroundColor: isDragged || isSelected ? (isOutOfBounds ? "#F08080" : "#EEE") : "#FFF",
+                }}
+              >
+                {value}
+              </li>
+            )}
+          />
+        </div>
+        {/* Lista User (derecha) con nuevos estilos */}
+        <div style={{ flex: '1 1 50%', maxWidth: '50%', display: 'flex', flexDirection: 'column' }}>
+          <h3>Artículos Elegidos</h3>
+          <List
+            removableByMove
+            values={userWhereas}
+            onChange={({ oldIndex, newIndex, targetRect }) => {
+              if (newIndex === -1) {
+                const listElement = document.querySelector('[data-testid="user-list"]');
+                if (listElement) {
+                  const listRect = listElement.getBoundingClientRect();
+                  const listCenter = listRect.left + (listRect.width / 2);
+                  if (targetRect.left < listCenter) {
+                    setIaWhereas([...iaWhereas, userWhereas[oldIndex]]);
+                  }
+                }
+              }
+              setUserWhereas(newIndex === -1 ? arrayRemove(userWhereas, oldIndex) : arrayMove(userWhereas, oldIndex, newIndex));
+            }}
+            renderList={({ children, props, isDragged }) => (
+              <ul
+                {...props}
+                data-testid="user-list"
+                style={{
+                  // ✨ Estilos del contenedor actualizados
+                  flex: 1,
+                  padding: "1em",
+                  whiteSpace: 'pre-line',
+                  cursor: isDragged ? "grabbing" : undefined,
+                  overflowY: "auto",
+                  backgroundColor: "#f7f7f7",
+                  borderRadius: "8px",
+                  border: "1px solid #ddd"
+                }}
+              >
+                {children}
+              </ul>
+            )}
+            renderItem={({ value, props, isDragged, isSelected, isOutOfBounds }) => (
+              <li
+                {...props}
+                style={{
+                  ...props.style,
+                  // ✨ Estilos de los ítems actualizados
+                  padding: "1em",
+                  margin: "0.5em 0",
+                  textAlign: "left",
+                  listStyleType: "none",
+                  cursor: isDragged ? "grabbing" : "grab",
+                  border: "1px solid #ddd",
+                  boxShadow: "2px 2px 5px rgba(0,0,0,0.08)",
+                  color: "#333",
+                  borderRadius: "5px",
+                  backgroundColor: isDragged || isSelected ? (isOutOfBounds ? "#F08080" : "#EEE") : "#FFF",
+                }}
+              >
+                {value}
+              </li>
+            )}
+          />
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <button
+            onClick={showSendButton ? sendData : changeToRight}
+            style={{
+              background: "none",   // sin fondo
+              border: "none",       // sin borde
+              cursor: "pointer",    // que parezca clickeable
+              padding: 0,           // quita padding
+            }}
+          >
+            {showSendButton ? <SendIcon style={{ fontSize: 30 }} /> :
+              <NavigateNextIcon style={{ fontSize: 30 }} />}
+          </button>
+        </div>
+      </div>
+      {/* 🔎 Botón flotante en esquina inferior derecha */}
+      <button
+        onClick={() => setOpenPopup(true)}
+        style={{
+          position: "fixed",
+          bottom: "20px",
+          right: "20px",
+          backgroundColor: "#2563eb",
+          color: "white",
+          border: "none",
+          borderRadius: "50%",
+          width: "50px",
+          height: "50px",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+          cursor: "pointer",
         }}
-        renderList={({ children, props, isDragged }) => (
-          <ul
-            {...props}
-            style={{
-              padding: "0em 0em 1em 0em",
-              cursor: isDragged ? "grabbing" : undefined,
+      >
+        <SearchIcon style={{ fontSize: 30 }} />
+      </button>
+      {/* 2. POPUP CON LA LISTA MOVIBLE INTEGRADA */}
+      {openPopup && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "80px",
+            right: "20px",
+            width: "350px", // Un poco más ancho para el contenido
+            maxHeight: "600px", // Altura máxima para evitar que sea muy grande
+            backgroundColor: "white",
+            border: "1px solid #ddd",
+            borderRadius: "10px",
+            boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+            padding: "1em",
+            zIndex: 9999,
+            display: 'flex',       // Flexbox para organizar el contenido
+            flexDirection: 'column' // Contenido en columna (título, lista, botón)
+          }}
+        >
+          <h4 style={{ marginTop: 0, textAlign: 'left', borderBottom: '1px solid #eee', paddingBottom: '0.5em' }}>Resultados</h4>
+
+          {/* La lista movible va aquí */}
+          <div style={{ flex: 1, overflowY: 'auto', paddingRight: '10px' }}> {/* Contenedor para que la lista tenga scroll */}
+            <List
+              removableByMove
+              values={popupItems}
+              onChange={move_results}
+              renderList={({ children, props, isDragged }) => (
+                <ul {...props} style={{ whiteSpace: 'pre-line', padding: 0, margin: 0, cursor: isDragged ? "grabbing" : undefined }}>
+                  {children}
+                </ul>
+              )}
+              renderItem={({ value, props, isDragged, isSelected, isOutOfBounds }) => (
+                <li
+                  {...props}
+                  style={{
+                    ...props.style,
+                    padding: "1em",
+                    textAlign: "left",
+                    margin: "0.5em 0em",
+                    listStyleType: "none",
+                    cursor: isDragged ? "grabbing" : "grab",
+                    border: "1px solid #CCC",
+                    boxShadow: "2px 2px 5px rgba(0,0,0,0.1)",
+                    color: "#333",
+                    borderRadius: "5px",
+                    backgroundColor: isDragged || isSelected ? (isOutOfBounds ? "#F08080" : "#EEE") : "#FFF",
+                  }}
+                >
+                  {value}
+                </li>
+              )}
+            />
+          </div>
+          {/* Input de búsqueda */}
+          <input
+            type="text"
+            placeholder="Escribe algo para buscar..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && searchTerm.trim() && !loadingPopupSearch) {
+                handleSearch();
+              }
             }}
-          >
-            {children}
-          </ul>
-        )}
-        renderItem={({
-          value,
-          props,
-          isDragged,
-          isSelected,
-          isOutOfBounds,
-        }) => (
-          <li
-            {...props}
-            key={props.key}
             style={{
-              ...props.style,
-              padding: "1.5em",
-              textAlign: "left",
-              margin: "0.5em 0em",
-              listStyleType: "none",
-              cursor: isDragged ? "grabbing" : "grab",
-              border: "2px solid #CCC",
-              boxShadow: "3px 3px #AAA",
-              color: "#333",
-              borderRadius: "5px",
-              fontFamily: 'Arial, "Helvetica Neue", Helvetica, sans-serif',
-              backgroundColor:
-                isDragged || isSelected
-                  ? isOutOfBounds
-                    ? "#F08080"
-                    : "#EEE"
-                  : "#FFF",
+              width: "100%", padding: "0.75em", borderRadius: "5px",
+              border: "1px solid #ccc", marginBottom: "1em", boxSizing: 'border-box'
             }}
-          >
-            {value}
-          </li>
-        )}
-      />
-      <button onClick={() => setItems(initialState)}>Reset</button>
+          />
+          {/* Botón para cerrar el popup */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5em', marginBottom: '1em' }}>
+            <button
+              onClick={closeAndResetPopup}
+              style={{
+                backgroundColor: "#f3f4f6",
+                border: "1px solid #ddd",
+                padding: "0.5em 1em",
+                borderRadius: "5px",
+                cursor: "pointer",
+              }}
+            >
+              Cerrar
+            </button>
+            <button
+              onClick={handleSearch}
+              disabled={loadingPopupSearch}
+              style={{
+                backgroundColor: "#f3f4f6",
+                border: "1px solid #ddd",
+                padding: "0.5em 1em",
+                borderRadius: "5px",
+                cursor: loadingPopupSearch ? "wait" : "pointer",
+              }}
+            >
+              {loadingPopupSearch ? "⏳ Buscando..." : "Buscar"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

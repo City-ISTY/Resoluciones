@@ -3,55 +3,18 @@
   "nodes": [
     {
       "parameters": {
-        "pollTimes": {
-          "item": [
-            {
-              "mode": "custom",
-              "cronExpression": "0/10 * * * * *"
-            }
-          ]
-        },
-        "output": "fields",
-        "fields": [
-          "body",
-          "from",
-          "subject"
-        ],
-        "filters": {
-          "custom": "isRead eq false and not(startswith(subject, 'RE:')) and contains(subject, 'revisar')"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.microsoftOutlookTrigger",
-      "typeVersion": 1,
-      "position": [
-        -1792,
-        160
-      ],
-      "id": "334e8ef4-8ee0-408e-9130-8bec51aa6d73",
-      "name": "Microsoft Outlook Trigger",
-      "alwaysOutputData": false,
-      "credentials": {
-        "microsoftOutlookOAuth2Api": {
-          "id": "aa1g0ggoDcXs6rTB",
-          "name": "Microsoft Outlook account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "toRecipients": "={{ $('Microsoft Outlook Trigger').first().json.from.emailAddress.address }}",
-        "subject": "=Revisión de Convocatoria - {{ $json.uuid }}",
-        "bodyContent": "=Buenos días, se necesita su autorización para el agendamiento de la Convocatoria.\n\n-----PARÁMETROS PROPUESTOS-----\n{{ $json.message.replace(/^[\\r\\n]+|[\\r\\n]+$/g, '') }}\n----------\n\nPOR FAVOR RESPONDER:\n- Para continuar: Responda con \"APROBADO\" en el cuerpo del mensaje (No cambiar el asunto)\n- Para realizar nuevos cambios, indicar el punto a cambiar, y el cambio que solicita.\n \nEn caso de haber más cambios, le contestaré en un minuto para que se verifique nuevamente.\n\nMuchas gracias y que tenga una buena tarde.\nAtte. Bruno ",
+        "toRecipients": "={{ $('START').first().json.from.emailAddress.address }}",
+        "subject": "=Revisión de Convocatoria - {{ $('createUUID').item.json.uuid }}",
+        "bodyContent": "=Por favor verificar que los cambios se hayan realizado correctamente\n\n-----PARÁMETROS PROPUESTOS-----\n{{ $json.text_structured }}\n----------\n\nPOR FAVOR RESPONDER:\n- Para continuar: Responda con \"APROBADO\" en el cuerpo del mensaje (No cambiar el asunto)\n- Para realizar nuevos cambios, indicar el punto a cambiar, y el cambio que solicita.\n \nEn caso de haber más cambios, le contestaré en un minuto para que se verifique nuevamente.\n\nMuchas gracias y que tenga una buena tarde.\nAtte. Bruno ",
         "additionalFields": {}
       },
       "type": "n8n-nodes-base.microsoftOutlook",
       "typeVersion": 2,
       "position": [
-        -1248,
-        160
+        -4192,
+        64
       ],
-      "id": "5b6573b5-c3d0-4521-b2e3-e2fc3813c2d6",
+      "id": "a1bc626c-f445-4ad2-bfb9-2d1b66b2f43a",
       "name": "Send a message",
       "webhookId": "ace6381b-ed18-445b-bc12-f00450c6438d",
       "alwaysOutputData": false,
@@ -90,38 +53,11 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -640,
-        160
+        -3552,
+        64
       ],
-      "id": "5af81c70-f6b8-4e3e-9fa1-be6d3909dad9",
+      "id": "c8a0a684-68f4-451b-b7be-ada7be539275",
       "name": "If"
-    },
-    {
-      "parameters": {
-        "operation": "reply",
-        "messageId": {
-          "__rl": true,
-          "value": "={{ $('ExtractLastMailResponse').first().json.id }}",
-          "mode": "id"
-        },
-        "message": "=<div>\nListo, por favor verificar que los cambios se hayan realizado correctamente\n<br>\n-----PARÁMETROS PROPUESTOS-----<br>\n{{ $json.acta }}<br>\n----------\n<br><br>\nPOR FAVOR RESPONDER:\n<br>\n- Para continuar: Responda con \"APROBADO\" en el cuerpo del mensaje (No cambiar el asunto)<br>\n- Para realizar nuevos cambios, indicar el punto a cambiar, y el cambio que solicita.<br>\nEn caso de haber más cambios, le contestaré en 30 segundos para que se verifique nuevamente.<br>\nMuchas gracias y que tenga una buena tarde.<br>\nAtte. Bruno \n</div>",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.microsoftOutlook",
-      "typeVersion": 2,
-      "position": [
-        -1216,
-        384
-      ],
-      "id": "22e4e2cb-a677-42bd-b725-527abc5feabd",
-      "name": "Reply to a message",
-      "webhookId": "425d96da-f199-4725-b573-3bfdbd624f35",
-      "credentials": {
-        "microsoftOutlookOAuth2Api": {
-          "id": "aa1g0ggoDcXs6rTB",
-          "name": "Microsoft Outlook account"
-        }
-      }
     },
     {
       "parameters": {
@@ -130,10 +66,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -816,
-        160
+        -3744,
+        64
       ],
-      "id": "9b9c762c-508e-4d84-b233-c7fa4a4afd35",
+      "id": "6aa2efdc-405b-43e2-aba5-4ca0d2beff6c",
       "name": "ExtractLastMailResponse",
       "alwaysOutputData": true,
       "onError": "continueRegularOutput"
@@ -163,10 +99,10 @@
       "type": "n8n-nodes-base.microsoftOutlook",
       "typeVersion": 2,
       "position": [
-        -1008,
-        160
+        -3968,
+        64
       ],
-      "id": "cceca839-102a-4d85-9cf2-2b95224b67ea",
+      "id": "93b1f3c4-cddd-4a22-bc99-ede4573799bb",
       "name": "Get many messages",
       "webhookId": "d8e3e4a8-34f0-4e5e-8836-6307a8ce30c1",
       "retryOnFail": false,
@@ -184,103 +120,30 @@
     },
     {
       "parameters": {
-        "amount": 20
+        "amount": 10
       },
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -400,
-        336
+        -3328,
+        208
       ],
-      "id": "142a9890-55f9-49d5-9ce4-b97847e9e58b",
+      "id": "4092eeb6-5a5a-4746-9fce-6882900e8418",
       "name": "Wait",
       "webhookId": "370dc68f-704b-4296-bc9c-118522873b2c"
     },
     {
       "parameters": {
-        "modelId": {
-          "__rl": true,
-          "value": "models/gemini-2.5-flash",
-          "mode": "list",
-          "cachedResultName": "models/gemini-2.5-flash"
-        },
-        "messages": {
-          "values": [
-            {
-              "content": "Eres un asistente administrativo inteligente especializado en la corrección de documentos",
-              "role": "model"
-            },
-            {
-              "content": "=Tu tarea es tomar un borrador original de un correo electrónico (Texto 1) y un segundo texto con solicitudes de cambio (Texto 2). Debes generar una nueva versión del Texto 1 que incorpore únicamente los cambios especificados en el Texto 2, manteniendo intacta toda la estructura y el contenido no mencionado. \n\n\n\n *Instrucciones Obligatorias a seguir \n\n 1. Lee el Texto 1 para entender la estructura y el contenido original. Lee el Texto 2 para identificar qué parámetros específicos deben ser modificados. \n\n 2. Solo modifica las secciones del Texto 1 que se indica en el Texto 2 \n\n 3. Conserva la estructura, sangrías y formato general del Texto 1 en tu respuesta, pero actualiza las numeraciones en caso de que se eliminen items, y no cambies el formato de separador entre el indice y el contenido | \n\n 4. Conserva lo que no se menciona: Si una sección o parámetro del Texto 1 (como \"Tipo de sesión\" o uno de los temas) no se menciona en el Texto 2, debe permanecer exactamente igual en el resultado final.  \n\n 5. Devuelve únicamente el texto 1 con las correciones que se piden en el texto 2, no des ninguna explicación, ni algun otro comentario. \n\n 6. Formato de salida: Texto plano, devuelve EXCLUSIVAMENTE el texto modificado, sin envolverlo entre comillas \n\n Tu tarea es tomar un borrador original de un correo electrónico (Texto 1) y un segundo texto con solicitudes de cambio (Texto 2). Debes generar una nueva versión del Texto 1 que incorpore únicamente los cambios especificados en el Texto 2, manteniendo intacta toda la estructura y el contenido no mencionado.  \n\n*ESTRUCTURA DEL TEXTO1 \n\n1| Fecha: *Aquí se indica la fecha de la reunión*\n\n2| Tipo: *Unicamente puede tomar los valores Ordinaria o Extraordinaria*\n\n3| Asistentes: *Participantes de la reunion* orden: *nombre_asistente - correo_electrónico - cargo_función* elm \"3.1| Andrés Tituana - alvaro.andres1996@hotmail.com - Representante de Estudiantes\"\n\n4| Temas a resolver: *Siempre va a ser una lista de maximo dos niveles* ejm \n\n\"4.1| Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera\n\n      4.1.1| Msc. Alfredo Armando Rodríquez Guzman, representante del Rector.\n\n\"\n\n\n\n  *Instrucciones Obligatorias a seguir  \n1. Lee el Texto 1 para entender la estructura y el contenido original. Lee el Texto 2 para identificar qué parámetros específicos deben ser modificados.  \n2. Solo modifica las secciones del Texto 1 que se indica en el Texto 2  \n3. Conserva la estructura, sangrías y formato general del Texto 1 en tu respuesta, pero actualiza las numeraciones en caso de que se eliminen items. \n4. Conserva lo que no se menciona: Si una sección o parámetro del Texto 1 (como \"Tipo de sesión\" o uno de los temas) no se menciona en el Texto 2, debe permanecer exactamente igual en el resultado final.   \n6. Devuelve únicamente el texto 1 con las correciones que se piden en el texto 2, no des ninguna explicación, ni algun otro comentario.  \n7. Si se te pide algun cambio fuera del formato del texto 1 establecido, no lo añadas, unicamtente te pueden pedir cambios de fecha, asistentes, tipo sesión o temas a resolver.\n\n8. La numeracion es estricta: 1-fecha, 2-tipo, 3-Asistentes, 4-temas. Nunca cambies la numeracion de los temas generales.\n9. Formato de salida: Devuelme unicamente el texto 1 en texto plano con los cambios realizados.\n\n\nTEXTO 1 - PARÁMETROS ORIGINALES:\n```{{ $json.previous_act_formatted }}```\nTEXTO 2 - CAMBIOS SOLICITADOS:\n```{{ $json.changes }}```"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.googleGemini",
-      "typeVersion": 1,
-      "position": [
-        0,
-        400
-      ],
-      "id": "1170d867-fdd7-4a27-8676-5a562552f7ed",
-      "name": "Realizar Cambios",
-      "credentials": {
-        "googlePalmApi": {
-          "id": "0Zr2gDUeSEg2Xe6E",
-          "name": "Google Gemini(PaLM) Api account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const output_data = $('Information Extractor').first().json.output\n\nconst teamsDataMeeting = {}\n\nteamsDataMeeting.isOnlineMeeting = true\nteamsDataMeeting.onlineMeetingProvider = \"teamsForBusiness\"\n\n\n\n\nconst fechaInicio = new Date(output_data.fecha);\nif (fechaInicio.getMinutes() === 0) {\n    fechaInicio.setHours(13, 0, 0, 0);\n}\n\nconst fechaFin = new Date(fechaInicio);\nfechaFin.setHours(fechaInicio.getHours() + 2);\n\n\nteamsDataMeeting.start = {\n    \"dateTime\": fechaInicio,\n    \"timeZone\": \"America/Guayaquil\"\n}\n\nteamsDataMeeting.end = {\n    \"dateTime\": fechaFin,\n    \"timeZone\": \"America/Guayaquil\"\n}\nteamsDataMeeting.attendees = output_data.asistentes.map((at)=>{\n  return({ \"emailAddress\": {\"address\": at.mail, \"name\": at.name}, \n  \"type\": \"optional\"})\n})\n\noutput_data.body =teamsDataMeeting\n\n\n\n\n\nconst number_session = output_data.tipo.toLowerCase() == \"ordinaria\" ? \n    ('00' + (Number($input.first().json.ordinary_session_number)+1)).slice(-3) : \n    ('00' + (Number($input.first().json.extraordinary_session_number)+1)).slice(-3)\n  \n  //if \n  output_data.session_code = `OCS-S${output_data.tipo.toLowerCase() == \"ordinaria\" ? \"O\" : \"E\"}-${number_session}-${$today.toString().substring(0, 4)}`\n\nteamsDataMeeting.subject = `Sesion ${output_data.tipo} ${output_data.session_code}`\n\n\nreturn [{ \"output\": output_data }];\n"
+        "jsCode": "const output_data = $('Information Extractor').first().json.output\n\n\n//Se agrega al RECTOR como asistenta\noutput_data.asistentes.unshift({\n  \"name\": \"Mgtr. Javier Hernando Garzón Espinoza\",\n  \"mail\": $env.N8N_RECTOR_EMAIL,\n  \"role\": \"Rector\",\n  \"principal\": true\n})\n\n\nconst teamsDataMeeting = {}\n\nteamsDataMeeting.isOnlineMeeting = true\nteamsDataMeeting.onlineMeetingProvider = \"teamsForBusiness\"\n\n\n\n\nconst fechaInicio = new Date(output_data.fecha);\nif (fechaInicio.getMinutes() === 0) {\n    fechaInicio.setHours(13, 0, 0, 0);\n}\n\nconst fechaFin = new Date(fechaInicio);\nfechaFin.setHours(fechaInicio.getHours() + 2);\n\n\nteamsDataMeeting.start = {\n    \"dateTime\": fechaInicio,\n    \"timeZone\": \"America/Guayaquil\"\n}\n\nteamsDataMeeting.end = {\n    \"dateTime\": fechaFin,\n    \"timeZone\": \"America/Guayaquil\"\n}\nteamsDataMeeting.attendees = output_data.asistentes.map((at)=>{\n  return({ \"emailAddress\": {\"address\": at.mail, \"name\": at.name}, \n  \"type\": \"optional\"})\n})\n\n//LE CREO A SECRETARÍA COMO ASISTENTE\nteamsDataMeeting.attendees.push({\n\"emailAddress\": {\n  \"address\": $env.N8N_SECRETARY_EMAIL,\n  \"name\": \"SECRETARÍA\"\n  },\n\"type\": \"optional\"\n})\noutput_data.body =teamsDataMeeting\n\n\n\nconst number_session = output_data.tipo.toLowerCase() == \"ordinaria\" ? \n    ('00' + (Number($input.first().json.ordinary_session_number + 1))).slice(-3) : \n    ('00' + (Number($input.first().json.extraordinary_session_number + 1))).slice(-3)\n  \n  //if \n  output_data.session_code = `OCS-S${output_data.tipo.toLowerCase() == \"ordinaria\" ? \"O\" : \"E\"}-${number_session}-${$today.toString().substring(0, 4)}`\n\nteamsDataMeeting.subject = `Sesion ${output_data.tipo} ${output_data.session_code}`\n\n\nreturn [{ \"output\": output_data }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        512,
-        128
+        -2400,
+        32
       ],
-      "id": "fc4be84e-822b-415e-98ad-ea6cca4fc31f",
+      "id": "9c6eae2a-130f-46cc-8ea1-c24a3b7ac61b",
       "name": "formatDataForMeeting"
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "bc69d1fd-6c2d-45b7-89bb-c32f8afb7a71",
-              "name": "acta",
-              "value": "={{ $json.content.parts[0].textoReemplazado }}",
-              "type": "string"
-            }
-          ]
-        },
-        "includeOtherFields": true,
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        -1392,
-        384
-      ],
-      "id": "ca4ab88b-ef77-49d2-9d55-78c5651fb8cb",
-      "name": "edit"
-    },
-    {
-      "parameters": {
-        "jsCode": "\nconst textoEstructurado = $input.first().json.content.parts[0].text\n\nconst textoReemplazado = textoEstructurado.replace(/(?<=\\n) +/g, match => '&nbsp;'.repeat(match.length)).replace(/\\n/g, '<br>');\n\n\n// Asigna el resultado a donde necesites\n$input.first().json.content.parts[0].textoReemplazado = textoReemplazado;\n\nreturn $input.all();\n\n"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -1552,
-        384
-      ],
-      "id": "dbcf6bc3-0492-4b07-93d0-474a68c197a4",
-      "name": "formatText"
     },
     {
       "parameters": {
@@ -309,10 +172,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -224,
-        144
+        -3136,
+        48
       ],
-      "id": "cfd3aa66-d8da-4657-9690-6267e54c66fe",
+      "id": "17f35827-298d-45d5-9af7-a3ca965b6eb4",
       "name": "approved"
     },
     {
@@ -323,37 +186,11 @@
       "type": "n8n-nodes-base.crypto",
       "typeVersion": 1,
       "position": [
-        -1440,
-        160
+        -4480,
+        64
       ],
-      "id": "4dc898ee-ac6c-4c77-987f-11fdc7b78807",
+      "id": "acdd142c-d24c-4e6c-9c01-31b3ac826c37",
       "name": "createUUID"
-    },
-    {
-      "parameters": {
-        "jsCode": "const htmlContent = $input.first().json.body.content || '';\n// Dividir por la etiqueta <hr> y tomar solo la primera parte\nconst html_split = htmlContent.split(/<hr[^>]*>/gi);\nconst user_suggest = html_split[0] || '';\nconst previous_act = html_split[1] || '';\nconst regex = /-----PARÁMETROS PROPUESTOS-----([\\s\\S]*?)----/;\nconst match = previous_act.match(regex);\nlet textoExtraido = match ? match[1].trim() : '';\n\nconst formatHtmlContent = (html) => {\n  return html\n    .replace(/<div[^>]*>/gi, '') // Eliminar apertura de divs\n    .replace(/<\\/div>/gi, '\\n')   // Convertir cierre de divs en saltos de línea\n    .replace(/<br\\s*\\/?>/gi, '\\n') // Convertir <br> en saltos de línea\n    .replace(/&nbsp;/g, ' ')      // Reemplazar espacios no breaking\n    .replace(/\\n{3,}/g, '\\n\\n')   // Reducir múltiples saltos de línea\n    .replace(/<[^>]*>/g, '');     // Eliminar el resto de etiquetas HTML\n};\n\nconst changes = formatHtmlContent(user_suggest);\nconst previous_act_formatted = formatHtmlContent(textoExtraido);\n\n\nreturn [{ json: { changes: changes, previous_act_formatted: previous_act_formatted, previous_act: previous_act } }];\n"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -416,
-        144
-      ],
-      "id": "0ba98d9b-04db-4a7c-8c5f-7f0ba957f25b",
-      "name": "cleanHTML"
-    },
-    {
-      "parameters": {
-        "jsCode": "const htmlContent = $input.first().json.body.content || '';\n// Dividir por la etiqueta <hr> y tomar solo la primera parte\nconst html_split = htmlContent.split(/<hr[^>]*>/i);\nconst user_suggest = html_split[0] || '';\n\n\nconst formatHtmlContent = (html) => {\n  return html\n    .replace(/<div[^>]*>/gi, '') // Eliminar apertura de divs\n    .replace(/<\\/div>/gi, '\\n')   // Convertir cierre de divs en saltos de línea\n    .replace(/<br\\s*\\/?>/gi, '\\n') // Convertir <br> en saltos de línea\n    .replace(/&nbsp;/g, ' ')      // Reemplazar espacios no breaking\n    .replace(/\\n{3,}/g, '\\n\\n')   // Reducir múltiples saltos de línea\n    .replace(/<[^>]*>/g, '');     // Eliminar el resto de etiquetas HTML\n};\n\nconst message = formatHtmlContent(user_suggest);\n\n\nreturn [{ json: { message: message } }];\n"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -1616,
-        160
-      ],
-      "id": "df1b4e5c-b372-4e12-a5ac-5f60ad252bca",
-      "name": "cleanHTML1"
     },
     {
       "parameters": {
@@ -372,10 +209,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        688,
-        128
+        -2208,
+        32
       ],
-      "id": "2782aea3-023b-4a73-a62b-655680ff72dc",
+      "id": "3bb1a885-72da-4c65-b153-7112fb11d719",
       "name": "create_teams_meeting",
       "credentials": {
         "microsoftOAuth2Api": {
@@ -398,7 +235,7 @@
             "meeting_datetime_ISO8631": "={{ $json.start.dateTime }}",
             "convocation_date_ISO8631": "={{ $today }}",
             "session_code": "={{ $('formatDataForMeeting').first().json.output.session_code }}",
-            "attendees": "={{ $('formatDataForMeeting').first().json.output.asistentes }}",
+            "attendees": "={{ $('formatDataForMeeting').first().json.output.asistentes.filter(item => !item.principal) }}",
             "teams_link": "={{ $json.onlineMeeting.joinUrl }}",
             "meeting_topics": "={{ $('formatDataForMeeting').first().json.output.temas }}"
           },
@@ -478,10 +315,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        880,
-        128
+        -2016,
+        32
       ],
-      "id": "d2427be6-fe9a-4083-a55a-d37dbd3b4dcf",
+      "id": "54724979-bb9f-43a5-9048-8e24db0ce7cc",
       "name": "PDF_CONVOCATORIA"
     },
     {
@@ -596,10 +433,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        1088,
-        128
+        -1824,
+        32
       ],
-      "id": "c8e01250-ac9e-4ed7-b4c3-b1ecb1399b69",
+      "id": "4e4402f0-8b27-4795-a5ff-2fcc69c3666e",
       "name": "SAVE_METADATA"
     },
     {
@@ -612,10 +449,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        336,
-        128
+        -2576,
+        32
       ],
-      "id": "3e8b2cb3-8c96-4b49-b622-f700acd61ff7",
+      "id": "c913c6e3-4c40-4110-a735-480b4edbda97",
       "name": "GET_RESOLUTIONS",
       "credentials": {
         "supabaseApi": {
@@ -633,10 +470,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        -16,
-        112
+        -2928,
+        16
       ],
-      "id": "6fd77a2d-2585-4edb-8290-1821773e8032",
+      "id": "df702324-4107-4f41-bf6d-c7c21522fabd",
       "name": "Google Gemini Chat Model",
       "credentials": {
         "googlePalmApi": {
@@ -654,10 +491,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        32,
-        -272
+        -2880,
+        -400
       ],
-      "id": "76fe9cc3-03d1-4104-b637-1d8ab9acf60a",
+      "id": "c08e677f-55d6-48dd-8206-5d838835c825",
       "name": "Structured Output Parser"
     },
     {
@@ -667,10 +504,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        -128,
-        -240
+        -3040,
+        -368
       ],
-      "id": "34e7cf6c-3603-4a52-8e6e-a8bf5e9aaa86",
+      "id": "40fc77aa-81d5-415c-b2e9-8e81d09e76bc",
       "name": "Google Gemini Chat Model2",
       "credentials": {
         "googlePalmApi": {
@@ -697,10 +534,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -16,
-        -96
+        -2928,
+        -224
       ],
-      "id": "d0d80c8f-5844-4549-b036-5228d0aa8b2a",
+      "id": "5447b68b-a4eb-455d-9d9b-2f850a84d40a",
       "name": "Information Extractor"
     },
     {
@@ -711,10 +548,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        144,
-        112
+        -2768,
+        16
       ],
-      "id": "a792637b-8e8d-4de2-b157-b4a77ffc8061",
+      "id": "d05674e3-6663-4fe9-a72e-7ec2314f4ee6",
       "name": "Google Gemini Chat Model1",
       "credentials": {
         "googlePalmApi": {
@@ -725,27 +562,274 @@
     },
     {
       "parameters": {
-        "toRecipients": "={{ $('formatDataForMeeting').first().json.output.asistentes.map(asistente => asistente.mail).join(', ') }}",
-        "subject": "Convocatoria Sessión",
-        "bodyContent": "=Buen día, se solicita su presencia en la sesión, por favor remitir el documento firmado.\n\nSe adjunta los links para la toma de asistencia y votos: \nASISTENCIA: \n{{ $('SAVE_METADATA').item.json.url_attendances }}\nVOTOS:\n{{ $('SAVE_METADATA').item.json.urt_votes }}",
-        "additionalFields": {
-          "attachments": {
-            "attachments": [
-              {
-                "binaryPropertyName": "data"
-              }
-            ]
-          }
+        "operation": "update",
+        "tableId": "sessions_resolutions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "extraordinary_session_number",
+              "condition": "gt",
+              "keyValue": "0"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "extraordinary_session_number",
+              "fieldValue": "={{$('formatDataForMeeting').item.json.output.tipo.toLowerCase() == \"extraordinaria\"?  $('GET_RESOLUTIONS').item.json.extraordinary_session_number+1: $('GET_RESOLUTIONS').item.json.extraordinary_session_number}}"
+            },
+            {
+              "fieldId": "ordinary_session_number",
+              "fieldValue": "={{$('formatDataForMeeting').item.json.output.tipo.toLowerCase() == \"ordinaria\"? $('GET_RESOLUTIONS').item.json.ordinary_session_number+1: $('GET_RESOLUTIONS').item.json.ordinary_session_number}}"
+            },
+            {
+              "fieldId": "last_session_type",
+              "fieldValue": "={{$('formatDataForMeeting').item.json.output.tipo.toLowerCase() == \"ordinaria\"?\"O\":\"E\" }}"
+            }
+          ]
         }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1584,
+        32
+      ],
+      "id": "d123a543-6ef4-4128-b7ab-160239b4663d",
+      "name": "UPDATE_SESSION_NUMBER",
+      "credentials": {
+        "supabaseApi": {
+          "id": "7iDL76ggTML8vg0b",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -5056,
+        240
+      ],
+      "id": "fc66f7a3-8e85-403d-a18e-fbb9f6538918",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0Zr2gDUeSEg2Xe6E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "\n{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"fecha\": {\n\t\t\t\"type\": \"string\",\n            \"format\": \"date-time\"\n        },\n\t\t\"tipo\":{\n\t\t\t\"type\": \"string\"\n\t\t},\n\t\t\"asistentes\":{\n\t\t\t\"type\": \"array\",\n\t\t\t\"items\": {\n\t\t\t\t\"type\": \"object\",\n\t\t\t\t\"properties\": {\n\t\t\t\t\t\"name\": {\n\t\t\t\t\t\t\"type\":\"string\"\n\t\t\t\t\t},\n\t\t\t\t\t\"mail\": {\n\t\t\t\t\t\t\"type\":\"string\",\n                        \"format\": \"email\"\n\t\t\t\t\t},\n\t\t\t\t\t\"role\": {\n\t\t\t\t\t\t\"type\":\"string\"\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t},\n\t\t\"temas\":{\n\t\t\t\"type\": \"array\",\n\t\t\t\"items\": {\n\t\t\t\t\"type\": \"object\",\n\t\t\t\t\"properties\": {\n\t\t\t\t\t\"topic\":{\n\t\t\t\t\t\t\"type\": \"string\"\n\t\t\t\t\t},\n\t\t\t\t\t\"sub_topics\":{\n\t\t\t\t\t\t\"type\": \"array\",\n\t\t\t\t\t\t\"items\": {\n\t\t\t\t\t\t\t\"type\": \"string\"\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -4992,
+        -80
+      ],
+      "id": "90608f31-2238-421f-a3dd-19625757ad0d",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -5152,
+        -80
+      ],
+      "id": "edec0a8a-2d7a-4347-a391-fc581689c569",
+      "name": "Google Gemini Chat Model4",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0Zr2gDUeSEg2Xe6E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Aquí está el documento para procesar:\n\n{{ \n//Se analiza si es un correo antiguo el que se está procesando\n    (() => {\n        try {\n             $('CLEAN_RESPONSE').first();\n            return true\n        } catch (error) {\n            return false;\n        }\n    })() ?\n  //CASO VERDADERO, SE COLOCA LA INFORMACION QUE SE TENIA ALMACENADA     \n$('CLEAN_RESPONSE').first().json.previous_act_formatted:\n//CASO FALSO, SE COLOCA LA INFORMACION QUE LLEGA DEL CORREO NUEVO\n$('CLEAN_ENTRY').first().json.message\n}}\n\n{{ \n//Se HACE EL MISMO ANALISIS, SI ES UN CORREO NUEVO, VA A INCLUIR EL CAMPO \"CAMBIOS\", SI NO, AQUÍ SE LO COLOCO\n    (() => {\n        try {\n             $('CLEAN_RESPONSE').first();\n            return true\n        } catch (error) {\n            return false;\n        }\n    })() ?\n  //CASO VERDADERO, SE COLOCA LA INFORMACION QUE SE TENIA ALMACENADA     \n\"CAMBIOS:\"+\"\\n\"+ $('CLEAN_RESPONSE').first().json.changes.replace(/^(\\r?\\n)+|(\\r?\\n)+$/g, ''):\n//CASO FALSO, NO SE COLOCA LA SECCION \"CAMBIOS\" POR QUE SE SUPONE QUE AL SER UN NUEVO CORREO ENTRANTE, EL USUARIO YA COLCA ESA PARTE.\n\"\"\n}}\n",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Eres un asistente de oficina altamente preciso, especializado en modificar borracciones de actas. Tu tarea es procesar un texto que contiene un \"Texto Original\" y una sección de \"CAMBIOS\".\n\n**Instrucciones Obligatorias:**\n\n1.  Tu única función es generar una nueva versión del \"Texto Original\" que incorpore los cambios especificados en la sección \"CAMBIOS\".\n2.  Si la sección \"CAMBIOS\" está vacía o no existe, devuelve el \"Texto Original\" sin ninguna modificación.\n3.  Conserva rigurosamente la estructura, sangrías, formato general y el separador \"|\" del \"Texto Original\".\n4.  Si eliminas un ítem de una lista, actualiza la numeración secuencial de los ítems restantes.\n5.  Cualquier sección no mencionada en \"CAMBIOS\" debe permanecer idéntica.\n6.  Solo puedes modificar: Fecha, Tipo, Asistentes y Temas. No alteres la estructura principal.\n7.  **Regla de Salida CRÍTICA:** Tu respuesta debe ser EXCLUSIVAMENTE el texto modificado en formato de texto plano. No incluyas explicaciones, saludos, comentarios, ni lo envuelvas en comillas o bloques de código.\n8.  Si encuentras al asistente \"Mgtr Javier Hernando Espinoza Garzón\", eliminalo"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -5040,
+        80
+      ],
+      "id": "c921f2dd-e98d-485f-a0ac-30b8cfb4c397",
+      "name": "Information Extractor1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -4896,
+        240
+      ],
+      "id": "1f34ae12-0ee2-450b-969e-a16d8d75e4e3",
+      "name": "Google Gemini Chat Model5",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0Zr2gDUeSEg2Xe6E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const output_structured_data = $('Information Extractor1').first().json.output\n\nfunction formatDataToText(data) {\n  // Usamos un array para ir construyendo cada línea del texto.\n  const outputLines = [];\n\n  // 1. Formatear Fecha\n  outputLines.push(`1| Fecha: ${data.fecha}`);\n\n  // 2. Formatear Tipo\n  outputLines.push(`2| Tipo: ${data.tipo}`);\n\n  // 3. Formatear Asistentes\n  outputLines.push(`3| Asistentes:`);\n  if (data.asistentes && data.asistentes.length > 0) {\n    data.asistentes.forEach((asistente, index) => {\n      const num = `3.${index + 1}`;\n      const asistenteInfo = `${asistente.name} - ${asistente.mail} - ${asistente.role}`;\n      // Añadimos sangría para el subnivel\n      outputLines.push(`   ${num}| ${asistenteInfo}`);\n    });\n  }\n\n  // 4. Formatear Temas a resolver (con subniveles)\n  outputLines.push(`4| Temas a resolver`);\n  if (data.temas && data.temas.length > 0) {\n    data.temas.forEach((tema, topicIndex) => {\n      const topicNum = `4.${topicIndex + 1}`;\n      // Añadimos sangría para el primer nivel de temas\n      outputLines.push(`   ${topicNum}| ${tema.topic}`);\n\n      // Verificamos si hay sub-temas para anidar\n      if (tema.sub_topics && tema.sub_topics.length > 0) {\n        tema.sub_topics.forEach((subTopic, subTopicIndex) => {\n          const subTopicNum = `${topicNum}.${subTopicIndex + 1}`;\n          // Añadimos una sangría mayor para el segundo nivel\n          outputLines.push(`      ${subTopicNum}| ${subTopic}`);\n        });\n      }\n    });\n  }\n\n  // Unimos todas las líneas en un solo string, separadas por un salto de línea.\n  return outputLines.join('\\n');\n}\n\n\nconst text_structured = formatDataToText(output_structured_data)\nconsole.log(text_structured)\n\nreturn [{json:{text_structured}}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4336,
+        64
+      ],
+      "id": "6018496e-071d-4ab9-87b4-bc1185a905ec",
+      "name": "FORMAT_TO_TEXT"
+    },
+    {
+      "parameters": {
+        "jsCode": "const htmlContent = $input.first().json.body.content || '';\n// Dividir por la etiqueta <hr> y tomar solo la primera parte\nconst html_split = htmlContent.split(/<hr[^>]*>/i);\nconst user_suggest = html_split[0] || '';\n\n\nconst formatHtmlContent = (html) => {\n  return html\n    .replace(/<div[^>]*>/gi, '') // Eliminar apertura de divs\n    .replace(/<\\/div>/gi, '\\n')   // Convertir cierre de divs en saltos de línea\n    .replace(/<br\\s*\\/?>/gi, '\\n') // Convertir <br> en saltos de línea\n    .replace(/&nbsp;/g, ' ')      // Reemplazar espacios no breaking\n    .replace(/\\n{3,}/g, '\\n\\n')   // Reducir múltiples saltos de línea\n    .replace(/<[^>]*>/g, '');     // Eliminar el resto de etiquetas HTML\n};\n\nconst message = formatHtmlContent(user_suggest);\n\n\nreturn [{ json: { message: message } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5232,
+        80
+      ],
+      "id": "906cf2ae-8907-42a8-9ead-1231693f2f0b",
+      "name": "CLEAN_ENTRY"
+    },
+    {
+      "parameters": {
+        "jsCode": "const htmlContent = $input.first().json.body.content || '';\n// Dividir por la etiqueta <hr> y tomar solo la primera parte\nconst html_split = htmlContent.split(/<hr[^>]*>/gi);\nconst user_suggest = html_split[0] || '';\nconst previous_act = html_split[1] || '';\nconst regex = /-----PARÁMETROS PROPUESTOS-----([\\s\\S]*?)----/;\nconst match = previous_act.match(regex);\nlet textoExtraido = match ? match[1].trim() : '';\n\nconst formatHtmlContent = (html) => {\n  return html\n    .replace(/<div[^>]*>/gi, '') // Eliminar apertura de divs\n    .replace(/<\\/div>/gi, '\\n')   // Convertir cierre de divs en saltos de línea\n    .replace(/<br\\s*\\/?>/gi, '\\n') // Convertir <br> en saltos de línea\n    .replace(/&nbsp;/g, ' ')      // Reemplazar espacios no breaking\n    .replace(/\\n{3,}/g, '\\n\\n')   // Reducir múltiples saltos de línea\n    .replace(/<[^>]*>/g, '');     // Eliminar el resto de etiquetas HTML\n};\n\nconst changes = formatHtmlContent(user_suggest);\nconst previous_act_formatted = formatHtmlContent(textoExtraido);\n\n\nreturn [{ json: { changes: changes, previous_act_formatted: previous_act_formatted, previous_act: previous_act } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3328,
+        48
+      ],
+      "id": "1c297a92-36dc-4486-b85f-21496816a91e",
+      "name": "CLEAN_RESPONSE"
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": {
+          "__rl": true,
+          "value": "={{ $('ExtractLastMailResponse').last().json.id }}",
+          "mode": "id"
+        },
+        "message": "=Listo, por favor verificar que los cambios se hayan realizado correctamente<br>\n-----PARÁMETROS PROPUESTOS-----<br>\n{{ \n    $json.text_structured\n      .replace(/\\r?\\n/g, '<br>')\n      .replace(/\\s{2,}/g, ' &nbsp;')\n}}\n<br>\n----------<br><br>\nPOR FAVOR RESPONDER:<br>\n- Para continuar: Responda con \"APROBADO\" en el cuerpo del mensaje (No cambiar el asunto)<br>\n- Para realizar nuevos cambios, indicar el punto a cambiar, y el cambio que solicita.<br>\nEn caso de haber más cambios, le contestaré en 30 segundos para que se verifique nuevamente.<br>\nMuchas gracias y que tenga una buena tarde.<br>\nAtte. Bruno",
+        "options": {}
       },
       "type": "n8n-nodes-base.microsoftOutlook",
       "typeVersion": 2,
       "position": [
-        1440,
-        128
+        -4272,
+        304
       ],
-      "id": "397f7fbd-67d2-40bf-b4e9-06782cc1170c",
-      "name": "SEND_SECRETARY",
+      "id": "c6c2f9f3-9e4b-49a8-9b90-a5cec998def2",
+      "name": "Reply to a message",
+      "webhookId": "425d96da-f199-4725-b573-3bfdbd624f35",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "aa1g0ggoDcXs6rTB",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a2d0f93c-0d73-4939-821a-92f351259159",
+              "leftValue": "={{ \n//Se analiza si es un correo antiguo el que se está procesando\n    (() => {\n        try {\n             $('CLEAN_RESPONSE').first();\n            return true\n        } catch (error) {\n            return false;\n        }\n    })()\n}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -4688,
+        80
+      ],
+      "id": "e02d9a1a-275c-4635-bb19-ca27350b3cb1",
+      "name": "IS_NEW_EMAIL"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output_structured_data = $('Information Extractor1').first().json.output\n\nfunction formatDataToText(data) {\n  // Usamos un array para ir construyendo cada línea del texto.\n  const outputLines = [];\n\n  // 1. Formatear Fecha\n  outputLines.push(`1| Fecha: ${data.fecha}`);\n\n  // 2. Formatear Tipo\n  outputLines.push(`2| Tipo: ${data.tipo}`);\n\n  // 3. Formatear Asistentes\n  outputLines.push(`3| Asistentes:`);\n  if (data.asistentes && data.asistentes.length > 0) {\n    data.asistentes.forEach((asistente, index) => {\n      const num = `3.${index + 1}`;\n      const asistenteInfo = `${asistente.name} - ${asistente.mail} - ${asistente.role}`;\n      // Añadimos sangría para el subnivel\n      outputLines.push(`   ${num}| ${asistenteInfo}`);\n    });\n  }\n\n  // 4. Formatear Temas a resolver (con subniveles)\n  outputLines.push(`4| Temas a resolver`);\n  if (data.temas && data.temas.length > 0) {\n    data.temas.forEach((tema, topicIndex) => {\n      const topicNum = `4.${topicIndex + 1}`;\n      // Añadimos sangría para el primer nivel de temas\n      outputLines.push(`   ${topicNum}| ${tema.topic}`);\n\n      // Verificamos si hay sub-temas para anidar\n      if (tema.sub_topics && tema.sub_topics.length > 0) {\n        tema.sub_topics.forEach((subTopic, subTopicIndex) => {\n          const subTopicNum = `${topicNum}.${subTopicIndex + 1}`;\n          // Añadimos una sangría mayor para el segundo nivel\n          outputLines.push(`      ${subTopicNum}| ${subTopic}`);\n        });\n      }\n    });\n  }\n\n  // Unimos todas las líneas en un solo string, separadas por un salto de línea.\n  return outputLines.join('\\n');\n}\n\n\nconst text_structured = formatDataToText(output_structured_data)\nconsole.log(text_structured)\n\nreturn [{json:{text_structured}}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4416,
+        304
+      ],
+      "id": "b58e099e-6e97-42f0-b4f2-50fec289a4b8",
+      "name": "FORMAT_TO_TEXT1"
+    },
+    {
+      "parameters": {
+        "toRecipients": "=aatituanav@uce.edu.ec",
+        "subject": "=PROGRAMACIÓN SESIÓN {{ $('formatDataForMeeting').item.json.output.tipo.toUpperCase() }} - {{ $('formatDataForMeeting').item.json.output.session_code }}",
+        "bodyContent": "=Buen día.\n\nSe informa la programación de la sesión {{ \n    $('formatDataForMeeting').first().json.output.tipo.charAt(0).toUpperCase() + \n    $('formatDataForMeeting').first().json.output.tipo.slice(1).toLowerCase() \n}} {{ $('formatDataForMeeting').first().json.output.session_code }} para el día {{ DateTime.fromISO($('formatDataForMeeting').first().json.output.fecha).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}, a las {{   $('formatDataForMeeting').first().json.output.fecha.split('T')[1].split(':').slice(0, 2).join(':') }} en el cual se notificó a los siguientes asistentes:\n{{ $('formatDataForMeeting').first().json.output.asistentes.map(at=>at.name+\" - \"+at.mail+\"\\n\").join(\"\") }}\n\nSe adjunta los links para la toma de asistencia y votos: \nASISTENCIA: \n{{ $('SAVE_METADATA').first().json.url_attendances }}\nVOTOS:\n{{ $('SAVE_METADATA').first().json.urt_votes }}\n\nNOTA: Se procederá al firmado del acta por parte de los asistentes, una vez listo, se le notificará por este medio.\n\n\nAtte.\nCentro de Innovacion Tecnológica Yaruquí\n\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        -1584,
+        -192
+      ],
+      "id": "3cd694ce-3fe7-4f64-ba73-ee9e2f40a2f4",
+      "name": "SEND_NOTIFICATION",
       "webhookId": "2e2dc7da-ecfe-405f-81dd-051e53bdc105",
       "credentials": {
         "microsoftOutlookOAuth2Api": {
@@ -756,51 +840,132 @@
     },
     {
       "parameters": {
-        "jsCode": " return{\n    json: $('PDF_CONVOCATORIA').first().json,\n    binary: $('PDF_CONVOCATORIA').first().binary\n  }\n"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1264,
-        128
-      ],
-      "id": "bb744c60-60f3-4c26-a7e4-9efd0505b670",
-      "name": "GET_BINARY"
-    }
-  ],
-  "pinData": {
-    "Microsoft Outlook Trigger": [
-      {
-        "json": {
-          "@odata.etag": "W/\"CQAAABYAAACJa4iwinkBQoNKizXKF/TOAAAMDNQn\"",
-          "id": "AAMkADU1MzgzMmM3LWVjYWItNGFkOS1hMjdhLTA4YTU2OWY2ZTJmMABGAAAAAAAQkpiSgVnUQZ6WjxACOvTnBwCJa4iwinkBQoNKizXKF-TOAAAAAAEMAACJa4iwinkBQoNKizXKF-TOAAAMDiIwAAA=",
-          "subject": "revisar",
-          "body": {
-            "contentType": "html",
-            "content": "<html><head>\r\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><style type=\"text/css\" style=\"display:none\">\r\n<!--\r\np\r\n\t{margin-top:0;\r\n\tmargin-bottom:0}\r\n-->\r\n</style></head><body dir=\"ltr\"><div class=\"elementToProof\" style=\"font-family:Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\">1| Fecha: 24 de septiembre del 2025 a las 4 de la tarde <br>2| Tipo: Ordinaria<br>3| Asistentes:<br>&nbsp;&nbsp; 3.1| Andrés Tituana - alvaro.andres1996@hotmail.com - Papá<br>&nbsp;&nbsp; 3.2| Jennifer Tituana - carloswringo@gmail.com - Hermana<br>&nbsp;&nbsp; 3.3&nbsp; Mister Wringo - mrwringo@hotmail.com - Hermano<br>4| Temas a resolver<br>&nbsp;&nbsp; 4.1| Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4.1.1| Msc. Alfredo Armando Rodríquez Guzman, representante del Rector, como presidente del comité.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4.1.2| Adm. Carlos Eduardo Esterlla Carrera, docente de la carrera de Gastronomía en calidad de delegado del personal docente.<br>&nbsp;&nbsp; 4.2| Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación considerando lo siguiente:<br>    4.2.1 Que el docente llevaba mucho tiempo fuera de la institución<br>    4.2.2 Que la normativa autoriza a la institución a presentar la oportuna renuncia del Ingeniero.<br>4.3   Aprobación de cambio de fecha en la ceremonia de graduación del Calendario Académico PAO 2025-I en base al oficio ISTY-VA-DEPC-056-2025.</div><div class=\"elementToProof\" style=\"font-family:Calibri,Helvetica,sans-serif; font-size:12pt; color:rgb(0,0,0)\"><br></div></body></html>"
+        "workflowId": {
+          "__rl": true,
+          "value": "w9px2GcY6A7pU9tt",
+          "mode": "list",
+          "cachedResultName": "SEND_PDF_TO_SIGN"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "binary_pdf_file_item": "={{ $('PDF_CONVOCATORIA').item}}",
+            "attendees": "={{ $('formatDataForMeeting').item.json.output.asistentes }}",
+            "meeting_type": "={{ $('formatDataForMeeting').item.json.output.tipo }}",
+            "session_code": "={{ $('formatDataForMeeting').item.json.output.session_code }}",
+            "subject": "=CONVOCATORIA SESIÓN"
           },
-          "from": {
-            "emailAddress": {
-              "name": "Andres Tituana",
-              "address": "alvaro.andres1996@hotmail.com"
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "meeting_type",
+              "displayName": "meeting_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "session_code",
+              "displayName": "session_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "binary_pdf_file_item",
+              "displayName": "binary_pdf_file_item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            },
+            {
+              "id": "attendees",
+              "displayName": "attendees",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "array",
+              "removed": false
             }
-          }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -1584,
+        256
+      ],
+      "id": "f4d70c1a-d61c-4d00-85f9-892858c69d41",
+      "name": "SIGN_MEETING_CALL"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "custom",
+              "cronExpression": "0/10 * * * * *"
+            }
+          ]
+        },
+        "output": "fields",
+        "fields": [
+          "body",
+          "from",
+          "subject"
+        ],
+        "filters": {
+          "custom": "not(startswith(subject, 'RE:')) and contains(subject, 'iniciar')",
+          "foldersToInclude": [
+            "AQMkADU1ADM4MzJjNy1lY2FiLTRhZDktYTI3YS0wOGE1NjlmNmUyZjAALgAAAxCSmJKBWdRBnpaPEAI69OcBAIlriLCKeQFCg0qLNcoX9M4AAAIBDAAAAA=="
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTrigger",
+      "typeVersion": 1,
+      "position": [
+        -5424,
+        48
+      ],
+      "id": "03184302-200c-43ef-9d1a-186caa57eb5a",
+      "name": "START",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "aa1g0ggoDcXs6rTB",
+          "name": "Microsoft Outlook account"
         }
       }
-    ]
-  },
+    }
+  ],
+  "pinData": {},
   "connections": {
-    "Microsoft Outlook Trigger": {
-      "main": [
-        [
-          {
-            "node": "cleanHTML1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Send a message": {
       "main": [
         [
@@ -816,7 +981,7 @@
       "main": [
         [
           {
-            "node": "cleanHTML",
+            "node": "CLEAN_RESPONSE",
             "type": "main",
             "index": 0
           }
@@ -824,17 +989,6 @@
         [
           {
             "node": "Wait",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Reply to a message": {
-      "main": [
-        [
-          {
-            "node": "Get many messages",
             "type": "main",
             "index": 0
           }
@@ -874,44 +1028,11 @@
         ]
       ]
     },
-    "Realizar Cambios": {
-      "main": [
-        [
-          {
-            "node": "formatText",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "formatDataForMeeting": {
       "main": [
         [
           {
             "node": "create_teams_meeting",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "edit": {
-      "main": [
-        [
-          {
-            "node": "Reply to a message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "formatText": {
-      "main": [
-        [
-          {
-            "node": "edit",
             "type": "main",
             "index": 0
           }
@@ -929,7 +1050,7 @@
         ],
         [
           {
-            "node": "Realizar Cambios",
+            "node": "Information Extractor1",
             "type": "main",
             "index": 0
           }
@@ -940,29 +1061,7 @@
       "main": [
         [
           {
-            "node": "Send a message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "cleanHTML": {
-      "main": [
-        [
-          {
-            "node": "approved",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "cleanHTML1": {
-      "main": [
-        [
-          {
-            "node": "createUUID",
+            "node": "FORMAT_TO_TEXT",
             "type": "main",
             "index": 0
           }
@@ -985,6 +1084,27 @@
         [
           {
             "node": "SAVE_METADATA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SAVE_METADATA": {
+      "main": [
+        [
+          {
+            "node": "SIGN_MEETING_CALL",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "SEND_NOTIFICATION",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "UPDATE_SESSION_NUMBER",
             "type": "main",
             "index": 0
           }
@@ -1057,27 +1177,139 @@
         ]
       ]
     },
-    "SAVE_METADATA": {
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Information Extractor1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor1": {
       "main": [
         [
           {
-            "node": "GET_BINARY",
+            "node": "IS_NEW_EMAIL",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "SEND_SECRETARY": {
-      "main": [
-        []
+    "Google Gemini Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor1",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
       ]
     },
-    "GET_BINARY": {
+    "FORMAT_TO_TEXT": {
       "main": [
         [
           {
-            "node": "SEND_SECRETARY",
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CLEAN_ENTRY": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CLEAN_RESPONSE": {
+      "main": [
+        [
+          {
+            "node": "approved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply to a message": {
+      "main": [
+        [
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IS_NEW_EMAIL": {
+      "main": [
+        [
+          {
+            "node": "createUUID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "FORMAT_TO_TEXT1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FORMAT_TO_TEXT1": {
+      "main": [
+        [
+          {
+            "node": "Reply to a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "START": {
+      "main": [
+        [
+          {
+            "node": "CLEAN_ENTRY",
             "type": "main",
             "index": 0
           }
@@ -1089,7 +1321,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "8d238cd1-bbb5-417c-ab2d-22d197b556f1",
+  "versionId": "738a194d-2794-4b0a-bb97-38dcd8c8c195",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"

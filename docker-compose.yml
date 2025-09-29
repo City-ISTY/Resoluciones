@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile
     image: n8n-custom
     container_name: N8N
+    env_file:
+      - .env
     ports:
       - "5678:5678"
     volumes:
@@ -18,10 +20,14 @@ services:
     image: gotenberg/gotenberg:latest
     container_name: gotenberg
     ports:
-      - "3000:3000"
+      - "3001:3001"
     restart: unless-stopped
     networks:
       - app-network
+    environment:
+      - PORT=3001
+      - N8N_USER_SETTINGS_ENV_VARS=["N8N_SECRETARY_EMAIL", "N8N_RECTOR_EMAIL"]
+
 
   pdf_reader:
     build:
@@ -34,27 +40,27 @@ services:
     networks:
       - app-network
 
-  reranker:
-    build:
-      context: ./reranker
-      dockerfile: Dockerfile
-    container_name: reranker
-    ports:
-      - "8000:8000"
-    restart: unless-stopped
-    networks:
-      - app-network
+  # reranker:
+  #   build:
+  #     context: ./reranker
+  #     dockerfile: Dockerfile
+  #   container_name: reranker
+  #   ports:
+  #     - "8000:8000"
+  #   restart: unless-stopped
+  #   networks:
+  #     - app-network
 
-  whereas_selector:
-    build:
-      context: ./whereas_selector
-      dockerfile: Dockerfile
-    container_name: whereas_selector
-    ports:
-      - "3001:3001"
-    restart: unless-stopped
-    networks:
-      - app-network
+  # whereas_selector:
+  #   build:
+  #     context: ./whereas_selector
+  #     dockerfile: Dockerfile
+  #   container_name: whereas_selector
+  #   ports:
+  #     - "3002:3002"
+  #   restart: unless-stopped
+  #   networks:
+  #     - app-network
 
 networks:
   app-network:

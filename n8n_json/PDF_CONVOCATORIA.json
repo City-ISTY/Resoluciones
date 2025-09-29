@@ -67,6 +67,15 @@
       "parameters": {
         "method": "POST",
         "url": "http://gotenberg:3000/forms/chromium/convert/html",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Gotenberg-Output-Filename",
+              "value": "={{ \"CONVOCATORIA-\"+$('START').item.json.session_code }}"
+            }
+          ]
+        },
         "sendBody": true,
         "contentType": "multipart-form-data",
         "bodyParameters": {
@@ -198,11 +207,11 @@
         176
       ],
       "id": "91771651-4b67-44b0-9d36-091af5d79ce1",
-      "name": "crear_convocatoria"
+      "name": "START"
     }
   ],
   "pinData": {
-    "crear_convocatoria": [
+    "START": [
       {
         "json": {
           "meeting_type": "Ordinaria",
@@ -339,7 +348,7 @@
         ]
       ]
     },
-    "crear_convocatoria": {
+    "START": {
       "main": [
         [
           {
@@ -365,7 +374,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "6fe0a3bf-4970-4341-9298-9d3167e0a8a8",
+  "versionId": "bf934928-3280-485d-9fd5-353a43a87a5e",
   "meta": {
     "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"
   },

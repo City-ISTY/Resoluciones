@@ -72,7 +72,7 @@
           "parameters": [
             {
               "name": "Gotenberg-Output-Filename",
-              "value": "={{ $('Code').item.json.tema_reunion.json.resolution_code }}"
+              "value": "={{ $('START').item.json.tema_reunion.resolution_code }}"
             }
           ]
         },
@@ -153,7 +153,7 @@
     },
     {
       "parameters": {
-        "html": "<!DOCTYPE html>\n<html>\n   <body style=\"text-align: justify\">\n      <div id=\"paguina\">\n         <p style=\"text-align: center;\"><strong>RESOLUCI&Oacute;N: {{ $json.tema_reunion.json.topic.resolution_code }}</strong></p>\n         <p style=\"text-align: center;\"><strong>EL &Oacute;RGANO COLEGIADO SUPERIOR DEL INSTITUTO SUPERIOR TECNOL&Oacute;GICO YARUQU&Iacute;</strong></p>\n         <p style=\"text-align: center;\">&nbsp;</p>\n         <p style=\"text-align: center;\"><strong>CONSIDERANDO</strong></p>\n         <div id=\"considerandos\" style=\"text-indent: -20px; padding-left: 20px\">\n            <p>Que, el art&iacute;culo 350 de la Constituci&oacute;n de la Rep&uacute;blica del Ecuador, establece que: <em>\"El sistema de Educaci&oacute;n Superior tiene como finalidad la formaci&oacute;n acad&eacute;mica y profesional con visi&oacute;n cient&iacute;fica y human&iacute;stica; la investigaci&oacute;n cient&iacute;fica y tecnol&oacute;gica; la innovaci&oacute;n, promoci&oacute;n, desarrollo y difuci&oacute;n de los saberes y las culturas; la construcci&oacute;n de soluciones para los problemas del pa&iacute;s, en relaci&oacute;n con los objetivos del r&eacute;gimen de desarrollo\";</em></p>\n            <p>Que, el art&iacute;culo 17 de la Ley Org&aacute;nica de Educaci&oacute;n Superior establece lo siguiente sobre el Reconocimiento de la autonom&iacute;a responsable, <em>\"El Estado reconoce a las universidades y escuelas polit&eacute;cnicas autonom&iacute;a acad&eacute;mica, administrativa, financiera y org&aacute;nica, acorde con los principios establecidos en la Constituci&oacute;n de la Rep&uacute;blica. <br><br> En el ejercicio de autonom&iacute;a responsable, las universidades y escuelas polit&eacute;cnicas mantendr&aacute;n relaciones de reciprocidad y cooperaci&oacute;n entre ellas y de estas con el estado y la sociedad; adem&aacute;s observar&aacute;n los principios de justicia, equidad, solidaridad, participaci&oacute;n ciudadana, responsabilidad social y rendici&oacute;n de cuentas.\"</em></p>\n            <p>Que, el art&iacute;culo 115 de la Ley Org&aacute;nica de Educaci&oacute;n superior, indica lo siguiente <em>\"Son instituciones de educaci&oacute;n superior t&eacute;cnica tecnol&oacute;gica, los institutos superiores t&eacute;cnicos, tecnol&oacute;gicos, pedag&oacute;gicos, y de artes\".</em></p>\n            <p>Que, el art&iacute;culo 118 de la Ley Org&aacute;nica de Educaci&oacute;n Superior establece lo siguiente, literal a) <em>\"El tercer nivel t&eacute;cnico-tecnol&oacute;gico superior, orientado al desarrollo de las habilidades y destrezas relacionadas con la aplicaci&oacute;n, adaptaci&oacute;n e innovaci&oacute;n tecnol&oacute;gica en procesos relacionados con la producci&oacute;n de bienes servicios; corresponden a este nivel los t&iacute;tulos profesionales de t&eacute;cnico superior, tecn&oacute;logo superior o su equivalente y tecn&oacute;logo superior universitario o su equivalente (...)\"</em></p>\n            <p>Que, el art&iacute;culo 4 del Reglamento de las Instituciones de Educaci&oacute;n Superior de formaci&oacute;n T&eacute;cnica y Tecnol&oacute;gica la establece lo siguiente literal b) sobre los institutos superiores tecnol&oacute;gicos <em>\"Son instituciones de educaci&oacute;n superior dedicadas a la formaci&oacute;n acad&eacute;mica y orientadas a la aplicaci&oacute;n, coordinaci&oacute;n y adaptaci&oacute;n de t&eacute;cnicas especializadas y del dise&ntilde;o, ejecuci&oacute;n y evaluaci&oacute;n de funciones y procesos relacionados con la producci&oacute;n de bienes y servicios.\"</em></p>\n            {{ $json.considerandosHTML }}\n         </div>\n         <p>Que, en sesi&oacute;n {{ $json.tipo_reunion.toLowerCase() }} del {{ DateTime.fromISO($json.fecha_reunion).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}, el &Oacute;rgano Colegiado Superior del Instituto Superior Tecnol&oacute;gico Yaruqu&iacute; trat&oacute; la {{ $json.tema_reunion.json.topic }}. En base a la normativa expuesta y en ejercicio de las atribuciones conferidas por la Ley Org&aacute;nica de Educaci&oacute;n Superior y el Reglamento de las Instituciones de Educaci&oacute;n Superior de Formaci&oacute;n T&eacute;cnica y Tecnol&oacute;gica.</p>\n         <p style=\"text-align: center;\"><strong>RESUELVE</strong></p>\n         <p><strong>Art&iacute;culo 1.-</strong>{{ $json.tema_reunion.json.topic.desition }} </p>\n         {{ $json.subtemasHTML }}\n{{ $json.tema_reunion.json.topic.notification && $json.tema_reunion.json.topic.notification !== \"\" ? '<p><strong>Art&iacute;culo 2.-</strong> ' + $json.tema_reunion.json.topic.notification + '</p>' : '' }}         <p>&nbsp;</p>\n         <p style=\"text-align: center;\"><strong>DISPOSICIONES FINALES</strong></p>\n         <p><strong>PRIMERA.-</strong> La presente resoluci&oacute;n entrar&aacute; en vigencia a partir de la fecha de suscripci&oacute;n de la misma.</p>\n         <p><strong>SEGUNDA.-</strong> Comun&iacute;quese y c&uacute;mplase.</p>\n         <p>Dado en la ciudad de Quito, el {{ DateTime.fromISO($json.fecha_reunion).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}, en la {{ $json.ordinal_number_session }} sesi&oacute;n extraordinaria del Organo Colegiado superior del Instituto Superior Tecnol&oacute;gico Yaruqu&iacute;.</p>\n         <p>&nbsp;</p>\n         <p>&nbsp;</p>\n         <p>Mgtr. Javier Hernando Harz&oacute;n Espinoza</p>\n         <p><strong>RECTOR</strong></p>\n         <p>En mi calidad de secretaria del &Oacute;rgano Colegiado superior del Instituto Superior Tecnol&oacute;gico Yaruqu&iacute;, CERTIFICO que la presente resoluci&oacute;n fue discutida y aprobada en sesi&oacute;n {{ $json.tipo_reunion }} Nro. {{ $json.cod_sesion }} desarrollada el {{ DateTime.fromISO($json.fecha_reunion).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}.&nbsp;</p>\n         <p>Lo certifico.-&nbsp;</p>\n         <p>&nbsp;</p>\n         <p>&nbsp;</p>\n         <p>Srta Camila Alexandra Pisu&ntilde;a Chizaiza</p>\n         <p><strong>SECRETARIA</strong></p>\n         <p><strong>&Oacute;RGANO COLEGIADO SUPERIOR</strong></p>\n      </div>\n   </body>\n</html>"
+        "html": "<!DOCTYPE html>\n<html>\n   <body style=\"text-align: justify\">\n      <div id=\"paguina\">\n         <p style=\"text-align: center;\"><strong>RESOLUCI&Oacute;N: {{ $json.tema_reunion.resolution_code }}</strong></p>\n         <p style=\"text-align: center;\"><strong>EL &Oacute;RGANO COLEGIADO SUPERIOR DEL INSTITUTO SUPERIOR TECNOL&Oacute;GICO YARUQU&Iacute;</strong></p>\n         <p style=\"text-align: center;\">&nbsp;</p>\n         <p style=\"text-align: center;\"><strong>CONSIDERANDO</strong></p>\n         <div id=\"considerandos\" style=\"text-indent: -20px; padding-left: 20px\">\n            <p>Que, el art&iacute;culo 350 de la Constituci&oacute;n de la Rep&uacute;blica del Ecuador, establece que: <em>\"El sistema de Educaci&oacute;n Superior tiene como finalidad la formaci&oacute;n acad&eacute;mica y profesional con visi&oacute;n cient&iacute;fica y human&iacute;stica; la investigaci&oacute;n cient&iacute;fica y tecnol&oacute;gica; la innovaci&oacute;n, promoci&oacute;n, desarrollo y difuci&oacute;n de los saberes y las culturas; la construcci&oacute;n de soluciones para los problemas del pa&iacute;s, en relaci&oacute;n con los objetivos del r&eacute;gimen de desarrollo\";</em></p>\n            <p>Que, el art&iacute;culo 17 de la Ley Org&aacute;nica de Educaci&oacute;n Superior establece lo siguiente sobre el Reconocimiento de la autonom&iacute;a responsable, <em>\"El Estado reconoce a las universidades y escuelas polit&eacute;cnicas autonom&iacute;a acad&eacute;mica, administrativa, financiera y org&aacute;nica, acorde con los principios establecidos en la Constituci&oacute;n de la Rep&uacute;blica. <br><br> En el ejercicio de autonom&iacute;a responsable, las universidades y escuelas polit&eacute;cnicas mantendr&aacute;n relaciones de reciprocidad y cooperaci&oacute;n entre ellas y de estas con el estado y la sociedad; adem&aacute;s observar&aacute;n los principios de justicia, equidad, solidaridad, participaci&oacute;n ciudadana, responsabilidad social y rendici&oacute;n de cuentas.\"</em></p>\n            <p>Que, el art&iacute;culo 115 de la Ley Org&aacute;nica de Educaci&oacute;n superior, indica lo siguiente <em>\"Son instituciones de educaci&oacute;n superior t&eacute;cnica tecnol&oacute;gica, los institutos superiores t&eacute;cnicos, tecnol&oacute;gicos, pedag&oacute;gicos, y de artes\".</em></p>\n            <p>Que, el art&iacute;culo 118 de la Ley Org&aacute;nica de Educaci&oacute;n Superior establece lo siguiente, literal a) <em>\"El tercer nivel t&eacute;cnico-tecnol&oacute;gico superior, orientado al desarrollo de las habilidades y destrezas relacionadas con la aplicaci&oacute;n, adaptaci&oacute;n e innovaci&oacute;n tecnol&oacute;gica en procesos relacionados con la producci&oacute;n de bienes servicios; corresponden a este nivel los t&iacute;tulos profesionales de t&eacute;cnico superior, tecn&oacute;logo superior o su equivalente y tecn&oacute;logo superior universitario o su equivalente (...)\"</em></p>\n            <p>Que, el art&iacute;culo 4 del Reglamento de las Instituciones de Educaci&oacute;n Superior de formaci&oacute;n T&eacute;cnica y Tecnol&oacute;gica la establece lo siguiente literal b) sobre los institutos superiores tecnol&oacute;gicos <em>\"Son instituciones de educaci&oacute;n superior dedicadas a la formaci&oacute;n acad&eacute;mica y orientadas a la aplicaci&oacute;n, coordinaci&oacute;n y adaptaci&oacute;n de t&eacute;cnicas especializadas y del dise&ntilde;o, ejecuci&oacute;n y evaluaci&oacute;n de funciones y procesos relacionados con la producci&oacute;n de bienes y servicios.\"</em></p>\n            {{ $json.considerandosHTML }}\n         </div>\n         <p>Que, en sesi&oacute;n {{ $json.tipo_reunion.toLowerCase() }} del {{ DateTime.fromISO($json.fecha_reunion).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}, el &Oacute;rgano Colegiado Superior del Instituto Superior Tecnol&oacute;gico Yaruqu&iacute; trat&oacute; la {{ $json.tema_reunion.topic }}. En base a la normativa expuesta y en ejercicio de las atribuciones conferidas por la Ley Org&aacute;nica de Educaci&oacute;n Superior y el Reglamento de las Instituciones de Educaci&oacute;n Superior de Formaci&oacute;n T&eacute;cnica y Tecnol&oacute;gica.</p>\n         <p style=\"text-align: center;\"><strong>RESUELVE</strong></p>\n         <p><strong>Art&iacute;culo 1.-</strong>{{ $json.tema_reunion.desition }} </p>\n         {{ $json.subtemasHTML }}\n{{ $json.tema_reunion.topic.notification && $json.tema_reunion.topic.notification !== \"\" ? '<p><strong>Art&iacute;culo 2.-</strong> ' + $json.tema_reunion.topic.notification + '</p>' : '' }}         <p>&nbsp;</p>\n         <p style=\"text-align: center;\"><strong>DISPOSICIONES FINALES</strong></p>\n         <p><strong>PRIMERA.-</strong> La presente resoluci&oacute;n entrar&aacute; en vigencia a partir de la fecha de suscripci&oacute;n de la misma.</p>\n         <p><strong>SEGUNDA.-</strong> Comun&iacute;quese y c&uacute;mplase.</p>\n         <p>Dado en la ciudad de Quito, el {{ DateTime.fromISO($json.fecha_reunion).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}, en la {{ $json.ordinal_number_session }} sesi&oacute;n extraordinaria del Organo Colegiado superior del Instituto Superior Tecnol&oacute;gico Yaruqu&iacute;.</p>\n         <p>&nbsp;</p>\n         <p>&nbsp;</p>\n         <p>Mgtr. Javier Hernando Harz&oacute;n Espinoza</p>\n         <p><strong>RECTOR</strong></p>\n         <p>En mi calidad de secretaria del &Oacute;rgano Colegiado superior del Instituto Superior Tecnol&oacute;gico Yaruqu&iacute;, CERTIFICO que la presente resoluci&oacute;n fue discutida y aprobada en sesi&oacute;n {{ $json.tipo_reunion }} Nro. {{ $json.cod_sesion }} desarrollada el {{ DateTime.fromISO($json.fecha_reunion).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}.&nbsp;</p>\n         <p>Lo certifico.-&nbsp;</p>\n         <p>&nbsp;</p>\n         <p>&nbsp;</p>\n         <p>Srta Camila Alexandra Pisu&ntilde;a Chizaiza</p>\n         <p><strong>SECRETARIA</strong></p>\n         <p><strong>&Oacute;RGANO COLEGIADO SUPERIOR</strong></p>\n      </div>\n   </body>\n</html>"
       },
       "type": "n8n-nodes-base.html",
       "typeVersion": 1.2,
@@ -184,20 +184,6 @@
     },
     {
       "parameters": {
-        "inputSource": "jsonExample",
-        "jsonExample": "{\n  \"tipo_reunion\": \"Ordinaria\",\n  \"fecha_reunion\": \"2025-09-24T13:00:00.0000000\",\n  \"cod_sesion\": \"OCS-SO-038-2025\",\n  \"tema_reunion\": {\n    \"json\": {\n      \"id_meeting\": \"e03dc9b9-f26f-4ff5-a0b6-7a464f908ed4\",\n      \"meeting_url\": \"https://teams.microsoft.com/l/meetup-join/19%3ameeting_YjFmOGRkMGItNmI4Ni00YmI3LTgyNjgtZjg2NmI1ZGNlNGRj%40thread.v2/0?context=%7b%22Tid%22%3a%229d91e1e7-5249-4205-8c19-8d1d9e333a60%22%2c%22Oid%22%3a%228cb570fb-7f11-4fc7-9acf-8c1f5c0d22fa%22%7d\",\n      \"meeting_datetime_ISO8631\": \"2025-09-24T13:00:00.0000000\",\n      \"convocation_date_ISO8631\": \"2025-09-22\",\n      \"meeting_type\": \"Ordinaria\",\n      \"session_code\": \"OCS-SO-038-2025\",\n      \"attendees\": [\n        {\n          \"name\": \"Andrés Tituana\",\n          \"mail\": \"alvaro.andres1996@hotmail.com\",\n          \"role\": \"Papá\",\n          \"id_assistant\": \"mfumbx9avyrqw3jqn3i\"\n        },\n        {\n          \"name\": \"Jennifer Tituana\",\n          \"mail\": \"carloswringo@gmail.com\",\n          \"role\": \"Hermana\",\n          \"id_assistant\": \"mfumbx9atwt1x8tbvjf\"\n        },\n        {\n          \"name\": \"Mister Wringo\",\n          \"mail\": \"mrwringo@hotmail.com\",\n          \"role\": \"Hermano\",\n          \"id_assistant\": \"mfumbx9avpefdvo2np\"\n        }\n      ],\n      \"attendances\": [\n        {\n          \"name\": \"Andrés Tituana\",\n          \"role\": \"Representante de Estudiantes\",\n          \"attendance\": \"\",\n          \"table\": \"asistencia\"\n        },\n        {\n          \"name\": \"Jennifer Tituana\",\n          \"role\": \"Miembro de la comisión de Etica\",\n          \"attendance\": \"\",\n          \"table\": \"asistencia\"\n        },\n        {\n          \"name\": \"Matthew Jaramillo\",\n          \"role\": \"Representante de profesores\",\n          \"attendance\": \"\",\n          \"table\": \"asistencia\"\n        }\n      ],\n      \"id_teams_meeting\": \"meeting_YjFmOGRkMGItNmI4Ni00YmI3LTgyNjgtZjg2NmI1ZGNlNGRj\",\n      \"number_sessions\": {\n        \"extraordinary_session_number\": 8,\n        \"ordinary_session_number\": 37,\n        \"resolution_number\": 193\n      },\n      \"number_sessions_updated\": {\n        \"resol_number\": 196,\n        \"ordinary_number_session\": 38,\n        \"exordinary_number_session\": 8\n      },\n      \"topic\": {\n        \"topic\": \"Aprobación de cambio de fecha en la ceremonia de graduación del Calendario Académico PAO 2025-I en base al oficio ISTY-VA-DEPC-056-2025.\",\n        \"sub_topics\": [],\n        \"id_topic\": \"mfumbx9bc8unb103lz\",\n        \"resolution_code\": \"R-OCS-SO-038-Nro.196-2025\",\n        \"vote_count_object\": {\n          \"AF\": 0,\n          \"EC\": 0,\n          \"AB\": 0,\n          \"RECTOR_VOTE\": null\n        },\n        \"votes\": [],\n        \"approved\": false,\n        \"meeting_summary\": \"Lorem ipsum dolor sit amet consectetur adipiscing elit iaculis fringilla, urna fames ridiculus interdum fusce cubilia dictum hendrerit tempus magnis, euismod magna auctor imperdiet cursus pellentesque varius enim. Tristique lacus venenatis iaculis interdum lobortis semper libero, congue suspendisse pretium tempor scelerisque orci ultrices augue, convallis laoreet fringilla condimentum dui ut.\\n Ullamcorper vel tempor conubia ut metus lacus, diam mauris penatibus risus dapibus fringilla mollis, justo vitae volutpat vehicula dis.Erat aptent orci phasellus viverra ligula, justo sodales tristique sem, arcu varius felis molestie. Mollis neque ultrices hac nulla pellentesque est diam phasellus suspendisse justo eget platea, risus hendrerit elementum condimentum vitae a eu tellus nullam vestibulum porttitor tristique feugiat, volutpat consequat curabitur lobortis purus mauris nibh tempor mi ullamcorper duis. Natoque phasellus quis varius vitae accumsan donec et sed sodales luctus imperdiet magna nostra aliquet, ornare porttitor class eget himenaeos dapibus ac mauris inceptos orci egestas habitasse.\"\n      }\n    },\n    \"pairedItem\": {\n      \"item\": 0\n    }\n  },\n  \"considerandos\": [\n    \"Que, el artículo 353 de la Constitución de la República del Ecuador indica lo siguiente 'El sistema de educación superior se regirá por: 1. Un organismo público de planificación, regulación y coordinación interna del sistema y de la relación entre sus distintos actores con la Función Ejecutiva (...)'\",\n    \"Que, el artículo 14 de la Ley Orgánica de Educación Superior (LOES) indica lo siguiente 'El sistema de educación superior estará integrado por universidades y escuelas politécnicas; institutos superiores técnicos, tecnológicos y pedagógicos; y conservatorios de música y artes, debidamente acreditados y evaluados. Estas instituciones, sean públicas o particulares, no tendrán fines de lucro.'\"\n  ]\n}"
-      },
-      "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        -400,
-        176
-      ],
-      "id": "99d99bcd-a76d-499b-beb6-a87222962ac9",
-      "name": "start"
-    },
-    {
-      "parameters": {
         "jsCode": "function armarSubResolucionesHTML(){\n  // Preprocesar los temas de la reunión\n  const subTemaObj = $input.first().json.tema_reunion.sub_topics\n  let subTemaHTML = '';\n\n  if (subTemaObj && subTemaObj.length > 0) {\n    subTemaHTML += '<ul>';\n    subTemaObj.forEach(subtema => {\n      subTemaHTML += `<li>${subtema}</li>`;\n    });\n    subTemaHTML += '</ul>';\n  }\n  return subTemaHTML\n}\n\n\nfunction ordinalHasta100(numero) {\n    if (numero < 1) return numero.toString();\n    // Números básicos (1-30)\n    const bases = {\n        1: 'primera', 2: 'segunda', 3: 'tercera', 4: 'cuarta',\n        5: 'quinta', 6: 'sexta', 7: 'séptima', 8: 'octava',\n        9: 'novena', 10: 'décima', 11: 'undécima', 12: 'duodécima',\n        13: 'decimotercera', 14: 'decimocuarta', 15: 'decimoquinta',\n        16: 'decimosexta', 17: 'decimoséptima', 18: 'decimoctava',\n        19: 'decimonovena', 20: 'vigésima', 30: 'trigésima',\n        40: 'cuadragésima', 50: 'quincuagésima', 60: 'sexagésima',\n        70: 'septuagésima', 80: 'octogésima', 90: 'nonagésima',\n        100: 'centésima'\n    };\n    if (bases[numero]) return bases[numero];\n    // Números compuestos (21-29, 31-39, etc.)\n    const decena = Math.floor(numero / 10) * 10;\n    const unidad = numero % 10;\n    \n    if (decena >= 20 && unidad > 0) {\n        return `${bases[decena]} ${bases[unidad]}`;\n    }\n    return `posición ${numero}`;\n}\n\n\nfunction armarListaConsiderandos(){\n  const consObj = $input.first().json.considerandos\n  let considHTML = '';\n  consObj.forEach(cons => {\n    considHTML += `<p>${cons}</p>`;\n  });\n  return considHTML\n}\n\nconst number = ordinalHasta100(parseInt($input.first().json.cod_sesion.match(/OCS-SO-(\\d+)-2025/)?.[1] || 0));\n\n// Agregar el HTML generado al objeto principal\nreturn {\n  json: {\n    ...items[0].json,\n    subtemasHTML: armarSubResolucionesHTML(),\n    considerandosHTML: armarListaConsiderandos(),\n    ordinal_number_session: number\n  }\n};"
       },
       "type": "n8n-nodes-base.code",
@@ -208,124 +194,104 @@
       ],
       "id": "96c7f830-b85d-45d7-8867-3ef5102f90df",
       "name": "Code"
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n  \"tipo_reunion\": \"Ordinaria\",\n  \"fecha_reunion\": \"2025-09-24T13:00:00.0000000\",\n  \"cod_sesion\": \"OCS-SO-038-2025\",\n  \"tema_reunion\": {\n    \"json\": {\n      \"id_meeting\": \"e03dc9b9-f26f-4ff5-a0b6-7a464f908ed4\",\n      \"meeting_url\": \"https://teams.microsoft.com/l/meetup-join/19%3ameeting_YjFmOGRkMGItNmI4Ni00YmI3LTgyNjgtZjg2NmI1ZGNlNGRj%40thread.v2/0?context=%7b%22Tid%22%3a%229d91e1e7-5249-4205-8c19-8d1d9e333a60%22%2c%22Oid%22%3a%228cb570fb-7f11-4fc7-9acf-8c1f5c0d22fa%22%7d\",\n      \"meeting_datetime_ISO8631\": \"2025-09-24T13:00:00.0000000\",\n      \"convocation_date_ISO8631\": \"2025-09-22\",\n      \"meeting_type\": \"Ordinaria\",\n      \"session_code\": \"OCS-SO-038-2025\",\n      \"attendees\": [\n        {\n          \"name\": \"Andrés Tituana\",\n          \"mail\": \"alvaro.andres1996@hotmail.com\",\n          \"role\": \"Papá\",\n          \"id_assistant\": \"mfumbx9avyrqw3jqn3i\"\n        },\n        {\n          \"name\": \"Jennifer Tituana\",\n          \"mail\": \"carloswringo@gmail.com\",\n          \"role\": \"Hermana\",\n          \"id_assistant\": \"mfumbx9atwt1x8tbvjf\"\n        },\n        {\n          \"name\": \"Mister Wringo\",\n          \"mail\": \"mrwringo@hotmail.com\",\n          \"role\": \"Hermano\",\n          \"id_assistant\": \"mfumbx9avpefdvo2np\"\n        }\n      ],\n      \"attendances\": [\n        {\n          \"name\": \"Andrés Tituana\",\n          \"role\": \"Representante de Estudiantes\",\n          \"attendance\": \"\",\n          \"table\": \"asistencia\"\n        },\n        {\n          \"name\": \"Jennifer Tituana\",\n          \"role\": \"Miembro de la comisión de Etica\",\n          \"attendance\": \"\",\n          \"table\": \"asistencia\"\n        },\n        {\n          \"name\": \"Matthew Jaramillo\",\n          \"role\": \"Representante de profesores\",\n          \"attendance\": \"\",\n          \"table\": \"asistencia\"\n        }\n      ],\n      \"id_teams_meeting\": \"meeting_YjFmOGRkMGItNmI4Ni00YmI3LTgyNjgtZjg2NmI1ZGNlNGRj\",\n      \"number_sessions\": {\n        \"extraordinary_session_number\": 8,\n        \"ordinary_session_number\": 37,\n        \"resolution_number\": 193\n      },\n      \"number_sessions_updated\": {\n        \"resol_number\": 196,\n        \"ordinary_number_session\": 38,\n        \"exordinary_number_session\": 8\n      },\n      \"topic\": {\n        \"topic\": \"Aprobación de cambio de fecha en la ceremonia de graduación del Calendario Académico PAO 2025-I en base al oficio ISTY-VA-DEPC-056-2025.\",\n        \"sub_topics\": [],\n        \"id_topic\": \"mfumbx9bc8unb103lz\",\n        \"resolution_code\": \"R-OCS-SO-038-Nro.196-2025\",\n        \"vote_count_object\": {\n          \"AF\": 0,\n          \"EC\": 0,\n          \"AB\": 0,\n          \"RECTOR_VOTE\": null\n        },\n        \"votes\": [],\n        \"approved\": false,\n        \"meeting_summary\": \"Lorem ipsum dolor sit amet consectetur adipiscing elit iaculis fringilla, urna fames ridiculus interdum fusce cubilia dictum hendrerit tempus magnis, euismod magna auctor imperdiet cursus pellentesque varius enim. Tristique lacus venenatis iaculis interdum lobortis semper libero, congue suspendisse pretium tempor scelerisque orci ultrices augue, convallis laoreet fringilla condimentum dui ut.\\n Ullamcorper vel tempor conubia ut metus lacus, diam mauris penatibus risus dapibus fringilla mollis, justo vitae volutpat vehicula dis.Erat aptent orci phasellus viverra ligula, justo sodales tristique sem, arcu varius felis molestie. Mollis neque ultrices hac nulla pellentesque est diam phasellus suspendisse justo eget platea, risus hendrerit elementum condimentum vitae a eu tellus nullam vestibulum porttitor tristique feugiat, volutpat consequat curabitur lobortis purus mauris nibh tempor mi ullamcorper duis. Natoque phasellus quis varius vitae accumsan donec et sed sodales luctus imperdiet magna nostra aliquet, ornare porttitor class eget himenaeos dapibus ac mauris inceptos orci egestas habitasse.\"\n      }\n    },\n    \"pairedItem\": {\n      \"item\": 0\n    }\n  },\n  \"considerandos\": [\n    \"Que, el artículo 353 de la Constitución de la República del Ecuador indica lo siguiente 'El sistema de educación superior se regirá por: 1. Un organismo público de planificación, regulación y coordinación interna del sistema y de la relación entre sus distintos actores con la Función Ejecutiva (...)'\",\n    \"Que, el artículo 14 de la Ley Orgánica de Educación Superior (LOES) indica lo siguiente 'El sistema de educación superior estará integrado por universidades y escuelas politécnicas; institutos superiores técnicos, tecnológicos y pedagógicos; y conservatorios de música y artes, debidamente acreditados y evaluados. Estas instituciones, sean públicas o particulares, no tendrán fines de lucro.'\"\n  ]\n}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -400,
+        176
+      ],
+      "id": "99d99bcd-a76d-499b-beb6-a87222962ac9",
+      "name": "START"
     }
   ],
   "pinData": {
-    "start": [
+    "START": [
       {
         "json": {
-          "tipo_reunion": "Ordinaria",
-          "fecha_reunion": "2025-09-24T13:00:00.0000000",
-          "cod_sesion": "OCS-SO-038-2025",
+          "tipo_reunion": "Extraordinaria",
+          "fecha_reunion": "2024-09-17T13:00:00.0000000",
+          "cod_sesion": "OCS-SE-009-2025",
           "tema_reunion": {
-            "json": {
-              "id_meeting": "d70873b1-71c3-496e-af88-d686662dec3f",
-              "meeting_url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_MThjZmZiN2YtZGIyZi00NzNjLWFhNWEtZWM2MGVjYjlkZDcw%40thread.v2/0?context=%7b%22Tid%22%3a%229d91e1e7-5249-4205-8c19-8d1d9e333a60%22%2c%22Oid%22%3a%228cb570fb-7f11-4fc7-9acf-8c1f5c0d22fa%22%7d",
-              "meeting_datetime_ISO8631": "2025-09-24T13:00:00.0000000",
-              "convocation_date_ISO8631": "2025-09-22",
-              "meeting_type": "Ordinaria",
-              "session_code": "OCS-SO-038-2025",
-              "attendees": [
-                {
-                  "name": "Andrés Tituana",
-                  "mail": "alvaro.andres1996@hotmail.com",
-                  "role": "Papá",
-                  "id_assistant": "mfuvy9vk670gl5b1me8"
-                },
-                {
-                  "name": "Jennifer Tituana",
-                  "mail": "carloswringo@gmail.com",
-                  "role": "Hermana",
-                  "id_assistant": "mfuvy9vkw2fbl2jptsd"
-                },
-                {
-                  "name": "Mister Wringo",
-                  "mail": "mrwringo@hotmail.com",
-                  "role": "Hermano",
-                  "id_assistant": "mfuvy9vklwldkppht7l"
-                }
-              ],
-              "attendances": [
-                {
-                  "id_assistant": "mfuvy9vk670gl5b1me8",
-                  "name": "Andrés Tituana",
-                  "role": "Papá",
-                  "attendance": "x",
-                  "table": "asistencia"
-                },
-                {
-                  "id_assistant": "mfuvy9vkw2fbl2jptsd",
-                  "name": "Jennifer Tituana",
-                  "role": "Hermana",
-                  "attendance": "",
-                  "table": "asistencia"
-                },
-                {
-                  "id_assistant": "mfuvy9vklwldkppht7l",
-                  "name": "Mister Wringo",
-                  "role": "Hermano",
-                  "attendance": "x",
-                  "table": "asistencia"
-                }
-              ],
-              "id_teams_meeting": "meeting_MThjZmZiN2YtZGIyZi00NzNjLWFhNWEtZWM2MGVjYjlkZDcw",
-              "number_sessions": {
-                "id": 1,
-                "extraordinary_session_number": 8,
-                "ordinary_session_number": 37,
-                "resolution_number": 118
-              },
-              "number_sessions_updated": {
-                "resol_number": 123,
-                "ordinary_number_session": 38,
-                "exordinary_number_session": 8
-              },
-              "topic": {
-                "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
-                "sub_topics": [
-                  "Msc. Alfredo Armando Rodríquez Guzman, representante del Rector, como presidente del comité.",
-                  "Adm. Carlos Eduardo Esterlla Carrera, docente de la carrera de Gastronomía en calidad de delegado del personal docente."
-                ],
-                "id_topic": "mfuvy9vk8eo9hagjtrv",
-                "resolution_code": "R-OCS-SO-038-Nro.119-2025",
-                "vote_count_object": {
-                  "AF": 0,
-                  "EC": 1,
-                  "AB": 1,
-                  "RECTOR_VOTE": null
-                },
-                "votes": [
-                  {
-                    "name": "Andrés Tituana",
-                    "id_topic": "mfuvy9vk8eo9hagjtrv",
-                    "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
-                    "option": "en contra",
-                    "table": "votos",
-                    "role": "Papá"
-                  },
-                  {
-                    "name": "Mister Wringo",
-                    "id_topic": "mfuvy9vk8eo9hagjtrv",
-                    "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
-                    "table": "votos",
-                    "opcion": "Abstencion",
-                    "role": "Hermano"
-                  }
-                ],
-                "approved": false,
-                "notification": "Notificar al área de talento Humano para su posterior procesamiento",
-                "meeting_summary": "Se trató la aprobación de la designación de los miembros del comité de ética del Instituto Superior Tecnológico Yaruquí. Durante la sesión, se presentaron los perfiles de los candidatos propuestos y, tras una deliberación sobre su idoneidad y experiencia, los asistentes votaron a favor, quedando el comité conformado de manera oficial para iniciar sus funciones.",
-                "reformulacion": "Aprobación de la designación de los miembros del comité de ética del Instituto Superior Tecnológico Yaruquí.",
-                "desition": "Aprobar la designación de los miembros del comité de ética del Instituto Superior Tecnológico Yaruquí."
-              }
+            "topic": "Aprobación de las codificaciones para las actas de grado de la institución, considerando que las anteriores no permitía diferenciar las actas por carrera.",
+            "sub_topics": [],
+            "id_topic": "mfx2fwn95kxevlrrqoc",
+            "resolution_code": "R-OCS-SE-010-Nro.125-2025",
+            "vote_count_object": {
+              "AF": 3,
+              "EC": 1,
+              "AB": 0,
+              "RECTOR_VOTE": null
             },
-            "pairedItem": {
-              "item": 0
-            }
+            "votes": [
+              {
+                "name": "Mgtr Javier Hernando Espinoza Garzón",
+                "id_topic": "mfx2fwn95kxevlrrqoc",
+                "topic": "Aprobación de las codificaciones para las actas de grado de la institución, considerando que las anteriores no permitía diferenciar las actas por carrera.",
+                "option": "A favor",
+                "table": "votos",
+                "meeting_finished": "",
+                "role": "Rector"
+              },
+              {
+                "name": "Dania Portelles Cobas",
+                "id_topic": "mfx2fwn95kxevlrrqoc",
+                "topic": "Aprobación de las codificaciones para las actas de grado de la institución, considerando que las anteriores no permitía diferenciar las actas por carrera.",
+                "option": "A favor",
+                "table": "votos",
+                "meeting_finished": "",
+                "role": "Vicerrectora Académica"
+              },
+              {
+                "name": "Carlos Eduardo Estrella Carrera",
+                "id_topic": "mfx2fwn95kxevlrrqoc",
+                "topic": "Aprobación de las codificaciones para las actas de grado de la institución, considerando que las anteriores no permitía diferenciar las actas por carrera.",
+                "option": "A favor",
+                "table": "votos",
+                "meeting_finished": "",
+                "role": "Vicerrector Académico"
+              },
+              {
+                "name": "Valeria Elizabeth Pinango Farinango",
+                "id_topic": "mfx2fwn95kxevlrrqoc",
+                "topic": "Aprobación de las codificaciones para las actas de grado de la institución, considerando que las anteriores no permitía diferenciar las actas por carrera.",
+                "option": "En contra",
+                "table": "votos",
+                "meeting_finished": "",
+                "role": "Jefa de Cuadrilla"
+              }
+            ],
+            "approved": true,
+            "notification": "",
+            "meeting_summary": "Se abordó la necesidad de aprobar nuevas codificaciones para las actas de grado de la institución, ya que el sistema anterior no permitía una diferenciación clara por carrera. Se presentaron los nuevos códigos, diseñados para ser más legibles e identificar de manera única cada programa académico (ej. Ingeniería Civil: AOE571, Sistemas: AOS457, etc.). La propuesta fue sometida a votación y aprobada por unanimidad por todos los asistentes.",
+            "reformulacion": "Aprobación de las codificaciones para las actas de grado de la institución, considerando que las anteriores no permitía diferenciar las actas por carrera.",
+            "desition": "Aprobar las codificaciones para las actas de grado de la institución, considerando que las anteriores no permitía diferenciar las actas por carrera."
           },
           "considerandos": [
-            "Que, el artículo 353 de la Constitución de la República del Ecuador indica lo siguiente 'El sistema de educación superior se regirá por: 1. Un organismo público de planificación, regulación y coordinación interna del sistema y de la relación entre sus distintos actores con la Función Ejecutiva (...)'",
-            "Que, el artículo 14 de la Ley Orgánica de Educación Superior (LOES) indica lo siguiente 'El sistema de educación superior estará integrado por universidades y escuelas politécnicas; institutos superiores técnicos, tecnológicos y pedagógicos; y conservatorios de música y artes, debidamente acreditados y evaluados. Estas instituciones, sean públicas o particulares, no tendrán fines de lucro.'"
+            "Que, el artículo 72 del Reglamento de Régimen Académico del ISTY indica lo siguiente sobre Reprobación del proceso de titulación.: \"Reprobación del proceso de titulación. - Si un estudiante no alcanzare la calificación mínima requerida para la aprobación del proceso de titulación, a través de las opciones establecidas por el ISTY en ejercicio de su autonomía, el estudiante podrá solicitar a la Dirección de Carreras se autorice una nueva aplicación de la opción de titulación escogida realizando el pago de derechos establecidos. De persistir la reprobación, el estudiante deberá matricularse nuevamente para acceder a la opción de titulación. CAPÍTULO IV OTORGAMIENTO, EMISIÓN Y REGISTRO DE TÍTULOS\"",
+            "Que, el artículo 25 del Reglamento para el Reconocimiento y Homologación de Estudios indica lo siguiente sobre De la Titulación: \"De la Titulación - Una vez que el estudiante de validación de conocimientos haya homologado las asignaturas correspondientes de la malla curricular, deberá Realizar un examen complexivo teórico-práctico cuyo objetivo es evaluar de manera integral el conocimiento, las habilidades y competencias adquiridas al final de la carrera. Este examen podrá ser presencial o virtual en correspondencia con la modalidad de estudio de cada carrera y respondiendo a los intereses institucionales. CAPÍTULO V VALIDACIÓN POR EJERCICIO PROFESIONAL\"",
+            "Que, la disposición CUARTA del Reglamento de Régimen Académico indica lo siguiente sobre DISPOSICIONES: \"DISPOSICIONES - Las IES podrán mantener para los estudiantes que se encuentren cursando las mallas vigentes, el proceso de titulación de conformidad a la norma vigente al momento de iniciar sus estudios.\"",
+            "Que, la disposición SEGUNDA del Reglamento de Régimen Académico indica lo siguiente sobre DISPOSICIONES: \"DISPOSICIONES - Los estudiantes que no hayan podido titularse en los tiempos establecidos para el efecto, podrán continuar sus estudios acogiéndose a los mecanismos de reconocimiento y homologación de asignaturas, cursos o sus equivalentes, según corresponda, en los plazos y términos establecidos en la norma.\"",
+            "Que, el artículo 45 del Reglamento para el Reconocimiento y Homologación de Estudios indica lo siguiente sobre De la Titulación: \"De la Titulación - Una vez que el estudiante de validación por ejercicio profesional haya homologado la malla correspondiente, deberá optar por una de las formas de titulación establecidas en el proyecto de la carrera. No se podrá homologar asignaturas, prácticas preprofesionales o giras de estudio por Experiencia laboral en los siguientes casos: 1. Cuando la experiencia laboral sea inferior al tiempo de la carrera a validar, el ISTY realizará un proceso de validación por conocimientos en los puestos de trabajo para los que se solicitará convalidación, con la asignatura correspondiente. 2. Cuando el solicitante no pudiera comprobar su experiencia laboral por cierre de la empresa o institución. 3. Cuando luego del análisis de las funciones realizadas en cada puesto laboral, no alcancen una similitud del 60% a las establecidas en las asignaturas que sean similares a los puestos laborales desempeñados. 4. Al comprobarse la ilegalidad, falsedad o dolo en los documentos presentados.\"",
+            "Que, el artículo 71 del Reglamento de Régimen Académico del ISTY indica lo siguiente sobre Opciones de titulación: \"Opciones de titulación - Dependiendo de la resolución de aprobación de las carreras que oferta la Institución, los estudiantes podrán optar por las opciones de titulación que el ISTY establezca en ejercicio de su autonomía de conformidad con la normativa vigente.\"",
+            "Que, el artículo 18 del Reglamento para el Reconocimiento y Homologación de Estudios indica lo siguiente sobre Del plazo: \"Del plazo - Los peticionarios, podrán solicitar rendir el examen de suficiencia de conocimientos de asignaturas de conformidad a lo que se establezca en el calendario académico.\"",
+            "Que, el artículo 22 del Reglamento para el Reconocimiento y Homologación de Estudios indica lo siguiente sobre Del plazo: \"Del plazo - Los peticionarios, podrán solicitar rendir el examen de validación de conocimientos de asignaturas de conformidad a lo que se establezca en el calendario académico.\"",
+            "Que, el artículo 114 del Reglamento de Régimen Académico indica lo siguiente sobre Período académico extraordinario: \"Período académico extraordinario - Las IES podrán implementar, adicionalmente, períodos académicos extraordinarios de mínimo cuatro (4) semanas. En este período extraordinario se podrá contratar al personal académico y administrativo que se requiera según la planificación de las IES. Los períodos académicos extraordinarios no podrán ser implementados para adelantar la titulación de los estudiantes.\"",
+            "Que, el artículo 38 del Reglamento para el Reconocimiento y Homologación de Estudios indica lo siguiente sobre De la vigencia: \"De la vigencia - Si el peticionario no se matricula en el plazo indicado en el calendario académico, el estudio de validación de ejercicio profesional se debe actualizar.\"",
+            "Que, el artículo 26 del Reglamento de Régimen Académico indica lo siguiente sobre Requisitos y opciones de titulación en el tercer nivel: \"Requisitos y opciones de titulación en el tercer nivel - Cada IES determinará en su normativa interna los requisitos para acceder a la titulación, así como las opciones para su aprobación. Los créditos correspondientes a las opciones de titulación estarán incluidos en la totalidad de créditos de la carrera. Se podrá emitir el título respectivo únicamente cuando el estudiante apruebe todos los requisitos académicos y administrativos establecidos por las IES, lo que constará en el acta consolidada de finalización de estudios, de conformidad con el artículo 85 de este Reglamento.\"",
+            "Que, el artículo 28 del Reglamento de Régimen Académico indica lo siguiente sobre Prórroga para opciones de titulación en cuarto nivel: \"Prórroga para opciones de titulación en cuarto nivel - La IES en su normativa interna establecerá el plazo adicional que tiene el estudiante para desarrollar su opción de titulación y los derechos y aranceles que deberá pagar para el efecto en el caso de solicitar prórrogas. La primera prórroga no requerirá de pago por concepto de derechos o aranceles, ni valor similar. Cuando el estudiante haya cumplido y aprobado la totalidad del plan de estudios excepto la opción de titulación y una vez transcurridos los plazos establecidos por la IES, deberá matricularse y tomar los cursos, asignaturas o equivalentes para la actualización de conocimientos en los plazos y condiciones que establezca la IES, siempre y cuando no hayan transcurrido diez (10) años desde que se cumplió y aprobó la totalidad del plan de estudios.\"",
+            "Que, la disposición SEGUNDA del Reglamento de Titulación indica lo siguiente sobre DISPOSICIONES: \"DISPOSICIONES - Considérese que, si un estudiante no concluye o aprueba la opción de titulación después de 10 años, el/la estudiante podrá retomar sus estudios en la misma o en otra carrera acogiéndose al mecanismo de homologación por validación de conocimientos.\"",
+            "Que, el artículo 36 del Reglamento para el Reconocimiento y Homologación de Estudios indica lo siguiente sobre Del plazo: \"Del plazo - Los peticionarios podrán solicitar la homologación por ejercicio profesional de conformidad a lo que se establezca en el calendario académico.\"",
+            "Que, el artículo 84 de la Ley Orgánica de Educación Superior indica lo siguiente sobre Requisitos para aprobación de cursos y carreras: \"Requisitos para aprobación de cursos y carreras - Los requisitos de carácter académico y disciplinario necesarios para la aprobación de cursos y carreras, constarán en el Reglamento de Régimen Académico, en los respectivos estatutos, reglamentos y demás normas que rigen al Sistema de Educación Superior. Solamente en casos establecidos excepcionalmente en la normativa interna, un estudiante podrá matricularse hasta por tercera ocasión en una misma materia o en el mismo ciclo, curso o nivel académico.\"",
+            "Que, el artículo 5 de la Ley Orgánica de Educación Superior indica lo siguiente sobre Derechos de las y los estudiantes: \"Derechos de las y los estudiantes - Son derechos de las y los estudiantes los siguientes: a) Acceder, movilizarse, permanecer, egresar y titularse sin discriminación conforme sus méritos académicos; b) Acceder a una educación superior de calidad y pertinente, que permita iniciar una carrera académica y/o profesional en igualdad de oportunidades; c) Contar y acceder a los medios y recursos adecuados para su formación superior; garantizados por la Constitución; d) Participar en el proceso de evaluación y acreditación de su carrera; e) Elegir y ser elegido para las representaciones estudiantiles e integrar el cogobierno, en el caso de las universidades y escuelas politécnicas; f) Ejercer la libertad de asociarse, expresarse y completar su formación bajo la más amplia libertad de cátedra e investigativa; g) Participar en el proceso de construcción, difusión y aplicación del conocimiento; h) El derecho a recibir una educación superior laica, intercultural, democrática, incluyente y diversa, que impulse la equidad de género, la justicia y la paz; i) Obtener de acuerdo con sus méritos académicos becas, créditos y otras formas de apoyo económico que le garantice igualdad de oportunidades en el proceso de formación de educación superior; y, j) A desarrollarse en un ámbito educativo libre de todo tipo de violencia. Artículo reformado por artículo 4 de Ley No. 0, publicada en Registro Oficial Suplemento 297 de 2 de Agosto de 2018. CONCORDANCIAS: CONSTITUCIÓN DE LA REPÚBLICA DEL ECUADOR, Arts. 28\"",
+            "Que, la disposición Vigésima Primera de la Ley Orgánica de Educación Superior indica lo siguiente sobre DISPOSICIONES: \"DISPOSICIONES - El plazo determinado en la Disposición anterior, podrá ser prorrogable hasta 180 días.\"",
+            "Que, el artículo 118 del Estatuto Isty indica lo siguiente sobre Derechos de los Estudiantes: \"Derechos de los Estudiantes - Son derechos de los estudiantes del Instituto Superior Tecnológico Yaruquí además de los previstos en la LOES, los siguientes: a. Realizar todos los procesos académicos y administrativos necesarios para poder obtener su título de tercer nivel sin ninguna clase de discriminación; b. Acceder en igualdad de oportunidades a una formación de calidad y calidez, que le permita iniciar una carrera profesional en igualdad de oportunidades; c. Acceder a recursos apropiados para su educación; d. Ser partícipes en los procesos de acreditación y evaluación de su carrera; e. Participar como elector en las representaciones estudiantiles, además de poder integrar el cogobierno como candidato; f. Tener libertad de asociación y libertad de expresión; g. Recibir una educación superior laica, intercultural, democrática, incluyente y diversa, que impulse la equidad de género, la justicia y la paz conforme lo dispuesto por la Constitución de la República; h. Poder aplicar a becas, apoyos económicos o similares conforme a sus méritos académicos y situación socio económica; i. Permanecer en la institución y titularse sin discriminación, conforme a sus méritos académicos; j. Ser atendidos de manera debida por los estamentos de la institución, de conformidad con las leyes, sus reglamentos, este Estatuto y demás normativas vigentes; k. Recibir al inicio del año académico el calendario de actividades y las programaciones de cada materia, debidamente aprobados; l. Exigir que los docentes asistan puntualmente a clases y que los traten con respeto; m. Recibir orientación e información sobre el Estatuto, reglamentos, normas y procedimientos mediante el acceso virtual de los mismos; y, n. Los demás establecidas en los Reglamento Internos y resoluciones de autoridad competente.\"",
+            "Que, el artículo 2 del Reglamento de Régimen Académico del ISTY indica lo siguiente sobre Ámbito: \"Ámbito - Este Reglamento es de obligatoria aplicación para las autoridades, miembros del personal académico, estudiantes y trabajadores que intervienen en las actividades académicas del ISTY. CAPÍTULO II ORGANIZACIÓN ACADÉMICA DEL ISTY Sección I De la estructura institucional\""
           ]
         }
       }
@@ -409,7 +375,18 @@
         ]
       ]
     },
-    "start": {
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "index",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "START": {
       "main": [
         [
           {
@@ -429,24 +406,13 @@
           }
         ]
       ]
-    },
-    "Code": {
-      "main": [
-        [
-          {
-            "node": "index",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "4e0b55c3-c179-4e0d-be3e-6f772cbdcc16",
+  "versionId": "23610c21-dea4-474d-9b58-bbfa0c2e740d",
   "meta": {
     "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"
   },

@@ -338,6 +338,27 @@ CREATE TABLE lastmodified(
 INSERT INTO lastmodified(last_modified)
 VALUES ('2025-09-22T13:41:47Z');
 ```
+**whereas_clauses:** Lleva un registro de los considerandos que se le muestran a secretaría para se elija a los más óptimos o que más se ajusten con la resolucion
+```
+CREATE TABLE IF NOT EXISTS whereas_clauses (
+    id BIGSERIAL PRIMARY KEY,
+    resolution TEXT,
+    whereasIA TEXT[],
+    whereasUSER TEXT[]
+);
+```
+**whereas_clauses_DATATRAINING:** Tabla para guardar datos para posterior entrenamiento de modelo
+El modelo va a elegir de entre un grupo de artículos, los que elija se guardan en whereasUSER, los que no elija se guardan en whereasIA. 
+Al final cuando el usuario elija cuáles son los artículos finales, se guardan en whereasFINALCHOICE
+```
+CREATE TABLE IF NOT EXISTS whereas_clauses_DATATRAINING (
+    id BIGSERIAL PRIMARY KEY,
+    resolution TEXT,
+    whereasIA TEXT[],
+    whereasUSER TEXT[],
+    whereasFINALCHOICE TEXT[]
+);
+```
 ## N8N
 Se accede mediante la url 
 ```

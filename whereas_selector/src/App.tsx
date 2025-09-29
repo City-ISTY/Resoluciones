@@ -1,5 +1,5 @@
 import './App.css';
-import RemovableByMove from './selector';
+import RemovableByMove from './Selector';
 
 function App() {
   return (

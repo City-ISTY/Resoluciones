@@ -1,11 +1,12 @@
 {
-  "name": "CREAR_EXCEL",
+  "name": "CREATE_EXCEL",
   "nodes": [
     {
       "parameters": {
         "operation": "xlsx",
         "options": {
-          "fileName": "={{ $('start').item.json.file_name+ \".xlsx\" }}"
+          "fileName": "={{ $('start').first().json.file_name+ \".xlsx\" }}",
+          "headerRow": "={{ $('start').first().json.header_row }}"
         }
       },
       "type": "n8n-nodes-base.convertToFile",
@@ -20,7 +21,7 @@
     {
       "parameters": {
         "fileName": "={{ $('start').item.json.file_name+ \".xlsx\" }}",
-        "parentId": "={{ $('start').item.json.parent_folder }}",
+        "parentId": "={{ $('start').first().json.parent_folder }}",
         "binaryData": true
       },
       "type": "n8n-nodes-base.microsoftOneDrive",
@@ -81,7 +82,7 @@
     {
       "parameters": {
         "inputSource": "jsonExample",
-        "jsonExample": "{\n  \"array\":  [\n  {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  },\n    {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  },\n    {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  },\n    {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  }\n],\n  \"file_name\": \"SDJFJASHDF\",\n  \"parent_folder\": \"\"\n  \n}\n"
+        "jsonExample": "{\n  \"array\":  [\n  {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  },\n    {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  },\n    {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  },\n    {\n    \"id_assistant\": \"Juan\",\n    \"name\": \"Pérez\",\n    \"role\": 30,\n    \"attendance\": false,\n    \"table\": \"asistencia\"\n  }\n],\n  \"file_name\": \"SDJFJASHDF\",\n  \"header_row\": true,\n  \"parent_folder\": \"01ZX2MQXNB22VZ2SIBENE25GIC4JVGCVFN\"\n  \n}\n"
       },
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
@@ -113,6 +114,30 @@
           "name": "Microsoft account"
         }
       }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1d3dd0d-5adb-45e3-aff8-cb5e1cd78bdf",
+              "name": "id_onedrive",
+              "value": "={{ $('GUARDAR_ARCHIVO').item.json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -128,
+        -32
+      ],
+      "id": "72652e1d-ef7a-4db5-ae26-3ceadc398c0d",
+      "name": "Edit Fields"
     }
   ],
   "pinData": {
@@ -149,8 +174,9 @@
               "table": "asistencia"
             }
           ],
-          "file_name": "SDJFJASHDF",
-          "parent_folder": ""
+          "header_row": true,
+          "file_name": "AAAAA",
+          "parent_folder": "01ZX2MQXNB22VZ2SIBENE25GIC4JVGCVFN"
         }
       }
     ]
@@ -204,13 +230,24 @@
       "main": [
         []
       ]
+    },
+    "URL_DESCARGA": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "fcff5e3f-7b02-4127-ad9c-f0cdc1e177c3",
+  "versionId": "25db5d16-c047-48e5-8c21-04576e82d9c2",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"

@@ -8,8 +8,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        -1264,
-        448
+        -1024,
+        464
       ],
       "id": "2cc680c5-a913-4098-b107-dfb5cbf7141c",
       "name": "Google Gemini Chat Model",
@@ -27,7 +27,7 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
       "typeVersion": 1,
       "position": [
-        -576,
+        -320,
         432
       ],
       "id": "bc43c81f-2048-4782-8be3-e90b24ad8dcf",
@@ -41,86 +41,27 @@
     },
     {
       "parameters": {
-        "promptType": "define",
-        "text": "=RESOLUCION: \"{{ $('start').first().json.resolucion }}\"\nLEYES Y NORMATIVAS: ```\n-------------------------------------\n{{ $json.results.map((context,idx)=>{\n\nreturn (\"NUMERO ARTÍCULO:\"+context.metadata.articulo +\"\\n\"+\n\"EXTRAIDO DE: \"+context.metadata.document_name +\"\\n\"+\n\"LEY:\"+context.text +\"\\n\"+\n\"TITULO DEL ARTICULO:\"+context.metadata.titulo +\"\\n -----------------------------------------------\\n\"\n)\n}) }}```",
-        "hasOutputParser": true,
-        "options": {
-          "systemMessage": "Eres un asistente experto en redacción de documentos oficiales para instituciones de educación superior en Ecuador, con amplio conocimiento de la Ley.\nOBJETIVO\n\tTu tarea es la de utilizar las normas para dar formato a considreandos formales para una resolución, para el Instituto Superior Tecnológico Yaruquí. \n\tPara ello recibirás dos elementos clave: *RESOLUCION* el cual es un parrafo que indica la desicion tomada por el Instituto, y *LEYES Y NORMATIVAS* \n\tlas cuales servirán como sustento legal para argumentar la resolución. \nINSTRUCCIONES:\n\t*Analizar la RESOLUCION: Lee atentamente la *Resolucion* para identificar la intención principal y los elementos centrales del tema.\n\t*Se te va a proporcionar un conjunto de leyes con esta estructura \n\t\tNUMERO ARTÍCULO: (Identifica al artículo)\n\t\tEXTRAIDO DE: (Es el nombre del documento, hace referencia a la norma de la cual se extrajo el artículo, usa este nombre del archivo para citar la ley)\n\t\tLEY:\n\t\tTITULO DEL ARTICULO:Ceremonia de Graduación\n\t*Analizar las LEYES Y NORMATIVAS: Revisa cada uno de las leyes proporcionadas. Identifica y extrae los artículos, estatutos o principios que justifican y dan fundamento a las decisiones que se redactan en la RESOLUCION.\n\t*Redactar la sección 'CONSIDERANDO': Utiliza las *LEYES Y NORMATIVAS* para elaborar los 'considerandos'. Cada considerando debe ser un párrafo que explique el marco legal o la razón de ser de la resolución, citando de manera exacta la ley.\n\t*Intenta utilizar la mayor cantidad de leyes, siempre y cuando la ley toque de alguna manera el tema de la resolución.\nFORMATO DE SALIDA: \n\tSolo devuelve JSON con el siguiente formato\n\t{\"considerandos\": \"aqui van los considerandos separados barra vertical (|)\"}\nFORMATO DE LOS CONSIDERANDOS: Cada considerando debe tener la siguiente estructura:\n\tFORMATO 1: Usalo en caso de que exista el numero de artículo, y el título\n\t\tQue, el artículo *NUMERO ARTÍCULO* del *EXTRAIDO DE* indica lo siguiente sobre *TITULO DEL ARTICULO*: \"*LEY*\"\n\tFORMATO 2: Usalo  en caso de no tener número de artículo.\n\t\tQue, el *EXTRAIDO DE* indica lo siguiente: \"*LEY*\"\nEXTRAE LA NORMA DEL NOMBRE DEL ARCHIVO. *EXTRAIDO DE* es un nombre de archivo, solo utilizalo para colocar ese nombre de la norma. no lo cites textualmente ya que el nombre del archivo normalmente viene con signos, extensiones de archivo, y no utilices mayusculas, formatealo correctamente como si citaras el nombre de la norma.\n\tejm: estatuto isty oct2024 v2 -> reestructuralo simplementa a \"Estatuto Isty\" capturando el nombre del estatuto o ley\n\t\n\tVARIACION DEL FORMATO: Analiza si vas a redactar un articulo, un anexo o una disposicion,etc, para que reformules la parte inicial del considerando ejm: si es un articulo iniciarias con \"que el articulo\", si es una disposicion: \"que la disposicion\", si no tiene nada, verifica el contenido para que puedar citar que tipo de ley es.\n",
-          "returnIntermediateSteps": false
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 2.2,
-      "position": [
-        704,
-        256
-      ],
-      "id": "6c44a370-cfa7-4705-b632-678dbce7cc6d",
-      "name": "GeneradorConsiderandos"
-    },
-    {
-      "parameters": {
-        "promptType": "define",
-        "text": "=\n\nLee y comprende la resolución completa.\n\nIdentifica los aspectos jurídicos clave, tales como:\n\nLa materia de derecho involucrada (ej. derecho administrativo, derecho educativo, derecho constitucional).\n\nLos principios legales aplicables (ej. interés superior, igualdad, razonabilidad, legalidad).\n\nLos procedimientos y requisitos formales (ej. plazos, formalidades, competencia del órgano emisor).\n\nLos derechos y cargas de las partes involucradas.\n\nLos argumentos centrales de la decisión (ej. méritos, excepcionalidad, motivos de hecho y de derecho).\n\nLos posibles vacíos legales o conflictos normativos que la resolución intenta resolver.\n\nExpande la resolución en un resumen jurídico técnico y formal, detallando los puntos que requieren sustento legal.\n\nGenera preguntas de investigación legal: El objetivo principal es formular una lista de 10 a 15 preguntas específicas que un abogado se plantearía para fundamentar jurídicamente la decisión. Estas preguntas deben:\n\nSer autocontenidas y claras.\n\nCubrir la mayor cantidad de aspectos posibles de la resolución (sustantivos, procedimentales, principios, jurisprudencia).\n\nEstar redactadas para dirigir la búsqueda hacia normas, jurisprudencia y doctrina relevante.\n\nEvitar ser genéricas; deben estar directamente vinculadas a los hechos y argumentos del caso.\n\nIncluye preguntas de profundización (follow-ups): Formula 2-3 preguntas adicionales que surjan del análisis más profundo y que puedan ser necesarias para casos complejos o matices específicos.\n\nUsa terminología jurídica precisa.\n\nNo inventes leyes ni artículos que no existen.\n\nEl objetivo es que las preguntas sean el vehículo para explorar exhaustivamente el marco legal aplicable en un sistema RAG.\n\nEl lenguaje debe ser formal y estar orientado a abogados.\nEntrada:\n\"{{ $json.resolucion }}\"\n\n\n\nFORMATO DE SALIDA: \nSolo devuelve JSON con el siguiente formato\n{\"research_questions\": (Lista de strings) Las 7 preguntas de investigación legal SEPARADAS POR PUNTO Y COMA}\n\n",
-        "hasOutputParser": true,
-        "options": {
-          "systemMessage": "Eres un asistente experto en derecho y en recuperación de información legal. \nTu tarea es analizar el texto completo de una resolución judicial o administrativa \ny transformarlo en un conjunto de preguntas útiles para encontrar \nartículos legales, jurisprudencia y doctrina que respalden jurídicamente la decisión."
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 2.2,
-      "position": [
-        -1216,
-        256
-      ],
-      "id": "f114bf35-4a1b-4f13-8ba5-ad0df6e7d1ac",
-      "name": "GeneradorTerminos"
-    },
-    {
-      "parameters": {
-        "jsonSchemaExample": "{\n\t\"terminos_busqueda\": \"\"\n}"
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"array\",\n\t\"items\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t}\n}"
       },
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        -1024,
-        448
+        -736,
+        464
       ],
       "id": "b5d1c3df-ad63-405d-aba9-1cc8830ad14e",
       "name": "Structured Output Parser"
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "3f28f526-5335-46c7-a450-f247d9a1356c",
-              "name": "aaa",
-              "value": "={{ $json.output.terminos_busqueda.split(\";\") }}",
-              "type": "array"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        -912,
-        256
-      ],
-      "id": "dfb22449-414d-486f-9769-eeecb15b6263",
-      "name": "Edit Fields1"
-    },
-    {
-      "parameters": {
-        "fieldToSplitOut": "aaa",
+        "fieldToSplitOut": "output",
         "options": {}
       },
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        -752,
+        -544,
         256
       ],
       "id": "e48b54d1-286a-42b3-abac-a2db13233174",
@@ -135,14 +76,14 @@
           "mode": "list",
           "cachedResultName": "documents"
         },
-        "prompt": "={{ $json.aaa }}",
+        "prompt": "={{ $json.output }}",
         "topK": 7,
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
       "typeVersion": 1.3,
       "position": [
-        -576,
+        -320,
         256
       ],
       "id": "f54b0ed5-0597-4885-b936-3d121013f75a",
@@ -156,73 +97,13 @@
     },
     {
       "parameters": {
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
-      "typeVersion": 1,
-      "position": [
-        624,
-        432
-      ],
-      "id": "4dce61a2-35b8-4c27-9ee5-1f3d5e0ddff0",
-      "name": "Google Gemini Chat Model1",
-      "credentials": {
-        "googlePalmApi": {
-          "id": "0Zr2gDUeSEg2Xe6E",
-          "name": "Google Gemini(PaLM) Api account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsonSchemaExample": "{\"considerandos\": \"\"}"
-      },
-      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.3,
-      "position": [
-        912,
-        432
-      ],
-      "id": "c1b82616-aa66-4936-b0bc-654568f594be",
-      "name": "Structured Output Parser1"
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "c43a18bc-599f-4dd2-b4da-2afd5f7dbb9f",
-              "name": "considerandos",
-              "value": "={{ $json.output.considerandos.split(\"|\") }}",
-              "type": "array"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        1008,
-        256
-      ],
-      "id": "595471ed-a9a2-43ad-ab03-1731f4667a51",
-      "name": "Edit Fields3"
-    },
-    {
-      "parameters": {
-        "workflowInputs": {
-          "values": [
-            {
-              "name": "resolucion"
-            }
-          ]
-        }
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n    \"resolucion\": \"Revisión de la solicitud para el ingreso del estudiante mediante examen complexivo fuera del cronograma.\"\n}"
       },
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1424,
+        -1136,
         256
       ],
       "id": "8c840e71-2e22-44d6-aecb-930146ecd3bd",
@@ -231,7 +112,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://192.168.1.199:8000/rerank",
+        "url": "http://reranker:8000/rerank",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -259,8 +140,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        96,
-        256
+        80,
+        -64
       ],
       "id": "9baeca0c-d9e7-47e1-b104-39a0aa9a366b",
       "name": "HTTP Request"
@@ -272,7 +153,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -80,
+        176,
         256
       ],
       "id": "5a0aaeda-35fa-48f7-820b-79e9208564c9",
@@ -285,7 +166,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -256,
+        0,
         256
       ],
       "id": "f46672de-6b35-42fb-891e-8d4d33621b3a",
@@ -293,13 +174,13 @@
     },
     {
       "parameters": {
-        "jsCode": "// Habilitar \"Run Once for All Items\"\nconst results = items[0].json.results;\n\n// Primero filtrar los que tengan score mayor a 0.8\nconst filteredResults = results.filter(item => item.score > 0.07);\n$('eliminar_duplicados').first().json.documentos\n// Luego ordenar por score de mayor a menor (descendente)\nconst sortedResults = filteredResults.sort((a, b) => b.score - a.score);\n$('eliminar_duplicados').first().json.documentos[0].document.metadata\nreturn [{\n  json: {\n    results: sortedResults\n  }\n}];"
+        "jsCode": "// Habilitar \"Run Once for All Items\"\nconst results = items[0].json.results;\nconsole.log(results);\n\n// Primero filtrar los que tengan score mayor a 0.8\nconst filteredResults = results.filter(item => item.score > 0.07);\n\n// Luego ordenar por score de mayor a menor (descendente)\nconst sortedResults = filteredResults.sort((a, b) => b.score - a.score);\n\nreturn [{\n  json: {\n    results: sortedResults\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        272,
-        256
+        304,
+        -64
       ],
       "id": "e7901e4a-9ba6-4ccb-a233-245858725523",
       "name": "ORDER_AND_FILTER"
@@ -311,11 +192,292 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        464,
-        256
+        496,
+        -64
       ],
       "id": "dc7d4ae7-d644-4aef-8c30-c1d559b80042",
       "name": "GET_METADATA"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -896,
+        464
+      ],
+      "id": "460e92fa-627c-4979-bf98-3df38419193a",
+      "name": "Google Gemini Chat Model4",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0Zr2gDUeSEg2Xe6E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1184,
+        -16
+      ],
+      "id": "1b552fce-332a-4692-931f-52e7e00d3839",
+      "name": "Google Gemini Chat Model5",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0Zr2gDUeSEg2Xe6E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"array\",\n\t\"items\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -896,
+        -16
+      ],
+      "id": "22d95d2d-9cdb-4b60-b0e0-0a088cf5eae8",
+      "name": "Structured Output Parser2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1056,
+        -16
+      ],
+      "id": "b9961e1f-69f3-44c3-99a0-1cfe9b9b09d7",
+      "name": "Google Gemini Chat Model6",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0Zr2gDUeSEg2Xe6E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\n\nLee y comprende la resolución completa.\n\nIdentifica los aspectos jurídicos clave, tales como:\n\nLa materia de derecho involucrada (ej. derecho administrativo, derecho educativo, derecho constitucional).\n\nLos principios legales aplicables (ej. interés superior, igualdad, razonabilidad, legalidad).\n\nLos procedimientos y requisitos formales (ej. plazos, formalidades, competencia del órgano emisor).\n\nLos derechos y cargas de las partes involucradas.\n\nLos argumentos centrales de la decisión (ej. méritos, excepcionalidad, motivos de hecho y de derecho).\n\nLos posibles vacíos legales o conflictos normativos que la resolución intenta resolver.\n\nExpande la resolución en un resumen jurídico técnico y formal, detallando los puntos que requieren sustento legal.\n\nGenera preguntas de investigación legal: El objetivo principal es formular una lista de 10 a 15 preguntas específicas que un abogado se plantearía para fundamentar jurídicamente la decisión. Estas preguntas deben:\n\nSer autocontenidas y claras.\n\nCubrir la mayor cantidad de aspectos posibles de la resolución (sustantivos, procedimentales, principios, jurisprudencia).\n\nEstar redactadas para dirigir la búsqueda hacia normas, jurisprudencia y doctrina relevante.\n\nEvitar ser genéricas; deben estar directamente vinculadas a los hechos y argumentos del caso.\n\nIncluye preguntas de profundización (follow-ups): Formula 2-3 preguntas adicionales que surjan del análisis más profundo y que puedan ser necesarias para casos complejos o matices específicos.\n\nUsa terminología jurídica precisa.\n\nNo inventes leyes ni artículos que no existen.\n\nEl objetivo es que las preguntas sean el vehículo para explorar exhaustivamente el marco legal aplicable en un sistema RAG.\n\nGenera 7 preguntas de no mas de 15 palabras.\n\nEl lenguaje debe ser formal y estar orientado a abogados.\nEntrada:\n\"{{ $json.resolucion }}\"\n\n\n\nFORMATO DE SALIDA: \nSolo devuelve JSON con el siguiente formato\n{\"output\":[aqui pones el arreglo con las preguntas]}\n\n",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "Eres un asistente experto en derecho y en recuperación de información legal. \nTu tarea es analizar el texto completo de una resolución judicial o administrativa \ny transformarlo en un conjunto de preguntas útiles para encontrar \nartículos legales, jurisprudencia y doctrina que respalden jurídicamente la decisión."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -960,
+        256
+      ],
+      "id": "f114bf35-4a1b-4f13-8ba5-ad0df6e7d1ac",
+      "name": "GENERADORPREGUNTAS"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Realiza un análisis jurídico exhaustivo de la resolución completa. Durante tu análisis, identifica sistemáticamente los siguientes elementos clave:\n\n1.  **Materia de Derecho:** (ej. administrativo, constitucional).\n2.  **Principios Jurídicos Aplicables:** (ej. debido proceso, interés superior).\n3.  **Hitos Procedimentales:** (ej. competencia, plazos, requisitos formales).\n4.  **Ratio Decidendi:** El núcleo argumentativo de la decisión (hechos y derecho).\n5.  **Conflictos Normativos o Vacíos Legales:** Si la resolución aborda alguno.\n\nA partir de este análisis, genera una lista de **entre 7 y 10 términos o frases clave de búsqueda en total**. Estos términos deben ser los más relevantes y estratégicos, optimizados para un sistema de Retrieval-Augmented Generation (RAG) para abogados.\n\nEl objetivo es que cada frase sea una consulta precisa y de alto impacto para localizar la normativa, jurisprudencia y doctrina más crucial para fundamentar, analizar o refutar la decisión.\n\n**Instrucciones para la generación de términos:**\n\n* **Prioridad y Relevancia:** Enfócate en los conceptos que son el eje central del caso.\n* **Especificidad:** Combina conceptos para acotar la búsqueda (ej. \"nulidad acto administrativo silencio positivo\"). Evita términos de una sola palabra.\n* **Terminología:** Utiliza lenguaje jurídico técnico y preciso.\n* **Accionabilidad:** Formula las frases como lo haría un abogado buscando activamente material para un caso.\n\nEntrada:\n\"{{ $json.resolucion }}\"\n\nFORMATO DE SALIDA:\nDevuelve exclusivamente un objeto JSON con la siguiente estructura:\n{\"terminos_clave\": [aqui incluyes el arreglo de strings con los términos generados]}\n",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "Eres un asistente experto en derecho y en recuperación de información legal. \nTu tarea es analizar el texto completo de una resolución judicial o administrativa \ny transformarlo en un conjunto de terminos específicos útiles para encontrar \nartículos legales, jurisprudencia y doctrina que respalden jurídicamente la decisión."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1104,
+        -224
+      ],
+      "id": "2fcd8c70-98a8-449a-919c-d927662e6718",
+      "name": "GENERADORTERMINOS"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=RESOLUCION: \"{{ $('start').first().json.resolucion }}\"\nLEYES Y NORMATIVAS: ```\n-------------------------------------\n{{ $json.results.map((context,idx)=>{\n\nreturn (\"ID: \"+context.text.id+\"\\nNUMERO ARTÍCULO:\"+context.text.document.metadata.articulo +\"\\n\"+\n\"EXTRAIDO DE: \"+context.text.document.metadata.document_name +\"\\n\"+\n\"LEY:\"+context.text.document.pageContent  +\"\\n\"+\n\"TITULO DEL ARTICULO:\"+context.text.document.metadata.titulo +\"\\n -----------------------------------------------\\n\"\n)\n}).join(\"\") }}```",
+        "hasOutputParser": true,
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "Eres un asesor legal y experto en la clasificación de documentos oficiales para instituciones de educación superior en Ecuador. Tu especialidad es la fundamentación de actos administrativos, como las resoluciones, con un agudo criterio para la selección de normativas pertinentes.\n\n**OBJETIVO**\nClasificar  rigurosamente las normativas más pertinentes de un conjunto proporcionado, que den sustento legal y formal a una resolución específica para el Instituto Superior Tecnológico Yaruquí. Actuarás como el filtro final de calidad para separar los artículos en dos categorías: articulos_pertinentes y artículos_irrelevantes.\n\nPara ello, recibirás dos elementos clave:\n1.  **RESOLUCION**: Un párrafo que describe la decisión tomada por el Instituto.\n2.  **LEYES Y NORMATIVAS**: Un conjunto de artículos preseleccionados que *potencialmente* sirven como sustento legal. Tu labor es validar su pertinencia.\n\n**INSTRUCCIONES:**\n\n**FASE 1: ANÁLISIS ESTRATÉGICO**\n\n1.  **Análisis Profundo de la RESOLUCION**: Lee y descompón la `RESOLUCION`. Identifica el verbo rector (aprobar, negar, designar, etc.), el sujeto, el objeto y el propósito central de la decisión. Debes tener una comprensión absoluta de lo que se busca justificar.\n2.  **Análisis Crítico de LEYES Y NORMATIVAS**: Revisa cada artículo proporcionado en `LEYES Y NORMATIVAS` y evalúalo individualmente contra la `RESOLUCION` usando los siguientes **Criterios de Selección y Discriminación**. y separalos en dos grupos, articulos_pertinentes que son los que más relacion tienen, y  artículos_irrelevantes que serán los que menos relacion tendrán.\n\n\n**FASE 2: CRITERIOS DE SELECCIÓN Y DISCRIMINACIÓN (El Separador)**\nDebes ser extremadamente selectivo. No todos los artículos proporcionados serán útiles. Aplica los siguientes filtros con rigor para poder separar los artículos en dos grupos:\n\n* **Pertinencia Directa**: ¿El artículo justifica, habilita o da un marco legal *directo* a la acción descrita en la `RESOLUCION`? No es suficiente una relación tangencial o temática. Si el artículo habla de \"evaluación docente\" en general, pero la resolución es sobre la \"creación de una comisión específica para la evaluación de desempeño\", prioriza artículos que hablen sobre la creación de comisiones o la delegación de funciones de evaluación.\n* **Fundamento Causa-Efecto**: El artículo debe ser una causa legal para la consecuencia (la `RESOLUCION`). Pregúntate: \"¿La existencia de este artículo hace *necesaria* o *permite explícitamente* la decisión que se está tomando?\".\n\n\n**PROCESO DE EVALUACIÓN:**\nPara cada artículo, considera:\n- identificado  del artículo\n- El contenido del artículo (LEY)\n- Su número y título\n- La fuente de donde fue extraído\n- Su aplicación directa a la resolución\n\n**FORMATO DE SALIDA EXACTO:**\n{\n  \"articulos_pertinentes\": [5, 12, 25],\n  \"articulos_irrelevantes\": [3, 8, 15]\n}",
+          "returnIntermediateSteps": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        256
+      ],
+      "id": "9691c907-79f9-4cc9-bb8d-4b346e66c2bf",
+      "name": "GeneradorConsiderandos1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        624
+      ],
+      "id": "e22b5ca9-1d57-44ee-bf81-add71874a91b",
+      "name": "Google Gemini Chat Model9",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0Zr2gDUeSEg2Xe6E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"articulos_pertinentes\": {\n\t\t\t\"type\": \"array\",\n\t\t\t\"items\": {\n\t\t\t\t\"type\": \"number\"\n\t\t\t}\n\t\t},\n      \"articulos_irrelevantes\": {\n\t\t\t\"type\": \"array\",\n\t\t\t\"items\": {\n\t\t\t\t\"type\": \"number\"\n\t\t\t}\n\t\t}\n\t}\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        976,
+        480
+      ],
+      "id": "b313cc49-3547-497f-a220-3594142e5a6a",
+      "name": "Structured Output Parser3"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst documents = $('eliminar_duplicados').first().json.documentos\nconst scores = $input.all().map(score_obj => score_obj.json)\nconst arrayUnificado = documents.map((string, index) => ({\n    text: string,\n    score_ranker: scores[index]\n}))\nconst arrayOrdenado = arrayUnificado.sort((a, b) => b.score_ranker - a.score_ranker)\nreturn [{\n  json: {\n    results: arrayOrdenado\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        256
+      ],
+      "id": "3770e95e-a24f-4aaa-9bca-58ab8118bf99",
+      "name": "ORDER_AND_FILTER1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://router.huggingface.co/hf-inference/models/BAAI/bge-m3/pipeline/sentence-similarity",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"inputs\": {\n        \"source_sentence\": \"{{ $('start').first().json.resolucion }}\",\n        \"sentences\": {{ $json.documents.toJsonString() }}\n    }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        352,
+        432
+      ],
+      "id": "18aacb6d-8dd8-4062-9142-7a23e6ec53f3",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "g1h5PQ84bfDgqJR0",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "deepseek-reasoner",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        848,
+        496
+      ],
+      "id": "79361cff-344e-4ef4-abfe-887bb39ff3c2",
+      "name": "DeepSeek Chat Model1",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "3UFgNLDytpRNxPz0",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        720,
+        496
+      ],
+      "id": "a4156601-7638-4b14-b674-9814efe7a534",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0Zr2gDUeSEg2Xe6E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = $('ORDER_AND_FILTER1').first().json.results\n\n// {{ $json.results.map((context,idx)=>{\n\n// return (\"ID: \"+context.text.id+\"\\nNUMERO ARTÍCULO:\"+context.text.document.metadata.articulo +\"\\n\"+\n// \"EXTRAIDO DE: \"+context.text.document.metadata.document_name +\"\\n\"+\n// \"LEY:\"+context.text.document.pageContent  +\"\\n\"+\n// \"TITULO DEL ARTICULO:\"+context.text.document.metadata.titulo +\"\\n -----------------------------------------------\\n\"\n// )\n// }).join(\"\") }}\nconst articulos_pertinentes = $input.first().json.output.articulos_pertinentes.map(idx=>{\n  //primero busco el elemento\n  const context = results.find(elm=>elm.text.id === idx)\n  return(\n        \"LEY: \"+context.text.document.pageContent+\"\\n\"+\n    \"TITULO: \"+context.text.document.metadata.titulo +\"\\n\"+\n    \"ARTICULO #: \"+context.text.document.metadata.articulo+\"\\n\"+\n    \"EXTRAIDO DE: \"+context.text.document.metadata.document_name\n  )\n})\n\nconst articulos_irrelevantes = $input.first().json.output.articulos_irrelevantes.map(idx=>{\n  //primero busco el elemento\n  const context = results.find(elm=>elm.text.id === idx)\n  return(\n    \"LEY: \"+context.text.document.pageContent+\"\\n\"+\n    \"TITULO: \"+context.text.document.metadata.titulo +\"\\n\"+\n    \"ARTICULO #: \"+context.text.document.metadata.articulo+\"\\n\"+\n    \"EXTRAIDO DE: \"+context.text.document.metadata.document_name\n    \n  )\n})\n\n\n const resultadoFinal = {\n     articulos_pertinentes: articulos_pertinentes,\narticulos_irrelevantes:articulos_irrelevantes\n};\nreturn resultadoFinal"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1088,
+        256
+      ],
+      "id": "1d7c9954-41d4-423e-a23f-fd4136a53c0e",
+      "name": "formatData"
+    },
+    {
+      "parameters": {
+        "jsCode": "const n = $input.first().json.documents.length\nconst indices = [];\n\nfor (let i = 0; i < n; i++) {\n  indices.push(i);\n}\nreturn indices.map(score => ({\n  json: {\n    score: score\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        256
+      ],
+      "id": "f78fb162-1ffd-490a-8abb-918f8fa989a8",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst documents = $('eliminar_duplicados').first().json.documentos\nconst scores = $input.all().map(score_obj => score_obj.json)\nconst arrayUnificado = documents.map((string, index) => ({\n    text: string,\n    score_ranker: scores[index]\n}))\nconst arrayOrdenado = arrayUnificado.sort((a, b) => b.score_ranker - a.score_ranker)\nreturn [{\n  json: {\n    results: arrayOrdenado\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        432
+      ],
+      "id": "c84fee63-b025-4ffb-be1e-764fe280acf9",
+      "name": "ORDER_AND_FILTER2"
     }
   ],
   "pinData": {
@@ -325,6 +487,184 @@
           "resolucion": "Revisión de la solicitud para el ingreso del estudiante Charles Felipe Estrella Vargas al proceso de titulación, mediante examen complexivo fuera del cronograma aprobado para la Titulación 2025-I, en base al oficio ISTY-VA-DEPC-055-2025"
         }
       }
+    ],
+    "HTTP Request": [
+      {
+        "json": {
+          "results": [
+            {
+              "score": 6.383657455444336,
+              "text": "De la Titulación - Una vez que el estudiante de validación de conocimientos haya homologado las asignaturas correspondientes de la malla curricular, deberá Realizar un examen complexivo teórico-práctico cuyo objetivo es evaluar de manera integral el conocimiento, las habilidades y competencias adquiridas al final de la carrera. Este examen podrá ser presencial o virtual en correspondencia con la modalidad de estudio de cada carrera y respondiendo a los intereses institucionales. CAPÍTULO V VALIDACIÓN POR EJERCICIO PROFESIONAL"
+            },
+            {
+              "score": 5.959705352783203,
+              "text": "Admisión extraordinaria - Se podrá admitir fuera de convocatoria por razones justificadas (traslados, convenios, casos fortuitos), previa resolución del Órgano Colegiado Superior."
+            },
+            {
+              "score": 5.776702880859375,
+              "text": "Derogatoria. - Quedan derogadas todas las disposiciones anteriores que se opongan al presente reglamento. RESOLUCIÓN: RCP-SO-35-No.544-2022 Versión: 001 En mi calidad de secretaria del Órgano Colegiado Superior del Instituto Superior Tecnológico Yaruquí, CERTIFICO que el presente Reglamento fue discutido y aprobado en sesión OCS-SO0-007-2025 desarrollada a los catorce (14) días del mes de julio de 2025. Lo certifico. - Camila Alexandra Zo Chicaiza SECRETARIA OCS (+593) 983961156 contacto@isty.edu.ec www.isty.edu.ec calle Eugenio Espejo y Amazonas. ANEXOS\nAnexo 1: Elementos fundamentales a incluir en el formato de inscripción y matrícula\na) Nombre del estudiante:\nb) Cédula/Pasaporte:\nc) Carrera:\nd) Fecha de inscripción:\ne) Documentos entregados:\nf) Título de bachiller\ng) Cédula/pasaporte\nh) Otros:\ni) Firma del responsable:\nAnexo 2: Protocolo de acompañamiento académico\n1. Detección de estudiantes en riesgo (por bajo rendimiento, inasistencia, factores personales).\n2. Asignación de tutor académico.\n3. Elaboración de plan de intervención (tutorías, orientación, talleres).\n4. Seguimiento mensual y registro de avances.\n5. Informe final y recomendaciones.\nAnexo 3: Procedimiento de postulación y adjudicación de estímulos\n1. Publicación de convocatoria y requisitos.\n2. Recepción de postulaciones/documentos.\n3. Evaluación por comisión designada.\n4. Publicación de resultados.\n5. Entrega formal de reconocimientos/becas.\nAnexo 4: Elementos a considerar en el formato de solicitud de revisión de calificación\na) Nombre del estudiante:\nb) Carrera:\nc) Asignatura:\nd) Docente:\ne) Motivo de la solicitud:\nf) Fecha:\ng) Firma del solicitante:\nh) Para uso institucional: Respuesta, firmas de responsabilidad."
+            },
+            {
+              "score": 5.511700630187988,
+              "text": "DISPOSICIONES - Las IES podrán mantener para los estudiantes que se encuentren cursando las mallas vigentes, el proceso de titulación de conformidad a la norma vigente al momento de iniciar sus estudios."
+            },
+            {
+              "score": 5.420357704162598,
+              "text": "DISPOSICIONES - Los estudiantes que no hayan podido titularse en los tiempos establecidos para el efecto, podrán continuar sus estudios acogiéndose a los mecanismos de reconocimiento y homologación de asignaturas, cursos o sus equivalentes, según corresponda, en los plazos y términos establecidos en la norma."
+            },
+            {
+              "score": 5.1668596267700195,
+              "text": "- Las asignaturas homologadas por validación del ejercicio profesional, constarán con la frase “HOMOLOGADO” y no serán consideradas para el cálculo del promedio general del estudiante. El ISTY podrá solicitar otra información que respalde la trayectoria profesional o la experiencia laboral, así como realizar otros procesos de verificación."
+            },
+            {
+              "score": 5.117312431335449,
+              "text": "Opciones de titulación - Las opciones de titulación con las que cuentan las carreras del ISTY tienen por objeto validar las competencias profesionales adquiridas por los estudiantes, garantizando de esta manera que el abordaje de situaciones, necesidades, problemas y desafíos profesionales futuros sean asumidos con probidad y excelencia."
+            },
+            {
+              "score": 5.094879150390625,
+              "text": "De la Titulación - Una vez que el estudiante de validación por ejercicio profesional haya homologado la malla correspondiente, deberá optar por una de las formas de titulación establecidas en el proyecto de la carrera. No se podrá homologar asignaturas, prácticas preprofesionales o giras de estudio por Experiencia laboral en los siguientes casos: 1. Cuando la experiencia laboral sea inferior al tiempo de la carrera a validar, el ISTY realizará un proceso de validación por conocimientos en los puestos de trabajo para los que se solicitará convalidación, con la asignatura correspondiente. 2. Cuando el solicitante no pudiera comprobar su experiencia laboral por cierre de la empresa o institución. 3. Cuando luego del análisis de las funciones realizadas en cada puesto laboral, no alcancen una similitud del 60% a las establecidas en las asignaturas que sean similares a los puestos laborales desempeñados. 4. Al comprobarse la ilegalidad, falsedad o dolo en los documentos presentados."
+            },
+            {
+              "score": 4.873030662536621,
+              "text": "Otorgamiento y emisión de títulos de tercer y cuarto nivel - Una vez que el estudiante haya aprobado la totalidad de créditos del plan de estudios de la carrera o programa y cumplido todos los requisitos académicos y administrativos establecidos por la IES para la graduación, la IES emitirá el acta consolidada de finalización de estudios y el título correspondiente. El acta consolidada deberá contener: los datos de identificación del estudiante, el registro de calificaciones, así como la identificación del tipo y número de horas de servicio a la comunidad mediante prácticas preprofesionales o pasantías. Desde la fecha de emisión del acta consolidada respectiva, la IES tendrá un término no mayor a cuarenta y cinco (45) días para registrar el título en el Sistema Nacional de Información de la Educación Superior (SNIESE), previo a su entrega al graduado. (Artículo reformado mediante Resolución RPC-SE-10-No.028-2022, de 27 de julio de 2022)"
+            },
+            {
+              "score": 4.767255783081055,
+              "text": "De la vigencia - Si el peticionario no se matricula en el plazo indicado en el calendario académico, el estudio de validación de ejercicio profesional se debe actualizar."
+            },
+            {
+              "score": 4.7651262283325195,
+              "text": "Período académico extraordinario - Las IES podrán implementar, adicionalmente, períodos académicos extraordinarios de mínimo cuatro (4) semanas. En este período extraordinario se podrá contratar al personal académico y administrativo que se requiera según la planificación de las IES. Los períodos académicos extraordinarios no podrán ser implementados para adelantar la titulación de los estudiantes."
+            },
+            {
+              "score": 4.707036972045898,
+              "text": "Criterio para la fijación del valor de los derechos - El valor de los derechos será fijado en función del arancel y será independiente del número de horas de las asignaturas, cursos o sus equivalentes que registre el estudiante. El valor que la IES cobrará por los derechos por la rendición de cada examen fuera del período académico ordinario de evaluación, así como por los exámenes de gracia, ubicación y recuperación será como máximo el diez por ciento (10%) del valor más alto de la matrícula ordinaria establecida del correspondiente período académico. Este valor no será aplicable en el caso de estudiantes que por circunstancias de caso fortuito, fuerza mayor, calamidad doméstica o enfermedad, debidamente justificadas, no hayan rendido los exámenes en el tiempo oportuno."
+            },
+            {
+              "score": 4.489853858947754,
+              "text": "Requisitos y opciones de titulación en el cuarto nivel - Cada IES determinará en su normativa interna los requisitos para acceder a la titulación, estableciendo su estructura, contenidos y parámetros para su desarrollo y evaluación. Las IES deberán garantizar a todos sus estudiantes la designación oportuna del director o tutor, de entre los miembros del personal académico de la propia IES o de una diferente, para el desarrollo y evaluación de la opción de titulación. La titulación de programas de Doctorado estará regulada en el reglamento que para el efecto expida el CES. La IES podrá emitir el título respectivo únicamente cuando el estudiante apruebe todos los requisitos académicos y administrativos establecidos por las IES, lo que constará en el acta consolidada de finalización de estudios, de conformidad con el artículo 85 de este Reglamento. (Artículo reformado mediante Resolución RPC-SE-03-No.008-2023, de 09 de marzo de 2023)"
+            },
+            {
+              "score": 4.295919418334961,
+              "text": "Requisitos y opciones de titulación en el tercer nivel - Cada IES determinará en su normativa interna los requisitos para acceder a la titulación, así como las opciones para su aprobación. Los créditos correspondientes a las opciones de titulación estarán incluidos en la totalidad de créditos de la carrera. Se podrá emitir el título respectivo únicamente cuando el estudiante apruebe todos los requisitos académicos y administrativos establecidos por las IES, lo que constará en el acta consolidada de finalización de estudios, de conformidad con el artículo 85 de este Reglamento."
+            },
+            {
+              "score": 3.7707443237304688,
+              "text": "Prórroga para opciones de titulación en cuarto nivel - La IES en su normativa interna establecerá el plazo adicional que tiene el estudiante para desarrollar su opción de titulación y los derechos y aranceles que deberá pagar para el efecto en el caso de solicitar prórrogas. La primera prórroga no requerirá de pago por concepto de derechos o aranceles, ni valor similar. Cuando el estudiante haya cumplido y aprobado la totalidad del plan de estudios excepto la opción de titulación y una vez transcurridos los plazos establecidos por la IES, deberá matricularse y tomar los cursos, asignaturas o equivalentes para la actualización de conocimientos en los plazos y condiciones que establezca la IES, siempre y cuando no hayan transcurrido diez (10) años desde que se cumplió y aprobó la totalidad del plan de estudios."
+            },
+            {
+              "score": 3.713759422302246,
+              "text": "Requisitos para la Validación por Ejercicio Profesional - Para poder optar por la homologación por mecanismo de Validación de Trayectoria Profesional se deberá cumplir con los siguientes requisitos: a) Especie valorada no reembolsable; b) Oficio de solicitud de Homologación dirigido al Rector del ISTY: c) Copia cédula de ciudadanía, de identidad o pasaporte; d) Copia certificada del título de bachiller o su equivalente (en el caso de no ser estudiante regular del ISTY). Se aceptarán los títulos de bachiller obtenidos en el extranjero, reconocidos o equiparados por el Ministerio de Educación. e) Documentos originales o copia certificada que evidencien la trayectoria profesional o experiencia laboral en el campo solicitado, tales como: 1. Experiencia profesional en el sector público o privado; 2. Hoja de Vida del peticionario: Breve descripción de las competencias que desarrolla en su ámbito laboral; presentación de la visión y misión de la empresa o institución; principales logros alcanzados a través de su desempeño laboral. Principales acciones de su hacer laboral que se encuentren vinculadas con el proceso de formación de su titulación y las competencias de la asignatura, principales logros y limitaciones. Estará sustentado desde la teoría de su ámbito profesional. 3. Certificados de trabajo (incluir historial laboral del IESS), que detallen la siguiente información: a. Institución; b. Cargo, función o dignidad (todos los cargos o puestos de trabajo); c. Funciones (detalladas para cada cargo); d. Tiempo (en la medida de lo posible en cada cargo). La Dirección de Carreras será responsable del seguimiento de todo el proceso concerniente a esta modalidad."
+            },
+            {
+              "score": 3.610896110534668,
+              "text": "Obtención irregular de títulos - Cuando una IES identifique que un título ha sido expedido y/o registrado de manera irregular en el SNIESE, motivadamente solicitará al órgano rector de la política pública de educación superior la eliminación del registro, lo que procederá de forma automática, sin perjuicio de las acciones legales pertinentes."
+            },
+            {
+              "score": 3.5492095947265625,
+              "text": "Del plazo - Los peticionarios podrán solicitar la homologación por ejercicio profesional de conformidad a lo que se establezca en el calendario académico."
+            },
+            {
+              "score": 3.5444564819335938,
+              "text": "Requisitos para aprobación de cursos y carreras - Los requisitos de carácter académico y disciplinario necesarios para la aprobación de cursos y carreras, constarán en el Reglamento de Régimen Académico, en los respectivos estatutos, reglamentos y demás normas que rigen al Sistema de Educación Superior. Solamente en casos establecidos excepcionalmente en la normativa interna, un estudiante podrá matricularse hasta por tercera ocasión en una misma materia o en el mismo ciclo, curso o nivel académico."
+            },
+            {
+              "score": 3.4221973419189453,
+              "text": "- La matrícula tiene validez solo durante el período académico para el cual se obtuvo la admisión."
+            },
+            {
+              "score": 3.2450475692749023,
+              "text": "Confidencialidad y derechos. - Toda información personal y académica tratada en el proceso de acompañamiento será confidencial, respetando la privacidad y los derechos del estudiante."
+            },
+            {
+              "score": 2.934907913208008,
+              "text": "Ámbito - El presente Reglamento aplica a todos los procesos académicos del"
+            },
+            {
+              "score": 2.747988700866699,
+              "text": "- La calidad de estudiante se la adquiere solo cuando se ha concluido el proceso de la matrícula, de lo contrario el postulante no puede concurrir a clases ni ser considerado como estudiante del instituto."
+            },
+            {
+              "score": 2.504159927368164,
+              "text": "Justificación de asistencia en asignaturas - Excepcionalmente, en casos de enfermedad grave, calamidad doméstica, caso fortuito o fuerza mayor, los estudiantes del ISTY podrán solicitar la justificación de faltas, para lo cual, deberán dirigir una solicitud a la Dirección de Carreras, en el término de 3 días hábiles luego de que el estudiante retorne a sus actividades académicas, debiendo adjuntar los documentos que justifiquen la causal alegada y el pago del rubro correspondiente. Recibida la solicitud, la Dirección de Carreras deberá analizarla y verificar la veracidad de los justificativos entregados por el estudiante en el término máximo de 3 días hábiles y emitir la resolución correspondiente y notificar a las instancias institucionales respectivas para su registro en el sistema académico. Únicamente se podrá justificar un máximo de $ faltas por periodo académico, considerando todas las asignaturas cursadas por el estudiante en el mismo."
+            },
+            {
+              "score": 2.255382537841797,
+              "text": "las becas, en razón de su autonomía responsable y el cumplimiento de la política pública emitida para el efecto. La admisión de estos estudiantes se realizará según los sistemas de ingreso y admisión propios de las instituciones de educación superior particulares que reciben rentas y asignaciones del Estado. Las instituciones de educación superior particulares que no utilicen la totalidad de los recursos públicos transferidos a la concesión de becas deberán reintegrar al Estado los saldos no utilizados. En caso de incumplimiento comprobado de las obligaciones, las instituciones deberán restituir al Estado, las asignaciones y rentas transferidas en el correspondiente año fiscal, sin afectar a los estudiantes becados. Los saldos no utilizados y los recursos restituidos se destinarán al programa de becas para la educación superior, de conformidad con lo previsto en esta ley."
+            },
+            {
+              "score": 1.966512680053711,
+              "text": "Revisión y Actualización. - El reglamento será revisado al menos cada dos años, o cuando lo exijan cambios normativos o recomendaciones de los entes evaluadores."
+            },
+            {
+              "score": 1.9285955429077148,
+              "text": "Tercera matrícula. - En los casos en que un estudiante repruebe por segunda ocasión una misma materia, curso o nivel académico, excepcionalmente el Órgano Colegiado Superior podrá conceder una tercera matrícula en los siguientes casos: a) Por calamidad doméstica debidamente comprobada; b) Por enfermedad catastrófica del estudiante o sus familiares dentro del cuarto grado de consanguinidad y segundo de afinidad, debidamente comprobada; y, c) Por caso fortuito o fuerza mayor, debidamente comprobados de conformidad con el ordenamiento jurídico."
+            },
+            {
+              "score": 1.6468496322631836,
+              "text": "Adaptaciones para estudiantes con discapacidad. - Se garantizarán adaptaciones razonables en los procesos de evaluación para estudiantes con discapacidad, asegurando igualdad de oportunidades."
+            },
+            {
+              "score": 1.5748443603515625,
+              "text": "Revisión y actualización. - El presente reglamento será revisado al menos cada dos años, o cuando lo exijan cambios normativos o recomendaciones de los entes evaluadores."
+            },
+            {
+              "score": 1.5316095352172852,
+              "text": "Estudiantes con necesidades educativas - Con la finalidad de atender a los estudiantes con necesidades educativas asociadas o no a la discapacidad, el ISTY desarrollará políticas, programas y planes de acción afirmativa e inclusión educativa, para lo cual se observarán las disposiciones expedidas por los organismos que rigen el Sistema de Educación Superior y las políticas de gestión institucional que el Rector expida para el efecto."
+            },
+            {
+              "score": 1.1790313720703125,
+              "text": "Proyectos académicos que no cuentan con itinerarios académicos - Los proyectos académicos de tercer nivel y especializaciones en el campo de la salud, no podrán contar con itinerarios académicos."
+            },
+            {
+              "score": 0.9889507293701172,
+              "text": "La administración pública constituye un servicio a la colectividad que se rige por los principios de eficacia, eficiencia, calidad, jerarquía, desconcentración, descentralización, coordinación, participación, planificación, transparencia y evaluación - Concordancias: CONSTITUCIÓN DE LA REPÚBLICA DEL ECUADOR, Arts. 233 CÓDIGO ORGÁNICO GENERAL DE PROCESOS, COGEP, Arts. 301, 303"
+            },
+            {
+              "score": 0.9821605682373047,
+              "text": "Reglamento sobre el Régimen Académico - El Consejo de Educación Superior aprobará el Reglamento de Régimen Académico que regule los títulos y grados académicos, el tiempo de duración, número de créditos de cada opción y demás aspectos relacionados con grados y títulos, buscando la armonización y la promoción de la movilidad estudiantil, de profesores o profesoras e investigadores o investigadoras."
+            },
+            {
+              "score": 0.5656270980834961,
+              "text": "DISPOSICIONES - Los estudiantes y docentes que consten en el padrón electoral y que no asistan a votar serán sancionados de conformidad a las normas aplicables a cada caso. Se admitirá como justificativos de inasistencias la fuerza mayor o caso fortuito debidamente documentado."
+            },
+            {
+              "score": 0.5596466064453125,
+              "text": "Generalidades - Los estudiantes deberán tomar en cuenta los siguientes aspectos para aplicar a una beca de cualquier tipo. En el caso de las becas que duren un semestre, los estudiantes podrán volver a aplicar. En el caso de las becas que tienen una duración a lo largo de toda la carrera, los estudiantes cada semestre tendrán que firmar el acta de beca. Los estudiantes podrán aplicar hasta 2 tipos de becas durante un mismo periodo."
+            },
+            {
+              "score": 0.4525423049926758,
+              "text": "Principios - Los principios en que se sustenta la presente normativa son: a) Transparencia y mérito b) Igualdad de oportunidades y no discriminación c) Desarrollo profesional y actualización permanente d) Mejora continua y responsabilidad institucional e) Ética, integridad y respeto a la normativa vigente"
+            },
+            {
+              "score": 0.4373760223388672,
+              "text": "La investigación institucional - Las IES, a partir de su naturaleza, fortalezas o dominios académicos, así como desde la especificidad de sus carreras o programas, definirán sus regulaciones internas y/o políticas de investigación."
+            },
+            {
+              "score": -0.26895809173583984,
+              "text": "Régimen disciplinario - Con el fin de normalizar los procesos de régimen disciplinario el instituto emitirá el Reglamento Especial de Faltas y Sanciones, el cual normará el inicio de procesos disciplinarios de oficio o petición de parte cuando un participante de la comunidad académica ya sea docente o estudiante incurra en faltas leves, graves y muy graves, el cual deberá guardar armonía con la LOES, su Reglamento y la demás normativa que rige el Sistema de Educación Superior. El Reglamento Especial de Faltas y Sanciones establecerá la clasificación de las faltas y su sanción y garantizará el debido proceso y el derecho a la defensa de los investigados. La instancia encargada de garantizar el debido proceso es el Comité de Ética. El Órgano Colegiado Superior en un plazo no mayor a los sesenta (60) días de iniciado el proceso disciplinario dictará la resolución que imponga la sanción o absuelve a los investigados con base a las evidencias que se recaben dentro del proceso disciplinario de manera motivada. Los profesores, investigadores o estudiantes sancionados podrán interponer recurso de reconsideración ante el Órgano Colegiado Superior en un término de tres (3) días contados a partir de la notificación de la resolución sancionatoria conforme los requisitos establecidos en el Reglamento Especial de Faltas y Sanciones sin perjuicio de plantear su recurso de apelación ante el Consejo de Educación Superior, conforme lo establece la Ley Orgánica de Educación Superior. Los recursos que se interpongan en contra de la resolución no suspenderán su ejecución. La sanción de separación definitiva de la institución es competencia privativa del Órgano Colegiado Superior. Las faltas en las que incurrieren los empleados o trabajadores del instituto serán tratadas de acuerdo con lo dispuesto en el Código de Trabajo y en el Reglamento Interno de Trabajo del instituto."
+            },
+            {
+              "score": -0.5210113525390625,
+              "text": "Principios Rectores - El presente reglamento se orienta bajo los principios de: Pertinencia, Participación, Transparencia, Mejora continua, Enfoque estratégico y Sostenibilidad."
+            },
+            {
+              "score": -0.5380477905273438,
+              "text": "Principios - El presente reglamento se basa en los siguientes principios: a) Transparencia y equidad b) Pertinencia y calidad c) Innovación y cooperación d) Responsabilidad institucional e) Mejora continua CAPÍTULO II: PLANIFICACIÓN Y FORMALIZACIÓN"
+            },
+            {
+              "score": -0.6176185607910156,
+              "text": "actividades académicas; y, d) Separación definitiva de la Institución; que será considerada como causal legal para la terminación de la relación laboral, de ser el caso. Los procesos disciplinarios se instauran, de oficio o a petición de parte, a aquellas y aquellos estudiantes, profesores e investigadores que hayan incurrido en las faltas tipificadas por la presente Ley y los Estatutos de la Institución. La normativa interna institucional establecerá el procedimiento y los órganos competentes, así como una instancia que vele por el debido proceso y el derecho a la defensa. La sanción de separación definitiva de la institución, así como lo previsto en el literal e) precedente, son competencia privativa del Órgano Colegiado Superior. El Órgano definido en los estatutos de la institución, en un plazo no mayor a los sesenta días de instaurado el proceso disciplinario, deberá emitir una resolución que impone la sanción o absuelve a las y los estudiantes, profesores e investigadores. Las y los estudiantes, profesores e investigadores podrán recurrir ante el Órgano Colegiado Superior de la Institución en los casos en los que se le haya impuesto una sanción por cometimiento de faltas calificadas como graves y de las muy graves cuya imposición no sea competencia del Órgano Colegiado Superior. De esta resolución cabe recurso de apelación ante Consejo de Educación Superior. Los recursos que se interpongan en contra de la resolución, no suspenderán su ejecución. Las sanciones para las y los servidores públicos serán las previstas en la Ley Orgánica del Servicio Público, y para las y los trabajadores de las instituciones de educación superior públicas y privadas se aplicará el Código del Trabajo. Inciso último sustituido por artículo 18 de Ley No. 0, publicada en Registro Oficial Suplemento 1008 de 19 de Mayo del 2017. Artículo sustituido por artículo 142 de Ley No. 0, publicada en Registro Oficial Suplemento 297 de 2 de Agosto del 2018."
+            },
+            {
+              "score": -0.8104257583618164,
+              "text": "La administración de justicia, en el cumplimiento de sus deberes y en el ejercicio de sus atribuciones, aplicará los siguientes principios - La administración de justicia, en el cumplimiento de sus deberes y en el ejercicio de sus atribuciones, aplicará los siguientes principios: 1. Los órganos de la Función Judicial gozarán de independencia interna y externa. Toda violación a este principio conllevará responsabilidad administrativa, civil y penal de acuerdo con la ley. 2. La Función Judicial gozará de autonomía administrativa, económica y financiera. 3. En virtud de la unidad jurisdiccional, ninguna autoridad de las demás funciones del Estado podrá desempeñar funciones de administración de justicia ordinaria, sin perjuicio de las potestades jurisdiccionales reconocidas por la Constitución. 4. El acceso a la administración de justicia será gratuito. La ley establecerá el régimen de costas procesales. 5. En todas sus etapas, los juicios y sus decisiones serán públicos, salvo los casos expresamente señalados en la ley. 6. La sustanciación de los procesos en todas las materias, instancias, etapas y diligencias se llevará a cabo mediante el sistema oral, de acuerdo con los principios de concentración, contradicción y dispositivo. Concordancias: CONSTITUCIÓN DE LA REPÚBLICA DEL ECUADOR, Arts. 2, 75, 76, 86 CÓDIGO ORGÁNICO DE LA FUNCIÓN JUDICIAL, Arts. 8, 9, 10, 12, 13, 14, 18, 123 CÓDIGO ORGÁNICO GENERAL DE PROCESOS, COGEP, Arts. 4, 284, 287 CÓDIGO ORGÁNICO INTEGRAL PENAL, COIP, Arts. 5, 560, 562 CÓDIGO DEL TRABAJO, Arts. 575 LEY ORGÁNICA DE GARANTÍAS JURISDICCIONALES Y CONTROL CONSTITUCIONAL, Arts. 2 Jurisprudencia: Gaceta Judicial, COMPETENCIA DE LA CORTE SUPREMA, 27-may-2009"
+            }
+          ],
+          "processed_batches": 5,
+          "total_documents": 42
+        }
+      }
     ]
   },
   "connections": {
@@ -332,7 +672,7 @@
       "ai_languageModel": [
         [
           {
-            "node": "GeneradorTerminos",
+            "node": "GENERADORPREGUNTAS",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -350,34 +690,12 @@
         ]
       ]
     },
-    "GeneradorTerminos": {
-      "main": [
-        [
-          {
-            "node": "Edit Fields1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Structured Output Parser": {
       "ai_outputParser": [
         [
           {
-            "node": "GeneradorTerminos",
+            "node": "GENERADORPREGUNTAS",
             "type": "ai_outputParser",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Edit Fields1": {
-      "main": [
-        [
-          {
-            "node": "Split Out1",
-            "type": "main",
             "index": 0
           }
         ]
@@ -405,44 +723,11 @@
         ]
       ]
     },
-    "Google Gemini Chat Model1": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "GeneradorConsiderandos",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Structured Output Parser1": {
-      "ai_outputParser": [
-        [
-          {
-            "node": "GeneradorConsiderandos",
-            "type": "ai_outputParser",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "GeneradorConsiderandos": {
-      "main": [
-        [
-          {
-            "node": "Edit Fields3",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "start": {
       "main": [
         [
           {
-            "node": "GeneradorTerminos",
+            "node": "GENERADORPREGUNTAS",
             "type": "main",
             "index": 0
           }
@@ -464,7 +749,7 @@
       "main": [
         [
           {
-            "node": "HTTP Request",
+            "node": "Code in JavaScript1",
             "type": "main",
             "index": 0
           }
@@ -495,9 +780,146 @@
     },
     "GET_METADATA": {
       "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model4": {
+      "ai_languageModel": [
         [
           {
-            "node": "GeneradorConsiderandos",
+            "node": "GENERADORPREGUNTAS",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "GENERADORTERMINOS",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "GENERADORTERMINOS",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model6": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "GENERADORTERMINOS",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "GENERADORPREGUNTAS": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model9": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser3": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "GeneradorConsiderandos1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ORDER_AND_FILTER1": {
+      "main": [
+        [
+          {
+            "node": "GeneradorConsiderandos1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "ORDER_AND_FILTER2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "GeneradorConsiderandos1",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "GeneradorConsiderandos1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GeneradorConsiderandos1": {
+      "main": [
+        [
+          {
+            "node": "formatData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "ORDER_AND_FILTER1",
             "type": "main",
             "index": 0
           }
@@ -509,7 +931,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "a55d3bc0-8cd5-442e-9853-966208dde3d8",
+  "versionId": "5cb6a8f9-bb85-4021-ac29-513771cc121b",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"
