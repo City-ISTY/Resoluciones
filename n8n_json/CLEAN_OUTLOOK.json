@@ -1,0 +1,105 @@
+{
+  "name": "CLEAN_OUTLOOK",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -256,
+        -80
+      ],
+      "id": "b8d678b7-78b9-414c-b335-65721823cddd",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        -80
+      ],
+      "id": "e0bbfef4-700d-4e32-a4f5-e23e286b00a0",
+      "name": "Get many messages",
+      "webhookId": "5f3b1c77-8c8d-436f-ae3c-8f324c4cd8ec",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "aa1g0ggoDcXs6rTB",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "messageId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        160,
+        -80
+      ],
+      "id": "8d3f1164-3239-4915-a067-588c50e9c8e2",
+      "name": "Delete a message",
+      "webhookId": "97b4c744-bbce-48b6-9160-ca6a4b85618e",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "aa1g0ggoDcXs6rTB",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages": {
+      "main": [
+        [
+          {
+            "node": "Delete a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "446dc9d2-a03c-4806-94ac-48fbe1c6b6dc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"
+  },
+  "id": "ID5MYNcBqSkkqzHt",
+  "tags": []
+}

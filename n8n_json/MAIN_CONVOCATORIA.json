@@ -4,7 +4,7 @@
     {
       "parameters": {
         "toRecipients": "={{ $('START').first().json.from.emailAddress.address }}",
-        "subject": "=Revisión de Convocatoria - {{ $('createUUID').item.json.uuid }}",
+        "subject": "=Revisión de Convocatoria - {{ $('createUUID').first().json.uuid  }}",
         "bodyContent": "=Por favor verificar que los cambios se hayan realizado correctamente\n\n-----PARÁMETROS PROPUESTOS-----\n{{ $json.text_structured }}\n----------\n\nPOR FAVOR RESPONDER:\n- Para continuar: Responda con \"APROBADO\" en el cuerpo del mensaje (No cambiar el asunto)\n- Para realizar nuevos cambios, indicar el punto a cambiar, y el cambio que solicita.\n \nEn caso de haber más cambios, le contestaré en un minuto para que se verifique nuevamente.\n\nMuchas gracias y que tenga una buena tarde.\nAtte. Bruno ",
         "additionalFields": {}
       },
@@ -61,12 +61,12 @@
     },
     {
       "parameters": {
-        "jsCode": "// Ordenar todos los mensajes por fecha (más reciente primero)\nconst sortedMessages = $input.all().sort((a, b) => {\n    const dateA = new Date(a.json.sentDateTime).getTime();\n    const dateB = new Date(b.json.sentDateTime).getTime();\n    return dateB - dateA;\n});\n\nif (sortedMessages.length === 0 || \n    (sortedMessages.length === 1 && Object.keys(sortedMessages[0].json).length === 0)) {\n    return [{\"finded\": false}];\n}else if(sortedMessages[0].json.from.emailAddress.address === \"city@isty.edu.ec\"){\n  return [{\"finded\": false}];\n}\n\nsortedMessages[0].json.finded = true;\nreturn sortedMessages[0];\n\n"
+        "jsCode": "// Ordenar todos los mensajes por fecha (más reciente primero)\nconst sortedMessages = $input.all().sort((a, b) => {\n    const dateA = new Date(a.json.sentDateTime).getTime();\n    const dateB = new Date(b.json.sentDateTime).getTime();\n    return dateB - dateA;\n});\nif (sortedMessages.length === 0 || \n    (sortedMessages.length === 1 && Object.keys(sortedMessages[0].json).length === 0)) {\n    return [{\"finded\": false}];\n}else if(sortedMessages[0].json.from.emailAddress.address === \"city@isty.edu.ec\" || sortedMessages[0].json.from.emailAddress.address === \"andres.tituana@isty.edu.ec\"){\n  return [{\"finded\": false}];\n}\n\nsortedMessages[0].json.finded = true;\nreturn sortedMessages[0];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -3744,
+        -3760,
         64
       ],
       "id": "6aa2efdc-405b-43e2-aba5-4ca0d2beff6c",
@@ -90,8 +90,9 @@
         ],
         "filtersUI": {
           "values": {
-            "filterBy": "search",
-            "search": "={{ $('createUUID').first().json.uuid }}"
+            "filters": {
+              "custom": "=contains(subject, '{{ $('createUUID').first().json.uuid }}')"
+            }
           }
         },
         "options": {}
@@ -134,7 +135,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const output_data = $('Information Extractor').first().json.output\n\n\n//Se agrega al RECTOR como asistenta\noutput_data.asistentes.unshift({\n  \"name\": \"Mgtr. Javier Hernando Garzón Espinoza\",\n  \"mail\": $env.N8N_RECTOR_EMAIL,\n  \"role\": \"Rector\",\n  \"principal\": true\n})\n\n\nconst teamsDataMeeting = {}\n\nteamsDataMeeting.isOnlineMeeting = true\nteamsDataMeeting.onlineMeetingProvider = \"teamsForBusiness\"\n\n\n\n\nconst fechaInicio = new Date(output_data.fecha);\nif (fechaInicio.getMinutes() === 0) {\n    fechaInicio.setHours(13, 0, 0, 0);\n}\n\nconst fechaFin = new Date(fechaInicio);\nfechaFin.setHours(fechaInicio.getHours() + 2);\n\n\nteamsDataMeeting.start = {\n    \"dateTime\": fechaInicio,\n    \"timeZone\": \"America/Guayaquil\"\n}\n\nteamsDataMeeting.end = {\n    \"dateTime\": fechaFin,\n    \"timeZone\": \"America/Guayaquil\"\n}\nteamsDataMeeting.attendees = output_data.asistentes.map((at)=>{\n  return({ \"emailAddress\": {\"address\": at.mail, \"name\": at.name}, \n  \"type\": \"optional\"})\n})\n\n//LE CREO A SECRETARÍA COMO ASISTENTE\nteamsDataMeeting.attendees.push({\n\"emailAddress\": {\n  \"address\": $env.N8N_SECRETARY_EMAIL,\n  \"name\": \"SECRETARÍA\"\n  },\n\"type\": \"optional\"\n})\noutput_data.body =teamsDataMeeting\n\n\n\nconst number_session = output_data.tipo.toLowerCase() == \"ordinaria\" ? \n    ('00' + (Number($input.first().json.ordinary_session_number + 1))).slice(-3) : \n    ('00' + (Number($input.first().json.extraordinary_session_number + 1))).slice(-3)\n  \n  //if \n  output_data.session_code = `OCS-S${output_data.tipo.toLowerCase() == \"ordinaria\" ? \"O\" : \"E\"}-${number_session}-${$today.toString().substring(0, 4)}`\n\nteamsDataMeeting.subject = `Sesion ${output_data.tipo} ${output_data.session_code}`\n\n\nreturn [{ \"output\": output_data }];\n"
+        "jsCode": "const output_data = $('Information Extractor').first().json.output\n\n\n//Se agrega al RECTOR como asistenta\noutput_data.asistentes.unshift({\n  \"name\": \"Mgtr. Javier Hernando Garzón Espinoza\",\n  \"mail\": $env.N8N_RECTOR_EMAIL,\n  \"role\": \"Rector\",\n  \"principal\": true\n})\n\n\nconst teamsDataMeeting = {}\n\nteamsDataMeeting.isOnlineMeeting = true\nteamsDataMeeting.onlineMeetingProvider = \"teamsForBusiness\"\n\n\n\n\nconst fechaInicio = new Date(output_data.fecha);\nif (fechaInicio.getMinutes() === 0) {\n    fechaInicio.setHours(13, 0, 0, 0);\n}\n\nconst fechaFin = new Date(fechaInicio);\nfechaFin.setHours(fechaInicio.getHours() + 2);\n\n\nteamsDataMeeting.start = {\n    \"dateTime\": fechaInicio,\n    \"timeZone\": \"America/Guayaquil\"\n}\n\nteamsDataMeeting.end = {\n    \"dateTime\": fechaFin,\n    \"timeZone\": \"America/Guayaquil\"\n}\nteamsDataMeeting.attendees = output_data.asistentes.map((at)=>{\n  return({ \"emailAddress\": {\"address\": at.mail, \"name\": at.name}, \n  \"type\": \"optional\"})\n})\n\n//LE CREO A SECRETARÍA COMO ASISTENTE\nteamsDataMeeting.attendees.push({\n\"emailAddress\": {\n  \"address\": $env.N8N_SECRETARY_EMAIL,\n  \"name\": \"SECRETARÍA\"\n  },\n\"type\": \"required\"\n})\noutput_data.body =teamsDataMeeting\n\n\n\nconst number_session = output_data.tipo.toLowerCase() == \"ordinaria\" ? \n    ('00' + (Number($input.first().json.ordinary_session_number + 1))).slice(-3) : \n    ('00' + (Number($input.first().json.extraordinary_session_number + 1))).slice(-3)\n  \n  //if \n  output_data.session_code = `OCS-S${output_data.tipo.toLowerCase() == \"ordinaria\" ? \"O\" : \"E\"}-${number_session}-${$today.toString().substring(0, 4)}`\n\nteamsDataMeeting.subject = `Sesion ${output_data.tipo} ${output_data.session_code}`\n\n\nreturn [{ \"output\": output_data }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -186,7 +187,7 @@
       "type": "n8n-nodes-base.crypto",
       "typeVersion": 1,
       "position": [
-        -4480,
+        -4512,
         64
       ],
       "id": "acdd142c-d24c-4e6c-9c01-31b3ac826c37",
@@ -209,7 +210,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -2208,
+        -2224,
         32
       ],
       "id": "3bb1a885-72da-4c65-b153-7112fb11d719",
@@ -315,7 +316,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        -2016,
+        -2032,
         32
       ],
       "id": "54724979-bb9f-43a5-9048-8e24db0ce7cc",
@@ -433,7 +434,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        -1824,
+        -1840,
         32
       ],
       "id": "4e4402f0-8b27-4795-a5ff-2fcc69c3666e",
@@ -593,8 +594,8 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -1584,
-        32
+        -1568,
+        -16
       ],
       "id": "d123a543-6ef4-4128-b7ab-160239b4663d",
       "name": "UPDATE_SESSION_NUMBER",
@@ -704,12 +705,12 @@
     },
     {
       "parameters": {
-        "jsCode": "const output_structured_data = $('Information Extractor1').first().json.output\n\nfunction formatDataToText(data) {\n  // Usamos un array para ir construyendo cada línea del texto.\n  const outputLines = [];\n\n  // 1. Formatear Fecha\n  outputLines.push(`1| Fecha: ${data.fecha}`);\n\n  // 2. Formatear Tipo\n  outputLines.push(`2| Tipo: ${data.tipo}`);\n\n  // 3. Formatear Asistentes\n  outputLines.push(`3| Asistentes:`);\n  if (data.asistentes && data.asistentes.length > 0) {\n    data.asistentes.forEach((asistente, index) => {\n      const num = `3.${index + 1}`;\n      const asistenteInfo = `${asistente.name} - ${asistente.mail} - ${asistente.role}`;\n      // Añadimos sangría para el subnivel\n      outputLines.push(`   ${num}| ${asistenteInfo}`);\n    });\n  }\n\n  // 4. Formatear Temas a resolver (con subniveles)\n  outputLines.push(`4| Temas a resolver`);\n  if (data.temas && data.temas.length > 0) {\n    data.temas.forEach((tema, topicIndex) => {\n      const topicNum = `4.${topicIndex + 1}`;\n      // Añadimos sangría para el primer nivel de temas\n      outputLines.push(`   ${topicNum}| ${tema.topic}`);\n\n      // Verificamos si hay sub-temas para anidar\n      if (tema.sub_topics && tema.sub_topics.length > 0) {\n        tema.sub_topics.forEach((subTopic, subTopicIndex) => {\n          const subTopicNum = `${topicNum}.${subTopicIndex + 1}`;\n          // Añadimos una sangría mayor para el segundo nivel\n          outputLines.push(`      ${subTopicNum}| ${subTopic}`);\n        });\n      }\n    });\n  }\n\n  // Unimos todas las líneas en un solo string, separadas por un salto de línea.\n  return outputLines.join('\\n');\n}\n\n\nconst text_structured = formatDataToText(output_structured_data)\nconsole.log(text_structured)\n\nreturn [{json:{text_structured}}]"
+        "jsCode": "const output_structured_data = $('Information Extractor1').first().json.output\n\nfunction formatDataToText(data) {\n  // Usamos un array para ir construyendo cada línea del texto.\n  const outputLines = [];\n\n  // 1. Formatear Fecha\n  outputLines.push(`1| Fecha: ${data.fecha}`);\n\n  // 2. Formatear Tipo\n  outputLines.push(`2| Tipo: ${data.tipo}`);\n\n  // 3. Formatear Asistentes\n  outputLines.push(`3| Asistentes:`);\n  if (data.asistentes && data.asistentes.length > 0) {\n    data.asistentes.forEach((asistente, index) => {\n      const num = `3.${index + 1}`;\n      const asistenteInfo = `${asistente.name} - ${asistente.mail} - ${asistente.role}`;\n      // Añadimos sangría para el subnivel\n      outputLines.push(`   ${num}| ${asistenteInfo}`);\n    });\n  }\n\n  // 4. Formatear Temas a resolver (con subniveles)\n  outputLines.push(`4| Temas a resolver`);\n  if (data.temas && data.temas.length > 0) {\n    data.temas.forEach((tema, topicIndex) => {\n      const topicNum = `4.${topicIndex + 1}`;\n      // Añadimos sangría para el primer nivel de temas\n      outputLines.push(`   ${topicNum}| ${tema.topic}`);\n\n      // Verificamos si hay sub-temas para anidar\n      if (tema.sub_topics && tema.sub_topics.length > 0) {\n        tema.sub_topics.forEach((subTopic, subTopicIndex) => {\n          const subTopicNum = `${topicNum}.${subTopicIndex + 1}`;\n          // Añadimos una sangría mayor para el segundo nivel\n          outputLines.push(`      ${subTopicNum}| ${subTopic}`);\n        });\n      }\n    });\n  }\n\n  // Unimos todas las líneas en un solo string, separadas por un salto de línea.\n  return outputLines.join('\\n');\n}\n\n\nconst text_structured = formatDataToText(output_structured_data)\n\nreturn [{json:{text_structured}}]"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -4336,
+        -4352,
         64
       ],
       "id": "6018496e-071d-4ab9-87b4-bc1185a905ec",
@@ -717,7 +718,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const htmlContent = $input.first().json.body.content || '';\n// Dividir por la etiqueta <hr> y tomar solo la primera parte\nconst html_split = htmlContent.split(/<hr[^>]*>/i);\nconst user_suggest = html_split[0] || '';\n\n\nconst formatHtmlContent = (html) => {\n  return html\n    .replace(/<div[^>]*>/gi, '') // Eliminar apertura de divs\n    .replace(/<\\/div>/gi, '\\n')   // Convertir cierre de divs en saltos de línea\n    .replace(/<br\\s*\\/?>/gi, '\\n') // Convertir <br> en saltos de línea\n    .replace(/&nbsp;/g, ' ')      // Reemplazar espacios no breaking\n    .replace(/\\n{3,}/g, '\\n\\n')   // Reducir múltiples saltos de línea\n    .replace(/<[^>]*>/g, '');     // Eliminar el resto de etiquetas HTML\n};\n\nconst message = formatHtmlContent(user_suggest);\n\n\nreturn [{ json: { message: message } }];\n"
+        "jsCode": "const htmlContent = $input.first().json.body.content || '';\n// Dividir por la etiqueta <hr> y tomar solo la primera parte\nconst html_split = htmlContent.split(/<hr[^>]*>/i);\nconst user_suggest = html_split[0] || '';\n\n\nconst formatHtmlContent = (html) => {\n  return html\n    .replace(/<div[^>]*>/gi, '') // Eliminar apertura de divs\n    .replace(/<\\/div>/gi, '\\n')   // Convertir cierre de divs en saltos de línea\n    .replace(/<br\\s*\\/?>/gi, '\\n') // Convertir <br> en saltos de línea\n    .replace(/&nbsp;/g, ' ')      // Reemplazar espacios no breaking\n    .replace(/\\n{3,}/g, '\\n\\n')   // Reducir múltiples saltos de línea\n    .replace(/<[^>]*>/g, '');     // Eliminar el resto de etiquetas HTML\n};\n\nconst message = formatHtmlContent(user_suggest);\n\n\nreturn [{ json: { message: message, rector_email: $env.N8N_RECTOR_EMAIL, secretary_email: $env.N8N_SECRETARY_EMAIL } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -749,7 +750,7 @@
           "value": "={{ $('ExtractLastMailResponse').last().json.id }}",
           "mode": "id"
         },
-        "message": "=Listo, por favor verificar que los cambios se hayan realizado correctamente<br>\n-----PARÁMETROS PROPUESTOS-----<br>\n{{ \n    $json.text_structured\n      .replace(/\\r?\\n/g, '<br>')\n      .replace(/\\s{2,}/g, ' &nbsp;')\n}}\n<br>\n----------<br><br>\nPOR FAVOR RESPONDER:<br>\n- Para continuar: Responda con \"APROBADO\" en el cuerpo del mensaje (No cambiar el asunto)<br>\n- Para realizar nuevos cambios, indicar el punto a cambiar, y el cambio que solicita.<br>\nEn caso de haber más cambios, le contestaré en 30 segundos para que se verifique nuevamente.<br>\nMuchas gracias y que tenga una buena tarde.<br>\nAtte. Bruno",
+        "message": "=Listo, por favor verificar que los cambios se hayan realizado correctamente<br>\n-----PARÁMETROS PROPUESTOS-----<br>\n{{ \n    $json.text_structured\n      .replace(/\\r?\\n/g, '<br>')\n      .replace(/\\s{2,}/g, ' &nbsp;')\n}}\n<br>\n----------<br><br>\nPOR FAVOR RESPONDER:<br>\n- Para continuar: Responda con \"APROBADO\" en el cuerpo del mensaje (No cambiar el asunto)<br>\n- Para realizar nuevos cambios, indicar el punto a cambiar, y el cambio que solicita.<br>\nEn caso de haber más cambios, le contestaré en 30 segundos para que se verifique nuevamente.<br>\nMuchas gracias y que tenga una buena tarde.<br>",
         "options": {}
       },
       "type": "n8n-nodes-base.microsoftOutlook",
@@ -796,7 +797,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -4688,
+        -4720,
         80
       ],
       "id": "e02d9a1a-275c-4635-bb19-ca27350b3cb1",
@@ -804,7 +805,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const output_structured_data = $('Information Extractor1').first().json.output\n\nfunction formatDataToText(data) {\n  // Usamos un array para ir construyendo cada línea del texto.\n  const outputLines = [];\n\n  // 1. Formatear Fecha\n  outputLines.push(`1| Fecha: ${data.fecha}`);\n\n  // 2. Formatear Tipo\n  outputLines.push(`2| Tipo: ${data.tipo}`);\n\n  // 3. Formatear Asistentes\n  outputLines.push(`3| Asistentes:`);\n  if (data.asistentes && data.asistentes.length > 0) {\n    data.asistentes.forEach((asistente, index) => {\n      const num = `3.${index + 1}`;\n      const asistenteInfo = `${asistente.name} - ${asistente.mail} - ${asistente.role}`;\n      // Añadimos sangría para el subnivel\n      outputLines.push(`   ${num}| ${asistenteInfo}`);\n    });\n  }\n\n  // 4. Formatear Temas a resolver (con subniveles)\n  outputLines.push(`4| Temas a resolver`);\n  if (data.temas && data.temas.length > 0) {\n    data.temas.forEach((tema, topicIndex) => {\n      const topicNum = `4.${topicIndex + 1}`;\n      // Añadimos sangría para el primer nivel de temas\n      outputLines.push(`   ${topicNum}| ${tema.topic}`);\n\n      // Verificamos si hay sub-temas para anidar\n      if (tema.sub_topics && tema.sub_topics.length > 0) {\n        tema.sub_topics.forEach((subTopic, subTopicIndex) => {\n          const subTopicNum = `${topicNum}.${subTopicIndex + 1}`;\n          // Añadimos una sangría mayor para el segundo nivel\n          outputLines.push(`      ${subTopicNum}| ${subTopic}`);\n        });\n      }\n    });\n  }\n\n  // Unimos todas las líneas en un solo string, separadas por un salto de línea.\n  return outputLines.join('\\n');\n}\n\n\nconst text_structured = formatDataToText(output_structured_data)\nconsole.log(text_structured)\n\nreturn [{json:{text_structured}}]"
+        "jsCode": "const output_structured_data = $('Information Extractor1').first().json.output\n\nfunction formatDataToText(data) {\n  // Usamos un array para ir construyendo cada línea del texto.\n  const outputLines = [];\n\n  // 1. Formatear Fecha\n  outputLines.push(`1| Fecha: ${data.fecha}`);\n\n  // 2. Formatear Tipo\n  outputLines.push(`2| Tipo: ${data.tipo}`);\n\n  // 3. Formatear Asistentes\n  outputLines.push(`3| Asistentes:`);\n  if (data.asistentes && data.asistentes.length > 0) {\n    data.asistentes.forEach((asistente, index) => {\n      const num = `3.${index + 1}`;\n      const asistenteInfo = `${asistente.name} - ${asistente.mail} - ${asistente.role}`;\n      // Añadimos sangría para el subnivel\n      outputLines.push(`   ${num}| ${asistenteInfo}`);\n    });\n  }\n\n  // 4. Formatear Temas a resolver (con subniveles)\n  outputLines.push(`4| Temas a resolver`);\n  if (data.temas && data.temas.length > 0) {\n    data.temas.forEach((tema, topicIndex) => {\n      const topicNum = `4.${topicIndex + 1}`;\n      // Añadimos sangría para el primer nivel de temas\n      outputLines.push(`   ${topicNum}| ${tema.topic}`);\n\n      // Verificamos si hay sub-temas para anidar\n      if (tema.sub_topics && tema.sub_topics.length > 0) {\n        tema.sub_topics.forEach((subTopic, subTopicIndex) => {\n          const subTopicNum = `${topicNum}.${subTopicIndex + 1}`;\n          // Añadimos una sangría mayor para el segundo nivel\n          outputLines.push(`      ${subTopicNum}| ${subTopic}`);\n        });\n      }\n    });\n  }\n\n  // Unimos todas las líneas en un solo string, separadas por un salto de línea.\n  return outputLines.join('\\n');\n}\n\n\nconst text_structured = formatDataToText(output_structured_data)\n\nreturn [{json:{text_structured}}]"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -817,15 +818,15 @@
     },
     {
       "parameters": {
-        "toRecipients": "=aatituanav@uce.edu.ec",
+        "toRecipients": "={{ $('CLEAN_ENTRY').first().json.secretary_email }}",
         "subject": "=PROGRAMACIÓN SESIÓN {{ $('formatDataForMeeting').item.json.output.tipo.toUpperCase() }} - {{ $('formatDataForMeeting').item.json.output.session_code }}",
-        "bodyContent": "=Buen día.\n\nSe informa la programación de la sesión {{ \n    $('formatDataForMeeting').first().json.output.tipo.charAt(0).toUpperCase() + \n    $('formatDataForMeeting').first().json.output.tipo.slice(1).toLowerCase() \n}} {{ $('formatDataForMeeting').first().json.output.session_code }} para el día {{ DateTime.fromISO($('formatDataForMeeting').first().json.output.fecha).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}, a las {{   $('formatDataForMeeting').first().json.output.fecha.split('T')[1].split(':').slice(0, 2).join(':') }} en el cual se notificó a los siguientes asistentes:\n{{ $('formatDataForMeeting').first().json.output.asistentes.map(at=>at.name+\" - \"+at.mail+\"\\n\").join(\"\") }}\n\nSe adjunta los links para la toma de asistencia y votos: \nASISTENCIA: \n{{ $('SAVE_METADATA').first().json.url_attendances }}\nVOTOS:\n{{ $('SAVE_METADATA').first().json.urt_votes }}\n\nNOTA: Se procederá al firmado del acta por parte de los asistentes, una vez listo, se le notificará por este medio.\n\n\nAtte.\nCentro de Innovacion Tecnológica Yaruquí\n\n",
+        "bodyContent": "=Buen día.\n\nSe informa la programación de la sesión {{ \n    $('formatDataForMeeting').first().json.output.tipo.charAt(0).toUpperCase() + \n    $('formatDataForMeeting').first().json.output.tipo.slice(1).toLowerCase() \n}} {{ $('formatDataForMeeting').first().json.output.session_code }} para el día {{ DateTime.fromISO($('formatDataForMeeting').first().json.output.fecha).setLocale('es').format(\"d 'de' MMMM 'de' yyyy\") }}, a las {{   $('formatDataForMeeting').first().json.output.fecha.split('T')[1].split(':').slice(0, 2).join(':') }} en el cual se notificó a los siguientes asistentes:\n{{ $('formatDataForMeeting').first().json.output.asistentes.map(at=>at.name+\" - \"+at.mail+\"\\n\").join(\"\") }}\n\nSe adjunta el link del archivo para la toma de asistencia y votos: \n{{ $json.link.webUrl }}\n\n\nNOTA: Se procederá al firmado del acta por parte de los asistentes, una vez listo, se le notificará por este medio.\n\n\nAtte.\nCentro de Innovacion Tecnológica Yaruquí\n\n",
         "additionalFields": {}
       },
       "type": "n8n-nodes-base.microsoftOutlook",
       "typeVersion": 2,
       "position": [
-        -1584,
+        -1568,
         -192
       ],
       "id": "3cd694ce-3fe7-4f64-ba73-ee9e2f40a2f4",
@@ -849,7 +850,7 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "binary_pdf_file_item": "={{ $('PDF_CONVOCATORIA').item}}",
+            "binary_pdf_file_item": "={{ $('GET_BINARY').item.binary}}",
             "attendees": "={{ $('formatDataForMeeting').item.json.output.asistentes }}",
             "meeting_type": "={{ $('formatDataForMeeting').item.json.output.tipo }}",
             "session_code": "={{ $('formatDataForMeeting').item.json.output.session_code }}",
@@ -918,8 +919,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        -1584,
-        256
+        -1488,
+        160
       ],
       "id": "f4d70c1a-d61c-4d00-85f9-892858c69d41",
       "name": "SIGN_MEETING_CALL"
@@ -941,18 +942,21 @@
           "subject"
         ],
         "filters": {
-          "custom": "not(startswith(subject, 'RE:')) and contains(subject, 'iniciar')",
+          "custom": "not(startswith(subject, 'RE:')) and contains(subject, 'revisar')",
           "foldersToInclude": [
-            "AQMkADU1ADM4MzJjNy1lY2FiLTRhZDktYTI3YS0wOGE1NjlmNmUyZjAALgAAAxCSmJKBWdRBnpaPEAI69OcBAIlriLCKeQFCg0qLNcoX9M4AAAIBDAAAAA=="
+            "AAMkADliNjk4NDAzLTY2NzYtNGVjMi05YjIyLTBmZWQwZmJlY2JhOQAuAAAAAADErCGzx_TkTI9Izs2IzL6lAQBp_BPEgka1RYOOtkWcCwxJAAAAAAEMAAA="
           ]
         },
-        "options": {}
+        "options": {
+          "attachmentsPrefix": "data",
+          "downloadAttachments": true
+        }
       },
       "type": "n8n-nodes-base.microsoftOutlookTrigger",
       "typeVersion": 1,
       "position": [
-        -5424,
-        48
+        -5440,
+        80
       ],
       "id": "03184302-200c-43ef-9d1a-186caa57eb5a",
       "name": "START",
@@ -962,6 +966,121 @@
           "name": "Microsoft Outlook account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "//const startBinary = $('START').first().binary;\nconst pdfData = $(\"PDF_CONVOCATORIA\").last().binary.data;\n\n// Crear el objeto binario combinado\nconst combinedBinary = {\n  data0: pdfData \n};\n\n//if (startBinary){\n  // Agregar todos los binarios de START con claves únicas\n  //let index = 1;\n  //Object.entries(startBinary).forEach(([key, binaryObj]) => {\n  //  combinedBinary[`data${index}`] = binaryObj;\n   // index++;\n  //});\n//}\n\n\nreturn {\n  json: $(\"PDF_CONVOCATORIA\").last().json,\n  binary: combinedBinary\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1648,
+        160
+      ],
+      "id": "73506d5e-fcd0-402b-930e-3c92f4fc524c",
+      "name": "GET_BINARY"
+    },
+    {
+      "parameters": {
+        "jsCode": "const startBinary = $('START').first().binary;\n\n// Crear el objeto binario combinado\nconst combinedBinary = {};\n\nif (startBinary){\n  // Agregar todos los binarios de START con claves únicas\n  let index = 0;\n  Object.entries(startBinary).forEach(([key, binaryObj]) => {\n    combinedBinary[`data${index}`] = binaryObj;\n    index++;\n  });\n}\n\n\nreturn {\n  json: {},\n  binary: combinedBinary\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1648,
+        336
+      ],
+      "id": "6aed013f-d908-4963-bf7f-0e050baf8cfc",
+      "name": "GET_BINARY1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "JTi09NEnZs2U3j0v",
+          "mode": "list",
+          "cachedResultName": "SEND_EMAIL_MULTIPLE_BINARIES"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "binaries": "={{ $('GET_BINARY1').item.binary}}",
+            "subject": "=INFORMACION ADICIONAL SESIÓN {{ $('formatDataForMeeting').item.json.output.session_code }}",
+            "body": "=Buen dia, se adjunta documentación correspondiente a los puntos de la sesión {{ $('formatDataForMeeting').item.json.output.tipo }}",
+            "to": "={{ $json.attendee.mail }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "to",
+              "displayName": "to",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "body",
+              "displayName": "body",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "binaries",
+              "displayName": "binaries",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -1312,
+        336
+      ],
+      "id": "a1430a73-c447-48d7-8caa-e3a2c760604b",
+      "name": "SEND_INFORMATION"
+    },
+    {
+      "parameters": {
+        "jsCode": "const attendees = $('formatDataForMeeting').first().json.output.asistentes\nconst result = []\n\n// Opción 1: for...in (accediendo al valor por clave)\nfor (let attendeeKey in attendees){\n  result.push({\n    json: {\n      attendee: {...attendees[attendeeKey]} // Spread del valor, no de la clave\n    }\n  })\n}\n\nreturn result"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1488,
+        336
+      ],
+      "id": "616d9e63-f5c5-470f-94d5-7c0af4d0140d",
+      "name": "SPLIT_ATTENDES"
     }
   ],
   "pinData": {},
@@ -1094,17 +1213,22 @@
       "main": [
         [
           {
-            "node": "SIGN_MEETING_CALL",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "SEND_NOTIFICATION",
             "type": "main",
             "index": 0
           },
           {
             "node": "UPDATE_SESSION_NUMBER",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GET_BINARY",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GET_BINARY1",
             "type": "main",
             "index": 0
           }
@@ -1315,13 +1439,46 @@
           }
         ]
       ]
+    },
+    "GET_BINARY": {
+      "main": [
+        [
+          {
+            "node": "SIGN_MEETING_CALL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET_BINARY1": {
+      "main": [
+        [
+          {
+            "node": "SPLIT_ATTENDES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SPLIT_ATTENDES": {
+      "main": [
+        [
+          {
+            "node": "SEND_INFORMATION",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "738a194d-2794-4b0a-bb97-38dcd8c8c195",
+  "versionId": "ab3d6f96-83f9-416d-ac6f-0dc466196f82",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"

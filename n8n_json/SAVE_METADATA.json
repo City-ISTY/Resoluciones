@@ -34,130 +34,6 @@
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "sOKBJYRMRjAcRKTh",
-          "mode": "list",
-          "cachedResultName": "CREAR_EXCEL"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "array": "={{ \n    (() => {\n      \n        const attendees = $('PARSER1').first().json.attendees\n        const topics = $('PARSER1').first().json.topics\n        const combinedArray = [];\n\n        attendees.forEach(person => {\n            topics.forEach(topicObj => {\n                combinedArray.push({\n                    name: person.name,\n                    id_topic: topicObj.id_topic,\n                    topic: topicObj.topic,\n                    option: '',\n                    table: \"votos\",\n                    notification: \"\",\n                    meeting_finished: \"\"\n                });\n            });\n        });\n\n        return combinedArray.sort((a, b) => a.topic.localeCompare(b.topic));\n    })()\n}}",
-            "file_name": "={{ $('start').first().json.session_code+\"_VOTOS\" }}",
-            "parent_folder": "01ZX2MQXLIPZG6YCWIRNA2FRDSIYBGHMP5"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "array",
-              "displayName": "array",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "array",
-              "removed": false
-            },
-            {
-              "id": "file_name",
-              "displayName": "file_name",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "parent_folder",
-              "displayName": "parent_folder",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.2,
-      "position": [
-        336,
-        16
-      ],
-      "id": "827346fa-54fb-4817-9367-6123c1e71413",
-      "name": "Call 'EXCEL_VOTOS'"
-    },
-    {
-      "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "sOKBJYRMRjAcRKTh",
-          "mode": "list",
-          "cachedResultName": "CREAR_EXCEL"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "array": "={{ \n   $('PARSER1').first().json.attendees.map(at=>{\n  return({\"id_assistant\":at.id_assistant, \"name\":at.name, \"role\": at.role, \"attendance\": \"\", \"table\": \"asistencia\"})})\n}}",
-            "file_name": "={{ $('PARSER1').first().json.session_code+\"_ASISTENCIA\"  }}",
-            "parent_folder": "01ZX2MQXNBFOLRVNXCXNDLYAWFAZDB5IAI"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "array",
-              "displayName": "array",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "array",
-              "removed": false
-            },
-            {
-              "id": "file_name",
-              "displayName": "file_name",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "parent_folder",
-              "displayName": "parent_folder",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.2,
-      "position": [
-        528,
-        16
-      ],
-      "id": "96d83fd9-ebd6-43a3-b8dd-b7d0cf6026f9",
-      "name": "Call 'EXCEL_ASISTENCIA'"
-    },
-    {
-      "parameters": {
         "jsCode": "const object = $('start').first().json\n\nconst id = () => Date.now().toString(36) + Math.random().toString(36).slice(2);\n\nconst attendes = $('start').first().json.attendees\nconst attendesId = attendes.map(attendee=>({...attendee, id_assistant: id()}))\n\nconst topics = $('start').first().json.topics\nconst topicsId = topics.map(tp=>({...tp, id_topic: id()}))\n//actualizo numeros de sesion\n\nconst ordinary_number_session = $input.first().json.ordinary_session_number + ($('start').first().json.meeting_type.toLocaleLowerCase() === \"ordinaria\" ? 1 : 0);\n\nconst exordinary_number_session = $input.first().json.extraordinary_session_number + ($('start').first().json.meeting_type.toLowerCase() === \"extraordinaria\" ? 1 : 0);\n\n\nreturn [{...object,\n         topics: topicsId,\n         attendees:attendesId,\n         ordinary_number_session,\n         exordinary_number_session\n        }];"
       },
       "type": "n8n-nodes-base.code",
@@ -168,35 +44,6 @@
       ],
       "id": "a53852d1-d272-4554-92ff-340e5eb6c85f",
       "name": "PARSER1"
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "ec77117f-14a0-4905-9046-b75d03b65536",
-              "name": "url_attendances",
-              "value": "={{ $json.link.webUrl }}",
-              "type": "string"
-            },
-            {
-              "id": "4df7427c-dfd1-4b2c-98ed-e460bb3e7822",
-              "name": "urt_votes",
-              "value": "={{ $('Call \\'EXCEL_VOTOS\\'').item.json.link.webUrl }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        720,
-        16
-      ],
-      "id": "bf80fc15-9e00-4215-bd9c-7b25648b68ef",
-      "name": "Edit Fields"
     },
     {
       "parameters": {
@@ -230,7 +77,7 @@
       "type": "n8n-nodes-base.microsoftOneDrive",
       "typeVersion": 1,
       "position": [
-        512,
+        496,
         -208
       ],
       "id": "5f607efe-0583-42f1-a54c-83b09995bf6e",
@@ -244,25 +91,163 @@
     },
     {
       "parameters": {
-        "url": "=https://graph.microsoft.com/v1.0/me/drive/root/children",
+        "operation": "copy",
+        "fileId": "01ZX2MQXKNZIR7VA3VVFBIG4DYTN6FTE7B",
+        "additionalFields": {
+          "name": "={{ $('start').first().json.session_code }}_DATA.xlsx"
+        },
+        "parentReference": {
+          "id": "01ZX2MQXM4UWA6MXCVGRCJKA3RBHY7FX4O"
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOneDrive",
+      "typeVersion": 1,
+      "position": [
+        672,
+        -208
+      ],
+      "id": "0b3718b2-7d73-4b1a-99eb-2d836829ef30",
+      "name": "COPY_TEMPLATE",
+      "credentials": {
+        "microsoftOneDriveOAuth2Api": {
+          "id": "Sk09Y3pRv4uy2lLG",
+          "name": "Microsoft Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const attendees = $('PARSER1').first().json.attendees;\nconst topics = $('PARSER1').first().json.topics;\nconst combinedArray = [];\n\nattendees.forEach(person => {\n    topics.forEach(topicObj => {\n        combinedArray.push({\n            nombre: person.name,\n            id_tema: topicObj.id_topic,\n            tema: topicObj.topic\n        });\n    });\n});\n\n// Ordenamos alfabéticamente por topic\nconst sortedArray = combinedArray.sort((a, b) => a.tema.localeCompare(b.tema));\n\n// ✅ Agregamos el índice en el mismo array\nconst finalArray = sortedArray.map((item, index) => {\n    return {\n        json: {\n            ...item,\n            num: index // o index + 1 si quieres empezar desde 1\n        }\n    };\n});\n\nreturn finalArray;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        -208
+      ],
+      "id": "a7dee2b7-f111-4b47-86ec-4e34a825e7d2",
+      "name": "STRUCTURE_VOTE_DATA"
+    },
+    {
+      "parameters": {
+        "jsCode": "const attendees = $('PARSER1').first().json.attendees;\n\n// Creamos el array con los datos y el índice incluido\nconst output = attendees.map((at, index) => {\n    return {\n        json: {\n            id_asistente: at.id_assistant,\n            nombre: at.name,\n            rol: at.role,\n            asistencia: \"\",\n            num: index // o index + 1 si prefieres empezar desde 1\n        }\n    };\n});\n\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        -208
+      ],
+      "id": "3998d0a3-6855-45a2-9772-c48f1f5b5ad8",
+      "name": "STRUCTURE_ATTENDANCE_DATA"
+    },
+    {
+      "parameters": {
+        "resource": "worksheet",
+        "operation": "update",
+        "workbook": {
+          "__rl": true,
+          "value": "={{ $('COPY_TEMPLATE').first().json.location.match(/items\\/([^?]+)/)[1] }}",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{BF7BEF82-C39B-4718-9718-A29EB4F70AD5}",
+          "mode": "list",
+          "cachedResultName": "VOTOS"
+        },
+        "dataMode": "autoMap",
+        "columnToMatchOn": "num",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.1,
+      "position": [
+        1040,
+        -208
+      ],
+      "id": "44b3499c-6c9e-416c-af94-9bf932880943",
+      "name": "WRITE_VOTES",
+      "credentials": {
+        "microsoftExcelOAuth2Api": {
+          "id": "7jl4WbaJjbJZ6pG5",
+          "name": "Microsoft Excel account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "worksheet",
+        "operation": "update",
+        "workbook": {
+          "__rl": true,
+          "value": "={{ $('COPY_TEMPLATE').first().json.location.match(/items\\/([^?]+)/)[1] }}",
+          "mode": "id"
+        },
+        "worksheet": {
+          "__rl": true,
+          "value": "{4C844841-4A4A-451B-8277-480BFCA13F15}",
+          "mode": "list",
+          "cachedResultName": "ASISTENCIA"
+        },
+        "dataMode": "autoMap",
+        "columnToMatchOn": "num",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcel",
+      "typeVersion": 2.1,
+      "position": [
+        1424,
+        -208
+      ],
+      "id": "12c65d7e-9f0f-4776-8e98-dd509212568d",
+      "name": "WRITE_ATTENDANCES",
+      "credentials": {
+        "microsoftExcelOAuth2Api": {
+          "id": "7jl4WbaJjbJZ6pG5",
+          "name": "Microsoft Excel account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.microsoft.com/v1.0/me/drive/items/{{ $('COPY_TEMPLATE').first().json.location.match(/items\\/([^?]+)/)[1] }}/createLink",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "microsoftOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"type\": \"edit\",\n  \"scope\": \"anonymous\"\n}\n",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        816,
-        -256
+        1760,
+        -208
       ],
-      "id": "168b0e7f-fe3b-46d7-8a30-380250abead8",
-      "name": "VER_CARPETAS",
+      "id": "1c96893d-0034-4f2d-8742-b670d421465a",
+      "name": "URL_DOWNLOAD",
       "credentials": {
         "microsoftOAuth2Api": {
           "id": "Y5GP57FlaZyiBK8B",
           "name": "Microsoft account"
         }
       }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        -208
+      ],
+      "id": "8e84ac14-db25-44b5-87a9-a671b05780d3",
+      "name": "Aggregate"
     }
   ],
   "pinData": {
@@ -303,6 +288,230 @@
           ]
         }
       }
+    ],
+    "GET_NUMBER_SESSION": [
+      {
+        "json": {
+          "id": 1,
+          "extraordinary_session_number": 17,
+          "ordinary_session_number": 14,
+          "resolution_number": 145,
+          "last_session_type": "E"
+        }
+      }
+    ],
+    "PARSER1": [
+      {
+        "json": {
+          "id_meeting": "5110183e-05e2-4f60-a35b-effb998d2efc",
+          "meeting_url": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_ZjI1YTU2MmMtNmMyMC00ZDk4LTg2ZWMtYjcyMmQ4MmZiZjhk%40thread.v2/0?context=%7b%22Tid%22%3a%229d91e1e7-5249-4205-8c19-8d1d9e333a60%22%2c%22Oid%22%3a%228cb570fb-7f11-4fc7-9acf-8c1f5c0d22fa%22%7d",
+          "meeting_datetime_ISO8631": "2025-10-24T13:00:00.0000000",
+          "convocation_date_ISO8631": "2025-09-24",
+          "meeting_type": "Extraordinaria",
+          "session_code": "OCS-SE-014-2025",
+          "attendees": [
+            {
+              "name": "Jennifer Tituana",
+              "mail": "alvaro.andres1996@hotmail.com",
+              "role": "Hermana",
+              "id_assistant": "mg7h4ofgo87rbbq5wt"
+            }
+          ],
+          "topics": [
+            {
+              "topic": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
+              "sub_topics": [
+                "Msc. Alfredo Armando Rodríquez Guzman, representante del Rector, como presidente del comité."
+              ],
+              "id_topic": "mg7h4ofg4l86uhcterj"
+            },
+            {
+              "topic": "Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación considerando lo siguiente:",
+              "sub_topics": [
+                "Que el docente llevaba mucho tiempo fuera de la institución",
+                "Que la normativa autoriza a la institución a presentar la oportuna renuncia del Ingeniero."
+              ],
+              "id_topic": "mg7h4ofgs7n5nbw1jj9"
+            },
+            {
+              "topic": "Aprobación de la actualización en",
+              "sub_topics": [],
+              "id_topic": "mg7h4ofgln3sbujjrca"
+            }
+          ],
+          "ordinary_number_session": 14,
+          "exordinary_number_session": 18
+        }
+      }
+    ],
+    "Convert to File": [
+      {
+        "json": {},
+        "binary": {
+          "file": {
+            "mimeType": "application/json",
+            "fileType": "json",
+            "fileExtension": "json",
+            "data": "W3siaWRfbWVldGluZyI6IjUxMTAxODNlLTA1ZTItNGY2MC1hMzViLWVmZmI5OThkMmVmYyIsIm1lZXRpbmdfdXJsIjoiaHR0cHM6Ly90ZWFtcy5taWNyb3NvZnQuY29tL2wvbWVldHVwLWpvaW4vMTklM2FtZWV0aW5nX1pqSTFZVFUyTW1NdE5tTXlNQzAwWkRrNExUZzJaV010WWpjeU1tUTRNbVppWmpoayU0MHRocmVhZC52Mi8wP2NvbnRleHQ9JTdiJTIyVGlkJTIyJTNhJTIyOWQ5MWUxZTctNTI0OS00MjA1LThjMTktOGQxZDllMzMzYTYwJTIyJTJjJTIyT2lkJTIyJTNhJTIyOGNiNTcwZmItN2YxMS00ZmM3LTlhY2YtOGMxZjVjMGQyMmZhJTIyJTdkIiwibWVldGluZ19kYXRldGltZV9JU084NjMxIjoiMjAyNS0xMC0yNFQxMzowMDowMC4wMDAwMDAwIiwiY29udm9jYXRpb25fZGF0ZV9JU084NjMxIjoiMjAyNS0wOS0yNCIsIm1lZXRpbmdfdHlwZSI6IkV4dHJhb3JkaW5hcmlhIiwic2Vzc2lvbl9jb2RlIjoiT0NTLVNFLTAxNC0yMDI1IiwiYXR0ZW5kZWVzIjpbeyJuYW1lIjoiSmVubmlmZXIgVGl0dWFuYSIsIm1haWwiOiJhbHZhcm8uYW5kcmVzMTk5NkBob3RtYWlsLmNvbSIsInJvbGUiOiJIZXJtYW5hIiwiaWRfYXNzaXN0YW50IjoibWc3aDRvZmdvODdyYmJxNXd0In1dLCJ0b3BpY3MiOlt7InRvcGljIjoiQXByb2JhY2nDs24gZGUgbGEgZGVzaWduYWNpb24gZGUgbG9zIG1pZW1icm9zIGRlbCBjb21pdMOpIGRlIMOpdGljYSBkZWwgaW5zdGl0dXRvIHN1cGVyaW9yIHRlY25vbMOzZ2ljbyB5YXJ1cXXDrSwgcXVlZGFuZG8gY29uZm9ybWFkbyBkZSBsYSBzaWd1aWVudGUgbWFuZXJhIiwic3ViX3RvcGljcyI6WyJNc2MuIEFsZnJlZG8gQXJtYW5kbyBSb2Ryw61xdWV6IEd1em1hbiwgcmVwcmVzZW50YW50ZSBkZWwgUmVjdG9yLCBjb21vIHByZXNpZGVudGUgZGVsIGNvbWl0w6kuIl0sImlkX3RvcGljIjoibWc3aDRvZmc0bDg2dWhjdGVyaiJ9LHsidG9waWMiOiJBcHJvYmFjacOzbiBkZSBsYSBhY2VwdGFjacOzbiBkZSBsYSByZW51bmNpYSBwcmVzZW50YWRhIHBvciBlbCBJbmcuIEtldmluIEphdmllciBBZ3VpbGFyIEN1aWNow6FuLCBKZWZlIGRlIGxhIFVuaWRhZCBkZSBUZWNub2xvZ8OtYXMgZGUgbGEgaW5mb3JtYWNpw7NuIHkgQ29tdW5pY2FjacOzbiBjb25zaWRlcmFuZG8gbG8gc2lndWllbnRlOiIsInN1Yl90b3BpY3MiOlsiUXVlIGVsIGRvY2VudGUgbGxldmFiYSBtdWNobyB0aWVtcG8gZnVlcmEgZGUgbGEgaW5zdGl0dWNpw7NuIiwiUXVlIGxhIG5vcm1hdGl2YSBhdXRvcml6YSBhIGxhIGluc3RpdHVjacOzbiBhIHByZXNlbnRhciBsYSBvcG9ydHVuYSByZW51bmNpYSBkZWwgSW5nZW5pZXJvLiJdLCJpZF90b3BpYyI6Im1nN2g0b2ZnczduNW5idzFqajkifSx7InRvcGljIjoiQXByb2JhY2nDs24gZGUgbGEgYWN0dWFsaXphY2nDs24gZW4iLCJzdWJfdG9waWNzIjpbXSwiaWRfdG9waWMiOiJtZzdoNG9mZ2xuM3NidWpqcmNhIn1dLCJvcmRpbmFyeV9udW1iZXJfc2Vzc2lvbiI6MTQsImV4b3JkaW5hcnlfbnVtYmVyX3Nlc3Npb24iOjE4fV0=",
+            "fileName": "OCS-SE-014-2025_METADATA.json",
+            "fileSize": "1.5 kB"
+          }
+        }
+      }
+    ],
+    "SAVE_METADATA": [
+      {
+        "json": {
+          "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users('8cb570fb-7f11-4fc7-9acf-8c1f5c0d22fa')/drive/items/$entity",
+          "@microsoft.graph.downloadUrl": "https://isty850-my.sharepoint.com/personal/city_isty_edu_ec/_layouts/15/download.aspx?UniqueId=41cafda6-464a-46ff-a4d6-697f44d33714&Translate=false&tempauth=v1.eyJzaXRlaWQiOiIzMDExYTdiYS04ZjZkLTRmZGYtYjc1OS1mMmYxZTUzYTdiMGQiLCJhcHBfZGlzcGxheW5hbWUiOiJOOE4gSW50ZWdyYXRpb24iLCJhcHBpZCI6IjE4NzQ4MjFhLTc1NTktNGI0ZS1iZTZiLTMyZGVmMzRlMDg4MCIsImF1ZCI6IjAwMDAwMDAzLTAwMDAtMGZmMS1jZTAwLTAwMDAwMDAwMDAwMC9pc3R5ODUwLW15LnNoYXJlcG9pbnQuY29tQDlkOTFlMWU3LTUyNDktNDIwNS04YzE5LThkMWQ5ZTMzM2E2MCIsImV4cCI6IjE3NTkyOTU3NTYifQ.CkAKDGVudHJhX2NsYWltcxIwQ09DeThzWUdFQUFhRm1aMmJqQmZZME13WTJzdGVXaHZXRVZWWWpoZlFVRXFBQT09CjIKCmFjdG9yYXBwaWQSJDAwMDAwMDAzLTAwMDAtMDAwMC1jMDAwLTAwMDAwMDAwMDAwMAoKCgRzbmlkEgI2NBILCNyg24PoqsA-EAUaDTQwLjEyNi4yNC4xNTIqLHp2cUZEZ1dIaGxocGk1ZHdqbjJyV2dUcm9rVjBKVU1yZ3QzbnNlWk1UdG89MJMBOAFCEKHLAovywACgUvjZd8TAyeBKEGhhc2hlZHByb29mdG9rZW5SCFsia21zaSJdaiQwMDhjOTA3OS03OWZiLTNiYzgtMGFjMS1kZDdlNTk3ZmY4MmZyKTBoLmZ8bWVtYmVyc2hpcHwxMDAzMjAwNTEyZTBmNjJlQGxpdmUuY29tegEyggESCefhkZ1JUgVCEYwZjR2eMzpgogEQY2l0eUBpc3R5LmVkdS5lY6oBEDEwMDMyMDA1MTJFMEY2MkWyAS1teWZpbGVzLndyaXRlIGFsbGZpbGVzLndyaXRlIGFsbHByb2ZpbGVzLnJlYWTIAQE.RpqM8NJkz6biCzQBekMy8adZi5_Ky8HjKN4Xn6ZyuNU&ApiVersion=2.0",
+          "createdDateTime": "2025-09-29T16:29:08Z",
+          "eTag": "\"{41CAFDA6-464A-46FF-A4D6-697F44D33714},2\"",
+          "id": "01ZX2MQXNG7XFECSSG75DKJVTJP5CNGNYU",
+          "lastModifiedDateTime": "2025-10-01T04:15:56Z",
+          "name": "OCS-SE-014-2025_METADATA.json",
+          "webUrl": "https://isty850-my.sharepoint.com/personal/city_isty_edu_ec/Documents/METADATA/OCS-SE-014-2025_METADATA.json",
+          "cTag": "\"c:{41CAFDA6-464A-46FF-A4D6-697F44D33714},2\"",
+          "size": 1505,
+          "createdBy": {
+            "application": {
+              "id": "1874821a-7559-4b4e-be6b-32def34e0880",
+              "displayName": "Microsoft Graph"
+            },
+            "user": {
+              "email": "city@isty.edu.ec",
+              "id": "8cb570fb-7f11-4fc7-9acf-8c1f5c0d22fa",
+              "displayName": "Centro de Innovacion Tecnológica Yaruquí"
+            }
+          },
+          "lastModifiedBy": {
+            "application": {
+              "id": "1874821a-7559-4b4e-be6b-32def34e0880",
+              "displayName": "Microsoft Graph"
+            },
+            "user": {
+              "email": "city@isty.edu.ec",
+              "id": "8cb570fb-7f11-4fc7-9acf-8c1f5c0d22fa",
+              "displayName": "Centro de Innovacion Tecnológica Yaruquí"
+            }
+          },
+          "parentReference": {
+            "driveType": "business",
+            "driveId": "b!uqcRMG2P30-3WfLx5Tp7DY7zd_EgX2JKkFR6AksKPxdkxOl1byooTrOqOfxFGrny",
+            "id": "01ZX2MQXOS5TWC5IXXI5H2DRTRMZAPE6BT",
+            "name": "METADATA",
+            "path": "/drive/root:/METADATA",
+            "siteId": "3011a7ba-8f6d-4fdf-b759-f2f1e53a7b0d"
+          },
+          "file": {
+            "mimeType": "application/json",
+            "hashes": {
+              "quickXorHash": "a5W7UnU1T0BAco0gbV+ffrWojSk="
+            }
+          },
+          "fileSystemInfo": {
+            "createdDateTime": "2025-09-29T16:29:08Z",
+            "lastModifiedDateTime": "2025-10-01T04:15:56Z"
+          }
+        }
+      }
+    ],
+    "COPY_TEMPLATE": [
+      {
+        "json": {
+          "location": "https://isty850-my.sharepoint.com/personal/city_isty_edu_ec/_api/v2.0/drives/b!uqcRMG2P30-3WfLx5Tp7DY7zd_EgX2JKkFR6AksKPxdkxOl1byooTrOqOfxFGrny/items/01ZX2MQXPBHIZNJPW6J5G3CPZ4SNH47XRD?force303=1&tempauth=v1.eyJzaXRlaWQiOiIzMDExYTdiYS04ZjZkLTRmZGYtYjc1OS1mMmYxZTUzYTdiMGQiLCJhcHBfZGlzcGxheW5hbWUiOiJOOE4gSW50ZWdyYXRpb24iLCJhcHBpZCI6IjE4NzQ4MjFhLTc1NTktNGI0ZS1iZTZiLTMyZGVmMzRlMDg4MCIsImF1ZCI6IjAwMDAwMDAzLTAwMDAtMGZmMS1jZTAwLTAwMDAwMDAwMDAwMC9pc3R5ODUwLW15LnNoYXJlcG9pbnQuY29tQDlkOTFlMWU3LTUyNDktNDIwNS04YzE5LThkMWQ5ZTMzM2E2MCIsImV4cCI6IjE3NTkzODU1NzUifQ.CkAKDGVudHJhX2NsYWltcxIwQ0xxSzg4WUdFQUFhRm5jdExUSTBZbXQzTXpCNVUwczVOM2RKTlZKS1FVRXFBQT09CjIKCmFjdG9yYXBwaWQSJDAwMDAwMDAzLTAwMDAtMDAwMC1jMDAwLTAwMDAwMDAwMDAwMAoKCgRzbmlkEgI2NRILCJravf3yrsA-EAUaDDQwLjEyNi4yOS45OSosaDZNMGhHZU5tUEUrTmxsYUdSb0IrU25jYlJwSk43YnhhMi91WFRVanMvTT0wwwE4AUIQocsJPZfgAKBFCnBS4zIVkEoQaGFzaGVkcHJvb2Z0b2tlblIIWyJrbXNpIl1qJDAwOGM5MDc5LTc5ZmItM2JjOC0wYWMxLWRkN2U1OTdmZjgyZnIpMGguZnxtZW1iZXJzaGlwfDEwMDMyMDA1MTJlMGY2MmVAbGl2ZS5jb216ATKCARIJ5-GRnUlSBUIRjBmNHZ4zOmCiARBjaXR5QGlzdHkuZWR1LmVjqgEQMTAwMzIwMDUxMkUwRjYyRbIBLW15ZmlsZXMud3JpdGUgYWxsZmlsZXMud3JpdGUgYWxscHJvZmlsZXMucmVhZMgBAQ.Yv6hY93eV6HL9OwRXHkvZfBtS5oSy3G8MET85L6o268"
+        }
+      }
+    ],
+    "STRUCTURE_VOTE_DATA": [
+      {
+        "json": {
+          "nombre": "Jennifer Tituana",
+          "id_tema": "mg7h4ofgs7n5nbw1jj9",
+          "tema": "Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación considerando lo siguiente:",
+          "tabla": "votos",
+          "num": 0
+        }
+      },
+      {
+        "json": {
+          "nombre": "Jennifer Tituana",
+          "id_tema": "mg7h4ofgln3sbujjrca",
+          "tema": "Aprobación de la actualización en",
+          "tabla": "votos",
+          "num": 1
+        }
+      },
+      {
+        "json": {
+          "nombre": "Jennifer Tituana",
+          "id_tema": "mg7h4ofg4l86uhcterj",
+          "tema": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
+          "tabla": "votos",
+          "num": 2
+        }
+      }
+    ],
+    "WRITE_VOTES": [
+      {
+        "json": {
+          "num": 0,
+          "nombre": "Jennifer Tituana",
+          "id_tema": "mg7h4ofgs7n5nbw1jj9",
+          "tema": "Aprobación de la aceptación de la renuncia presentada por el Ing. Kevin Javier Aguilar Cuichán, Jefe de la Unidad de Tecnologías de la información y Comunicación considerando lo siguiente:",
+          "opcion": "",
+          "tabla": "votos",
+          "notificacion": "",
+          "reunion_terminada": ""
+        }
+      },
+      {
+        "json": {
+          "num": 1,
+          "nombre": "Jennifer Tituana",
+          "id_tema": "mg7h4ofgln3sbujjrca",
+          "tema": "Aprobación de la actualización en",
+          "opcion": "",
+          "tabla": "votos",
+          "notificacion": "",
+          "reunion_terminada": ""
+        }
+      },
+      {
+        "json": {
+          "num": 2,
+          "nombre": "Jennifer Tituana",
+          "id_tema": "mg7h4ofg4l86uhcterj",
+          "tema": "Aprobación de la designacion de los miembros del comité de ética del instituto superior tecnológico yaruquí, quedando conformado de la siguiente manera",
+          "opcion": "",
+          "tabla": "votos",
+          "notificacion": "",
+          "reunion_terminada": ""
+        }
+      }
+    ],
+    "STRUCTURE_ATTENDANCE_DATA": [
+      {
+        "json": {
+          "id_asistente": "mg7h4ofgo87rbbq5wt",
+          "nombre": "Jennifer Tituana",
+          "rol": "Hermana",
+          "asistencia": "",
+          "tabla": "asistencia",
+          "num": 0
+        }
+      }
+    ],
+    "WRITE_ATTENDANCES": [
+      {
+        "json": {
+          "num": 0,
+          "id_asistente": "mg7h4ofgo87rbbq5wt",
+          "nombre": "Jennifer Tituana",
+          "rol": "Hermana",
+          "asistencia": "",
+          "tabla": "asistencia"
+        }
+      }
     ]
   },
   "connections": {
@@ -322,28 +531,6 @@
         [
           {
             "node": "SAVE_METADATA",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Call 'EXCEL_VOTOS'": {
-      "main": [
-        [
-          {
-            "node": "Call 'EXCEL_ASISTENCIA'",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Call 'EXCEL_ASISTENCIA'": {
-      "main": [
-        [
-          {
-            "node": "Edit Fields",
             "type": "main",
             "index": 0
           }
@@ -376,7 +563,73 @@
       "main": [
         [
           {
-            "node": "Call 'EXCEL_VOTOS'",
+            "node": "COPY_TEMPLATE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "STRUCTURE_VOTE_DATA": {
+      "main": [
+        [
+          {
+            "node": "WRITE_VOTES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "COPY_TEMPLATE": {
+      "main": [
+        [
+          {
+            "node": "STRUCTURE_VOTE_DATA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "STRUCTURE_ATTENDANCE_DATA": {
+      "main": [
+        [
+          {
+            "node": "WRITE_ATTENDANCES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WRITE_VOTES": {
+      "main": [
+        [
+          {
+            "node": "STRUCTURE_ATTENDANCE_DATA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WRITE_ATTENDANCES": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "URL_DOWNLOAD",
             "type": "main",
             "index": 0
           }
@@ -388,7 +641,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "5a127402-63d3-4a42-a36e-c9c1c6c89f23",
+  "versionId": "2d3ea4ea-d385-418e-9dea-58e5d3002a07",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"

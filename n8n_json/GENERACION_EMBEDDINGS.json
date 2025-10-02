@@ -60,9 +60,16 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=ACTÚA COMO UN REFINADOR Y ESTRACTOR DE TEXTO\nNecesito que hagas dos cosas\nContexto: Se te proporcionará un texto extraído de una página de un documento normativo mediante OCR. Este texto puede contener el inicio de un nuevo artículo, el final de un artículo de la página anterior, o una combinación de ambos.\n\n# TAREA PRINCIPAL\nTu objetivo es analizar el texto, identificar y extraer los artículos o fragmentos de artículos, corregir errores de OCR y ortografía, y devolver la información en un formato JSON estructurado.\n\n# LÓGICA DE EXTRACCIÓN Y REGLAS\nSigue estas reglas en orden estricto:\n1.  **IDENTIFICAR EL FRAGMENTO INICIAL:** Barre el texto desde el principio. Todo el contenido que aparezca ANTES del primer marcador de artículo (como \"Art. 14\", \"Articulo 15\", etc.) debe ser considerado como un único bloque cohesivo. Este bloque es la continuación de un artículo de la página anterior. Agrupa todo este contenido inicial en un solo objeto JSON.\n    * En este objeto, los campos `numero` y `titulo` deben estar vacíos (`\"\"`).\n    * Todo el texto de este bloque debe ir dentro del campo `norma`.\n2.  **EXTRAER ARTÍCULOS COMPLETOS:** A partir del primer marcador de artículo encontrado, cada nuevo bloque que comience con un patrón como \"Art. #\", \"Articulo #\", etc., debe ser extraído como un objeto JSON individual.\n    * Identifica y extrae el `numero` del artículo.\n    * Identifica y extrae el `titulo`, que es la frase corta que sigue al número del artículo, y que termina justo antes del comienzo de la descripción principal de la norma. La estructura suele ser: Art [Número] [Separador]  [Título del artículo] [Separador] [Inicio del cuerpo de la norma].\n    * El resto del texto del artículo conformará la `norma`.\n3. EXTRAER DISPOSICIONES: Busca en el texto fragmentos numerados con ordinales en formato de texto (ej. PRIMERA, SEGUNDA, TERCERA).\n    *Para estos casos vas a asignar asi los campos.\n    El campo numero será el ordinal en texto (ej. \"PRIMERA\").\n    El campo titulo vas a poner \"DISPOSICIONES\"\n    El campo norma será el texto completo que sigue al número ordinal.\n4. EXTRAER CONSIDERANDOS: Los considerandos siempre inician con la palabra \"Que\", y luego hacen referencia a algun artículo, ten cuidado, ya que esto no es un artículo en sí. para estos vas a colocar en el campo `titulo` la palabra \"CONSIDERANDO\"\n4.  **CASO SIN ARTÍCULOS:** Si el texto proporcionado NO CONTIENE ningún marcador de artículo en absoluto, trata todo el texto como un único fragmento. En este caso, crea un solo objeto JSON donde todo el contenido esté en el campo `norma`, y los campos `numero` y `titulo` estén vacíos.\n5.  **CORRECCIÓN Y LIMPIEZA:** Durante la extracción, corrige errores evidentes de ortografía y OCR (ej. \"ArL\" por \"Art.\", \"proclamaci6n\" por \"proclamación\") y elimina saltos de línea, encabezados y pies de páguina. NO cambies el sentido original del texto.\n\nSALIDA: \nVas a devolver un array donde vas a encontrar cada artículo encontrado\n\n[\n    {\n        \"numero\": \"1\",\n        \"titulo\": \"El título que siempre viene luego del identificador de artículo (Articulo n)\",\n        \"norma\": \"El texto corregido y completo del artículo.\"\n    }\n]\n\n\nTEXTO A ANALIZAR: \n{{ $json.text }}",
+        "text": "=TEXTO A ANALIZAR: \n{{ $json.text }}",
         "hasOutputParser": true,
         "needsFallback": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=# MISIÓN\n\nACTÚA COMO UN EXPERTO EN ESTRUCTURACIÓN DE DOCUMENTOS Y EXTRACCIÓN DE CONTENIDO.\n\n**OBJETIVO PRINCIPAL:** Tu misión es recibir un texto extraído vía OCR, determinar su estructura, segmentarlo en bloques lógicos, corregir errores y devolver una representación JSON limpia y **completamente unificada**, utilizando siempre la misma estructura de objeto para cada bloque de contenido.\n\n---\n\n# CONTEXTO\n\nEl texto que recibirás proviene de un proceso de OCR, por lo que puede contener errores de formato, ortografía y caracteres extraños. Los documentos pueden ser de dos tipos principales:\n1.  **Documentos Normativos:** Leyes, reglamentos, estatutos, etc., estructurados en Artículos, Disposiciones y Anexos.\n2.  **Documentos Informativos:** Informes, manuales, guías académicas, etc., estructurados por temas, secciones y subsecciones con títulos y contenido descriptivo.\n\n---\n\n# LÓGICA DE PROCESAMIENTO\n\nSigue estos pasos en orden estricto:\n\n**PASO 1: ANÁLISIS Y CLASIFICACIÓN DEL DOCUMENTO**\n* Si encuentras cualquier patron que denote que el contenido es un articulo, Disposicion, o Anexo como \"Art.\", \"Artículo\", \"Disposición\", \"ANEXO\" (con sus variaciones numéricas), clasifica el documento como **NORMATIVO** y aplica las **REGLAS PARA DOCUMENTOS NORMATIVOS**.\n* Si no encuentras esos marcadores, y el texto se organiza con títulos, subtítulos y párrafos descriptivos, clasifícalo como **INFORMATIVO** y aplica las **REGLAS PARA DOCUMENTOS INFORMATIVOS**.\n\n**PASO 2: APLICACIÓN DE REGLAS Y EXTRACCIÓN**\n* Aplica el conjunto de reglas correspondiente al tipo de documento identificado.\n\n**PASO 3: LIMPIEZA Y FORMATEO**\n* Durante todo el proceso, aplica las **REGLAS GENERALES** de corrección y manejo de tablas.\n\n---\n\n### **REGLAS PARA DOCUMENTOS NORMATIVOS**\n1.  **IDENTIFICAR EL FRAGMENTO INICIAL:** Barre el texto desde el principio. Todo el contenido que aparezca ANTES del primer marcador de artículo (como \"Art. 14\", \"Articulo 15\", etc.) debe ser considerado como un único bloque cohesivo. Este bloque es la continuación de un artículo de la página anterior. Agrupa todo este contenido inicial en un solo objeto JSON.\n    * En este objeto, los campos `numero` y `titulo` deben estar vacíos (`\"\"`).\n    * Todo el texto de este bloque debe ir dentro del campo `norma`.\n2.  **EXTRAER ARTÍCULOS:** Busca patrones como \"Art. #\", \"Artículo #\".\n    * Crea un objeto JSON por cada artículo.\n    * `tipo`: \"articulo\"\n    * `numero`: El número extraído del artículo (ej. \"14\").\n\t* `seccion_padre`: (String) El título del bloque jerárquico superior.\n    * `titulo`: La frase corta que sigue al número, antes del cuerpo principal.\n    * `contenido`: El resto del texto del artículo.\n3.  **EXTRAER DISPOSICIONES:** Busca numeros ordinales \"PRIMERA\", \"SEGUNDA\", \"TERCERA\" seguidos de \".-\" o similar, que indiquen una disposición.\n    * Crea un objeto JSON por cada disposición.\n    * `tipo`: \"disposicion\"\n    * `numero`: El ordinal en texto (ej. \"PRIMERA\").\n    * `titulo`: El texto que sigue inmediatamente al número ordinal, si lo hay, caso contrario, dejalo vacio.\n    * `seccion_padre`: (String) El título del bloque jerárquico superior.\n    * `contenido`: El cuerpo de la disposición.\n4.  **EXTRAER ANEXOS:** Busca patrones como \"ANEXO #\", \"Anexo A\".\n    * Crea un objeto JSON por cada anexo.\n    * `tipo`: \"anexo\"\n    * `numero`: El identificador del anexo (ej. \"1\", \"A\").\n    * `titulo`: El título del anexo.\n\t* `seccion_padre`: (String) El título del bloque jerárquico superior.\n    * `contenido`: La informacion estructurada.\n\n---\n\n### **REGLAS PARA DOCUMENTOS INFORMATIVOS**\n\n1.  **IDENTIFICAR UNIDADES SEMÁNTICAS POR TÍTULOS:** La segmentación se basa en los títulos y subtítulos. Cada uno marca el inicio de un nuevo bloque de contenido.\n    * Considera como título cualquier línea que, por su formato (mayúsculas, brevedad) y su posición, funcione como un encabezado para el texto que le sigue.\n\n2.  **EXTRAER SECCIONES:** Por cada unidad semántica, crea un objeto JSON:\n    * **`tipo`**: \"seccion\".\n    * **`titulo`**: El texto del título/subtítulo (ej. \"Gastronomía\", \"Programa Nro.1: Investigación...\", \"Objetivos Generales\"), si no encuentras ningun titulo, deja este campo vacío.\n    * **`numero`**: Analiza el `titulo` en busca de un identificador alfanumérico al inicio (ej. \"2.1.\", \"A)\", \"Programa Nro.1\"). Si lo encuentras, extráelo aquí. Si no, déjalo vacío.\n    * **`seccion_padre`**: Infiere el título de la sección principal a la que pertenece este bloque. Si es una sección de primer nivel, déjalo vacío.\n    * **`contenido`**: Todo el texto (párrafos, listas) que pertenece a esa sección hasta el siguiente título.\n\n---\n\n### **REGLAS GENERALES (APLICABLES A TODOS LOS DOCUMENTOS)**\n\n1.  **CORRECCIÓN Y LIMPIEZA:** Corrige errores de OCR y ortografía. Elimina encabezados, pies de página y saltos de línea innecesarios. **No alteres el significado original.**\n2.  **ESTRUCTURACIÓN DE TABLAS Y LISTAS:** Si detectas contenido de tablas o listas desordenado por el OCR, reestructúralo dentro del campo `contenido` usando Markdown para mantener su legibilidad y relaciones clave-valor.\n\n---\n\n# ESTRUCTURA DE SALIDA UNIFICADA\n\nDevuelve un único array de objetos JSON. **Cada objeto en el array, sin excepción, debe seguir esta estructura:**\n\n* **`tipo`**: (String) El tipo de bloque extraído. Ej: \"articulo\", \"disposicion\", \"seccion\", \"capitulo\", \"fragmento_continuacion\".\n* **`numero`**: (String) El identificador numérico o alfanumérico del bloque, si existe. Si no, `\"\"`.\n* **`titulo`**: (String) El título o nombre descriptivo del bloque. Si no existe, `\"\"`.\n* **`seccion_padre`**: (String) El título del bloque jerárquico superior.\n* **`contenido`**: (String) El texto principal del bloque, limpio y formateado.\n"
+            }
+          ]
+        },
         "batching": {
           "batchSize": 20
         }
@@ -80,13 +87,14 @@
     {
       "parameters": {
         "schemaType": "manual",
-        "inputSchema": "{\n\t\"type\": \"array\",\n\t\"items\": {\n\t\t\"type\": \"object\",\n\t\t\"properties\": {\n\t\t\t\"articulo\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t},\n\t\t\t\"titulo\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t},\n\t\t\t\"norma\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t}\n\t\t}\n\t}\n}"
+        "inputSchema": "{\n\t\"type\": \"array\",\n\t\"items\": {\n\t\t\"type\": \"object\",\n\t\t\"properties\": {\n          \"tipo\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t},\n\t\t\t\"numero\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t},\n\t\t\t\"titulo\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t},\n\t\t\t\"contenido\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t},\n           \"seccion_padre\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t}\n\t\t}\n\t}\n}",
+        "autoFix": true
       },
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        1952,
-        112
+        1968,
+        128
       ],
       "id": "fcf9a5cb-e60e-4e0d-bef9-eb4f669beeac",
       "name": "Structured Output Parser"
@@ -253,7 +261,7 @@
       "typeVersion": 2.2,
       "position": [
         256,
-        -32
+        -16
       ],
       "id": "c46c219b-064d-47fe-9100-7e9d066d2caa",
       "name": "Filter"
@@ -446,7 +454,7 @@
       "typeVersion": 1,
       "position": [
         816,
-        128
+        112
       ],
       "id": "78a0cee8-6d2f-4183-bf7b-34c480be7f79",
       "name": "Aggregate"
@@ -464,7 +472,7 @@
             {
               "id": "6a2cda01-249d-4bf6-ad22-e25ab64e773b",
               "leftValue": "={{ $json.data.length }}",
-              "rightValue": 3000,
+              "rightValue": 1000,
               "operator": {
                 "type": "number",
                 "operation": "gt"
@@ -506,7 +514,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        1440,
+        1456,
         128
       ],
       "id": "ec473333-b881-40ad-8343-728a9bdb8873",
@@ -567,8 +575,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        1728,
-        128
+        1568,
+        368
       ],
       "id": "7f92853e-0fb8-441a-875f-4b8456745441",
       "name": "Google Gemini Chat Model",
@@ -577,7 +585,8 @@
           "id": "0Zr2gDUeSEg2Xe6E",
           "name": "Google Gemini(PaLM) Api account"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -595,6 +604,45 @@
         "googlePalmApi": {
           "id": "0Zr2gDUeSEg2Xe6E",
           "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1888,
+        320
+      ],
+      "id": "910237c2-8268-44a3-b02f-a51ce8640ed3",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0Zr2gDUeSEg2Xe6E",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "deepseek-reasoner",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        1728,
+        128
+      ],
+      "id": "42b6e62c-dea7-4824-9250-d261d1368b20",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "3UFgNLDytpRNxPz0",
+          "name": "DeepSeek account"
         }
       }
     }
@@ -880,13 +928,7 @@
     },
     "Google Gemini Chat Model": {
       "ai_languageModel": [
-        [
-          {
-            "node": "Basic LLM Chain",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Google Gemini Chat Model1": {
@@ -899,13 +941,35 @@
           }
         ]
       ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "54c35b26-5a71-4aea-8c60-5b63a025df60",
+  "versionId": "5e55a741-7212-4d70-846f-16c17b05678b",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "54ec11882ca9b3e82b062f751bf5d6c4d986ec6ac834af1d71fe0dcbd9b6a5cf"

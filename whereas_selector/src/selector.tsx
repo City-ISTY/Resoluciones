@@ -5,15 +5,19 @@ import { WhereasClause, WhereasClauseIA } from './types'
 import SearchIcon from '@mui/icons-material/Search';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import SendIcon from '@mui/icons-material/Send';
+import { getDistinctDocumentNames } from './services/dbService';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 // Workaround for React 19 compatibility with react-icons
 import { generateEmbedding } from './services/geminiService'
 import { supabase } from './configuration/supabaseClient'
+import Select from 'react-select';
 
 const RemovableByMove: React.FC = () => {
   const [openPopup, setOpenPopup] = useState(false);
   const [searchTerm, setSearchTerm] = useState(""); // 1. Estado para el input de búsqueda
   const [popupItems, setPopupItems] = useState<string[]>([]); // 2. Estado para los ítems, inicia vacío
+  const [documentList, setDocumentList] = useState<{ value: string, label: string }[]>([]);
+  const [selectedDocument, setSelectedDocument] = useState<{ value: string, label: string } | null>(null);
 
   const [loadingPopupSearch, setLadingPopupSearch] = useState(false)
 
@@ -32,8 +36,17 @@ const RemovableByMove: React.FC = () => {
 
 
   useEffect(() => {
+
     const fetchData = async () => {
+
+
       try {
+        const docNames = await getDistinctDocumentNames()
+        const formattedDocs = docNames.map(name => ({
+          value: name, // El valor interno
+          label: name  // Lo que el usuario ve
+        }));
+        setDocumentList(formattedDocs)
         const { data: whereasData, error } = await supabase
           .from('whereas_clauses')
           .select('*')
@@ -99,18 +112,59 @@ const RemovableByMove: React.FC = () => {
 
 
   }
+
+
+  const getFilteredData = async (documentName: string, articleSearchTerm: string) => {
+    // Construimos el patrón de búsqueda para el artículo. 
+    // Los '%' indican que el texto puede estar en cualquier parte del campo 'articulo'.
+    const articlePattern = `${articleSearchTerm}`;
+
+    const { data: documents, error } = await supabase
+      .from('documents') // 1. Selecciona tu tabla 'documents'
+      .select('content, metadata') // 2. Trae las columnas que necesitas
+      // 3. Filtra por el nombre exacto del documento en la metadata
+      .filter('metadata->>document_name', 'eq', documentName)
+      // 4. Filtra por el artículo de forma flexible (insensible a mayúsculas/minúsculas)
+      .ilike('metadata->>articulo', articlePattern);
+
+    if (error) {
+      console.error('Error en búsqueda filtrada:', error);
+      return []; // Devuelve un array vacío en caso de error
+    }
+
+    return documents;
+  };
+
+
   // Función que se ejecuta al presionar "Buscar"
   const handleSearch = async () => {
-    setLadingPopupSearch(true)
-    // En un caso real, aquí usarías 'searchTerm' para filtrar o hacer una llamada a una API.
-    // Por ahora, solo poblamos la lista con los datos iniciales.
-    const documents = await getVectorialData()
+    setLadingPopupSearch(true);
+    let documents = []; // Inicializamos un array para guardar los resultados
 
-    setPopupItems(documents.map((elm: any) => {
+    if (selectedDocument) {
+      documents = await getFilteredData(selectedDocument.value, searchTerm);
+    } else {
+      documents = await getVectorialData();
+    }
 
-      return ("LEY: " + elm.content + "\nTITULO: " + elm.metadata.titulo + "\nARTICULO #: " + elm.metadata.articulo + "\nEXTRAIDO DE: " + elm.metadata.document_name)
-    }));
-    setLadingPopupSearch(false)
+    // Este bloque se ejecuta sin importar qué búsqueda se hizo
+    if (documents && documents.length > 0) {
+      setPopupItems(documents.map((elm: any) => {
+        // Usamos '??' para manejar el caso en que elm.metadata no exista
+        const metadata = elm.metadata ?? {};
+        return (
+          "LEY: " + (elm.content ?? 'N/A') +
+          "\nTITULO: " + (metadata.titulo ?? 'N/A') +
+          "\nARTICULO #: " + (metadata.articulo ?? 'N/A') +
+          "\nEXTRAIDO DE: " + (metadata.document_name ?? 'N/A')
+        );
+      }));
+    } else {
+      // Si no hay resultados, limpiamos la lista
+      setPopupItems([]);
+    }
+
+    setLadingPopupSearch(false);
   };
 
   // Función para cerrar y resetear el popup
@@ -160,6 +214,7 @@ const RemovableByMove: React.FC = () => {
         return
       }
       alert('Datos enviados correctamente')
+      window.close()
     } catch (error) {
       console.error('Error sending data:', error)
     }
@@ -256,17 +311,24 @@ const RemovableByMove: React.FC = () => {
             removableByMove
             values={iaWhereas}
             onChange={({ oldIndex, newIndex, targetRect }) => {
+              // Si el nuevo índice es -1, significa que se soltó fuera de un área válida
               if (newIndex === -1) {
                 const listElement = document.querySelector('[data-testid="ia-list"]');
                 if (listElement) {
                   const listRect = listElement.getBoundingClientRect();
-                  const listCenter = listRect.left + (listRect.width / 2);
-                  if (targetRect.left > listCenter) {
-                    setUserWhereas([...userWhereas, iaWhereas[oldIndex]]);
+                  // Solo si se suelta a la DERECHA de la lista, se mueve el elemento
+                  if (targetRect.left > listRect.right) {
+                    // Añadir a la lista de usuario
+                    setUserWhereas(prev => [...prev, iaWhereas[oldIndex]]);
+                    // Eliminar de la lista de IA
+                    setIaWhereas(prev => arrayRemove(prev, oldIndex));
                   }
+                  // Si se suelta a la izquierda, no se hace nada y el ítem vuelve a su lugar.
                 }
+              } else {
+                // Si se mueve dentro de la misma lista, solo se reordena
+                setIaWhereas(arrayMove(iaWhereas, oldIndex, newIndex));
               }
-              setIaWhereas(newIndex === -1 ? arrayRemove(iaWhereas, oldIndex) : arrayMove(iaWhereas, oldIndex, newIndex));
             }}
             renderList={({ children, props, isDragged }) => (
               <ul
@@ -317,17 +379,24 @@ const RemovableByMove: React.FC = () => {
             removableByMove
             values={userWhereas}
             onChange={({ oldIndex, newIndex, targetRect }) => {
+              // Si el nuevo índice es -1, significa que se soltó fuera de un área válida
               if (newIndex === -1) {
                 const listElement = document.querySelector('[data-testid="user-list"]');
                 if (listElement) {
                   const listRect = listElement.getBoundingClientRect();
-                  const listCenter = listRect.left + (listRect.width / 2);
-                  if (targetRect.left < listCenter) {
-                    setIaWhereas([...iaWhereas, userWhereas[oldIndex]]);
+                  // Solo si se suelta a la IZQUIERDA de la lista, se mueve el elemento
+                  if (targetRect.left < listRect.left) {
+                    // Añadir a la lista de IA
+                    setIaWhereas(prev => [...prev, userWhereas[oldIndex]]);
+                    // Eliminar de la lista de usuario
+                    setUserWhereas(prev => arrayRemove(prev, oldIndex));
                   }
+                  // Si se suelta a la derecha, no se hace nada y el ítem vuelve a su lugar.
                 }
+              } else {
+                // Si se mueve dentro de la misma lista, solo se reordena
+                setUserWhereas(arrayMove(userWhereas, oldIndex, newIndex));
               }
-              setUserWhereas(newIndex === -1 ? arrayRemove(userWhereas, oldIndex) : arrayMove(userWhereas, oldIndex, newIndex));
             }}
             renderList={({ children, props, isDragged }) => (
               <ul
@@ -477,32 +546,56 @@ const RemovableByMove: React.FC = () => {
             }}
           />
           {/* Botón para cerrar el popup */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5em', marginBottom: '1em' }}>
-            <button
-              onClick={closeAndResetPopup}
-              style={{
-                backgroundColor: "#f3f4f6",
-                border: "1px solid #ddd",
-                padding: "0.5em 1em",
-                borderRadius: "5px",
-                cursor: "pointer",
-              }}
-            >
-              Cerrar
-            </button>
-            <button
-              onClick={handleSearch}
-              disabled={loadingPopupSearch}
-              style={{
-                backgroundColor: "#f3f4f6",
-                border: "1px solid #ddd",
-                padding: "0.5em 1em",
-                borderRadius: "5px",
-                cursor: loadingPopupSearch ? "wait" : "pointer",
-              }}
-            >
-              {loadingPopupSearch ? "⏳ Buscando..." : "Buscar"}
-            </button>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between', // Espacio entre selector y botones
+            alignItems: 'center',            // Alineación vertical
+            gap: '1em',                       // Espacio entre elementos
+            marginTop: '1em'                  // Margen superior para separarlo de la lista
+          }}>
+
+            {/* 1. EL SELECTOR CON BUSCADOR (ocupa el espacio disponible) */}
+            <div style={{ flex: 1 }}>
+              <Select
+                options={documentList}
+                value={selectedDocument}
+                onChange={(selectedOption) => setSelectedDocument(selectedOption)}
+                placeholder="Selecciona o busca una norma..."
+                isClearable   // Permite borrar la selección con una 'x'
+                isSearchable  // Habilita la búsqueda
+                // Opcional: Texto si no hay opciones
+                noOptionsMessage={() => "No se encontraron normas"}
+              />
+            </div>
+
+            {/* 2. CONTENEDOR PARA LOS BOTONES (a la derecha) */}
+            <div style={{ display: 'flex', gap: '0.5em' }}>
+              <button
+                onClick={closeAndResetPopup}
+                style={{
+                  backgroundColor: "#f3f4f6",
+                  border: "1px solid #ddd",
+                  padding: "0.5em 1em",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                Cerrar
+              </button>
+              <button
+                onClick={handleSearch}
+                disabled={loadingPopupSearch}
+                style={{
+                  backgroundColor: "#f3f4f6",
+                  border: "1px solid #ddd",
+                  padding: "0.5em 1em",
+                  borderRadius: "5px",
+                  cursor: loadingPopupSearch ? "wait" : "pointer",
+                }}
+              >
+                {loadingPopupSearch ? "⏳ Buscando..." : "Buscar"}
+              </button>
+            </div>
           </div>
         </div>
       )}
